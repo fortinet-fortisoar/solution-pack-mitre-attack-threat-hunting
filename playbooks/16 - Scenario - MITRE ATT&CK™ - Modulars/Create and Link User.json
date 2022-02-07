@@ -1,0 +1,644 @@
+{
+    "@type": "Workflow",
+    "triggerLimit": null,
+    "name": "Create and Link User",
+    "aliasName": null,
+    "tag": "#Subroutine #DeDuplicate #Relate",
+    "description": "Create user (if it doesn't exist already), and link to specified email, alert or incident",
+    "isActive": false,
+    "debug": false,
+    "singleRecordExecution": false,
+    "remoteExecutableFlag": false,
+    "parameters": [
+        "user_query_output",
+        "alertRecordIRI",
+        "emailRecordIRI",
+        "incidentRecordIRI",
+        "domain",
+        "computername"
+    ],
+    "synchronous": false,
+    "lastModifyDate": 1644164607,
+    "collection": "\/api\/3\/workflow_collections\/e1d97fae-bb76-4989-b4d2-a30b6109e91f",
+    "versions": [],
+    "triggerStep": "\/api\/3\/workflow_steps\/84f8e934-5f55-45f0-98c1-37238f7d8ff0",
+    "steps": [
+        {
+            "@type": "WorkflowStep",
+            "name": "Link User to Alert",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "__link": {
+                        "users": "[\"{{vars.steps.Create_New_User['@id']}}\"]",
+                        "incidents": "{% if vars.input.params.incidentRecordIRI %}['{{vars.input.params.incidentRecordIRI}}']{% endif %}"
+                    }
+                },
+                "_showJson": false,
+                "operation": "Append",
+                "collection": "{{vars.input.params.alertRecordIRI}}",
+                "collectionType": "\/api\/3\/alerts",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "170",
+            "left": "1060",
+            "stepType": "\/api\/3\/workflow_step_types\/b593663d-7d13-40ce-a3a3-96dece928722",
+            "uuid": "34a13aa2-2c82-4a54-9c1e-213a2446b176",
+            "id": 4640
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "No host data",
+            "description": null,
+            "arguments": {
+                "params": [],
+                "version": "2.4.0",
+                "connector": "cyops_utilities",
+                "operation": "no_op",
+                "operationTitle": "Utils: No Operation",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "140",
+            "left": "1920",
+            "stepType": "\/api\/3\/workflow_step_types\/0109f35d-090b-4a2b-bd8a-94cbc3508562",
+            "uuid": "ef55c88e-5c3b-4eeb-8a61-595158947258",
+            "id": 4641
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Copy  of Link User to Alert",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "__link": {
+                        "users": "[\"{{vars.steps.Link_User['@id']}}\"]",
+                        "incidents": "{% if vars.input.params.incidentRecordIRI %}['{{vars.input.params.incidentRecordIRI}}']{% endif %}"
+                    }
+                },
+                "_showJson": false,
+                "operation": "Append",
+                "collection": "{{vars.input.params.alertRecordIRI}}",
+                "collectionType": "\/api\/3\/alerts",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "300",
+            "left": "1060",
+            "stepType": "\/api\/3\/workflow_step_types\/b593663d-7d13-40ce-a3a3-96dece928722",
+            "uuid": "f4548b49-ab75-4357-a922-05e2505700c6",
+            "id": 4642
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Find Host Record",
+            "description": null,
+            "arguments": {
+                "query": {
+                    "sort": [],
+                    "limit": 30,
+                    "logic": "AND",
+                    "filters": [
+                        {
+                            "type": "primitive",
+                            "field": "hostname",
+                            "value": "%{{vars.input.params.computername}}%",
+                            "operator": "like"
+                        }
+                    ]
+                },
+                "module": "assets?$limit=1000",
+                "step_variables": {
+                    "resultRecordscount": "{{vars.result | length}}"
+                }
+            },
+            "status": null,
+            "top": "231",
+            "left": "1920",
+            "stepType": "\/api\/3\/workflow_step_types\/b593663d-7d13-40ce-a3a3-96dece928770",
+            "uuid": "2e3025bd-e1a4-4b70-bf8c-f2438758e247",
+            "id": 4643
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Do Nothing",
+            "description": null,
+            "arguments": {
+                "params": [],
+                "version": "2.1.3",
+                "connector": "cyops_utilities",
+                "operation": "no_op",
+                "operationTitle": "Utils: No Operation",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "400",
+            "left": "760",
+            "stepType": "\/api\/3\/workflow_step_types\/0109f35d-090b-4a2b-bd8a-94cbc3508562",
+            "uuid": "1e46ede5-5f86-4fed-8cda-43c8c8c80c31",
+            "id": 4644
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Start",
+            "description": null,
+            "arguments": {
+                "step_variables": {
+                    "input": {
+                        "params": {
+                            "domain": "{{ vars.domain }}",
+                            "hostname": "{{ vars.hostname }}",
+                            "computername": "{{ vars.computername }}",
+                            "indicatorType": "{{ vars.indicatorType }}",
+                            "alertRecordIRI": "{{ vars.alertRecordIRI }}",
+                            "emailRecordIRI": "{{ vars.emailRecordIRI }}",
+                            "indicatorValue": "{{ vars.indicatorValue }}",
+                            "incidentRecordIRI": "{{ vars.incidentRecordIRI }}",
+                            "user_query_output": "{{ vars.user_query_output }}"
+                        }
+                    }
+                }
+            },
+            "status": null,
+            "top": "40",
+            "left": "80",
+            "stepType": "\/api\/3\/workflow_step_types\/b348f017-9a94-471f-87f8-ce88b6a7ad62",
+            "uuid": "84f8e934-5f55-45f0-98c1-37238f7d8ff0",
+            "id": 4645
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Set User IRI from Copy link",
+            "description": null,
+            "arguments": {
+                "userIRI": "{{vars.steps.Create_New_User['@id']}}"
+            },
+            "status": null,
+            "top": "170",
+            "left": "1340",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "4487c247-882c-4c18-a608-c82029742fde",
+            "id": 4646
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Host data in Alert",
+            "description": null,
+            "arguments": {
+                "conditions": [
+                    {
+                        "step_iri": "\/api\/3\/workflow_steps\/2e3025bd-e1a4-4b70-bf8c-f2438758e247",
+                        "condition": "{{ vars.input.params.computername | length > 0 }}"
+                    },
+                    {
+                        "default": true,
+                        "step_iri": "\/api\/3\/workflow_steps\/ef55c88e-5c3b-4eeb-8a61-595158947258"
+                    }
+                ]
+            },
+            "status": null,
+            "top": "231",
+            "left": "1634",
+            "stepType": "\/api\/3\/workflow_step_types\/12254cf5-5db7-4b1a-8cb1-3af081924b28",
+            "uuid": "c18c6c0d-906a-4331-b14f-465ed9c0f652",
+            "id": 4647
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Link User and Alert to Host Record",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "__link": {
+                        "users": "[\"{{vars.userIRI}}\"]",
+                        "alerts": "[\"{{vars.input.params.alertRecordIRI}}\"]",
+                        "incidents": "{% if vars.input.params.incidentRecordIRI %}['{{vars.input.params.incidentRecordIRI}}']{% endif %}"
+                    }
+                },
+                "_showJson": false,
+                "operation": "Append",
+                "collection": "{{vars.steps.Find_Host_Record[0]['@id']}}",
+                "collectionType": "\/api\/3\/assets",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "191",
+            "left": "2492",
+            "stepType": "\/api\/3\/workflow_step_types\/b593663d-7d13-40ce-a3a3-96dece928722",
+            "uuid": "151d624b-220f-4fbd-bcf3-df689b9ccef7",
+            "id": 4648
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Retrieve existing records",
+            "description": null,
+            "arguments": {
+                "query": {
+                    "sort": [],
+                    "limit": 30,
+                    "logic": "AND",
+                    "filters": [
+                        {
+                            "type": "primitive",
+                            "field": "securityid",
+                            "value": "{{vars.input.params['user_query_output']}}",
+                            "operator": "eq"
+                        }
+                    ]
+                },
+                "module": "users?$limit=1000",
+                "step_variables": {
+                    "resultRecordscount": "{{vars.result | length}}"
+                }
+            },
+            "status": null,
+            "top": "240",
+            "left": "80",
+            "stepType": "\/api\/3\/workflow_step_types\/b593663d-7d13-40ce-a3a3-96dece928770",
+            "uuid": "8707b628-5e9d-48d6-9c71-d53ac822f44d",
+            "id": 4649
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create Host Record and link to User and Alert",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "ip": null,
+                    "tag": null,
+                    "name": "{{vars.input.params.computername.split(\".\",1)[0]}}",
+                    "notes": null,
+                    "scans": null,
+                    "tasks": null,
+                    "users": "[\"{{vars.userIRI}}\"]",
+                    "alerts": "[\"{{vars.input.params.alertRecordIRI}}\"]",
+                    "owners": null,
+                    "status": null,
+                    "emailID": null,
+                    "category": null,
+                    "comments": null,
+                    "hostname": "{{vars.input.params.computername.split(\".\",1)[0]}}",
+                    "location": null,
+                    "companies": null,
+                    "deviceUID": null,
+                    "incidents": "{% if vars.input.params.incidentRecordIRI %}['{{vars.input.params.incidentRecordIRI}}']{% endif %}",
+                    "managedBy": null,
+                    "assetClass": null,
+                    "indicators": null,
+                    "macAddress": "52:54:00:ef:1c:03",
+                    "propertyOf": null,
+                    "attachments": null,
+                    "criticality": null,
+                    "dateScanned": null,
+                    "description": null,
+                    "legalMatters": null,
+                    "serialNumber": null,
+                    "operatingSystem": null,
+                    "vulnerabilities": null,
+                    "registrationDate": null
+                },
+                "_showJson": false,
+                "collection": "\/api\/3\/assets",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "268",
+            "left": "2491",
+            "stepType": "\/api\/3\/workflow_step_types\/2597053c-e718-44b4-8394-4d40fe26d357",
+            "uuid": "672f9497-a094-43f2-aca7-8bbe5f4763f9",
+            "id": 4650
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Link User",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "__link": {
+                        "alerts": "[\"{{vars.input.params.alertRecordIRI}}\"]",
+                        "incidents": "{% if vars.input.params.incidentRecordIRI %}['{{vars.input.params.incidentRecordIRI}}']{% endif %}"
+                    }
+                },
+                "_showJson": false,
+                "operation": "Append",
+                "collection": "{{vars.steps.Retrieve_existing_records[0]['@id']}}",
+                "collectionType": "\/api\/3\/users",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "300",
+            "left": "760",
+            "stepType": "\/api\/3\/workflow_step_types\/b593663d-7d13-40ce-a3a3-96dece928722",
+            "uuid": "ef7579f3-9ddc-4d11-b761-c3820ccd6291",
+            "id": 4651
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Set User IRI from link",
+            "description": null,
+            "arguments": {
+                "userIRI": "{{vars.steps.Link_User['@id']}}"
+            },
+            "status": null,
+            "top": "300",
+            "left": "1340",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "f21c96c6-cf95-47e6-826d-cd17d61b8183",
+            "id": 4652
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Does host record exist",
+            "description": null,
+            "arguments": {
+                "conditions": [
+                    {
+                        "step_iri": "\/api\/3\/workflow_steps\/151d624b-220f-4fbd-bcf3-df689b9ccef7",
+                        "condition": "{{ vars.resultRecordscount != 0 }}"
+                    },
+                    {
+                        "step_iri": "\/api\/3\/workflow_steps\/672f9497-a094-43f2-aca7-8bbe5f4763f9",
+                        "condition": "{{ vars.resultRecordscount == 0 }}"
+                    }
+                ]
+            },
+            "status": null,
+            "top": "231",
+            "left": "2200",
+            "stepType": "\/api\/3\/workflow_step_types\/12254cf5-5db7-4b1a-8cb1-3af081924b28",
+            "uuid": "593c20e0-6eac-4cf4-804e-6ca560acaf77",
+            "id": 4653
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Data present",
+            "description": null,
+            "arguments": {
+                "conditions": [
+                    {
+                        "step_iri": "\/api\/3\/workflow_steps\/8707b628-5e9d-48d6-9c71-d53ac822f44d",
+                        "condition": "{{ vars.input.params['user_query_output'] | length > 0 }}"
+                    },
+                    {
+                        "step_iri": "\/api\/3\/workflow_steps\/a0cb7c7c-fb94-41f8-9759-82ee0c8988d8",
+                        "condition": "{{ vars.input.params['user_query_output'] | length == 0 }}"
+                    }
+                ]
+            },
+            "status": null,
+            "top": "140",
+            "left": "80",
+            "stepType": "\/api\/3\/workflow_step_types\/12254cf5-5db7-4b1a-8cb1-3af081924b28",
+            "uuid": "068bd0d1-dd23-46b7-bc68-40ba118dfeb1",
+            "id": 4654
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create New User",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "alerts": "[\"{{vars.input.params.alertRecordIRI}}\"]",
+                    "assets": null,
+                    "domain": "{{vars.input.params['user_query_output'].split(sep=\"\\\\\\\\\")[0]}}",
+                    "owners": null,
+                    "comments": null,
+                    "username": "{{vars.input.params['user_query_output'].split(sep=\"\\\\\\\\\")[1]}}",
+                    "incidents": "{% if vars.input.params.incidentRecordIRI %}['{{vars.input.params.incidentRecordIRI}}']{% endif %}",
+                    "securityid": "{{vars.input.params['user_query_output']}}",
+                    "knownCompromised": null
+                },
+                "_showJson": false,
+                "collection": "\/api\/3\/users",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "170",
+            "left": "760",
+            "stepType": "\/api\/3\/workflow_step_types\/2597053c-e718-44b4-8394-4d40fe26d357",
+            "uuid": "4894884c-9b52-4fc0-a2cd-f557be413428",
+            "id": 4655
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Do records exist",
+            "description": null,
+            "arguments": {
+                "conditions": [
+                    {
+                        "step_iri": "\/api\/3\/workflow_steps\/ef7579f3-9ddc-4d11-b761-c3820ccd6291",
+                        "condition": "{{ vars.resultRecordscount != 0 and vars.input.params['user_query_output'] != \"NT AUTHORITY\\\\\\\\SYSTEM\" }}"
+                    },
+                    {
+                        "step_iri": "\/api\/3\/workflow_steps\/4894884c-9b52-4fc0-a2cd-f557be413428",
+                        "condition": "{{ vars.resultRecordscount == 0 and vars.input.params['user_query_output'] != \"NT AUTHORITY\\\\\\\\SYSTEM\" }}"
+                    },
+                    {
+                        "step_iri": "\/api\/3\/workflow_steps\/1e46ede5-5f86-4fed-8cda-43c8c8c80c31",
+                        "condition": "{{ vars.input.params['user_query_output'] == \"NT AUTHORITY\\\\\\\\SYSTEM\" or vars.resultRecordscount == 0 }}"
+                    }
+                ]
+            },
+            "status": null,
+            "top": "240",
+            "left": "380",
+            "stepType": "\/api\/3\/workflow_step_types\/12254cf5-5db7-4b1a-8cb1-3af081924b28",
+            "uuid": "8a5fbb0e-0383-41a3-ab8a-e32800e9e849",
+            "id": 4656
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "No data",
+            "description": null,
+            "arguments": {
+                "params": [],
+                "version": "2.2.0",
+                "connector": "cyops_utilities",
+                "operation": "no_op",
+                "operationTitle": "Utils: No Operation",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "140",
+            "left": "380",
+            "stepType": "\/api\/3\/workflow_step_types\/0109f35d-090b-4a2b-bd8a-94cbc3508562",
+            "uuid": "a0cb7c7c-fb94-41f8-9759-82ee0c8988d8",
+            "id": 4657
+        }
+    ],
+    "routes": [
+        {
+            "@type": "WorkflowRoute",
+            "name": "Start -> Data present",
+            "targetStep": "\/api\/3\/workflow_steps\/068bd0d1-dd23-46b7-bc68-40ba118dfeb1",
+            "sourceStep": "\/api\/3\/workflow_steps\/84f8e934-5f55-45f0-98c1-37238f7d8ff0",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "e2f827e8-4f91-4f0f-a41f-9fe01d254d0b"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Data present -> No data",
+            "targetStep": "\/api\/3\/workflow_steps\/a0cb7c7c-fb94-41f8-9759-82ee0c8988d8",
+            "sourceStep": "\/api\/3\/workflow_steps\/068bd0d1-dd23-46b7-bc68-40ba118dfeb1",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "39b75bd3-4ec8-42a5-89ff-4fa9f53fd69c"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Does host record exist -> Link User to Host Record",
+            "targetStep": "\/api\/3\/workflow_steps\/151d624b-220f-4fbd-bcf3-df689b9ccef7",
+            "sourceStep": "\/api\/3\/workflow_steps\/593c20e0-6eac-4cf4-804e-6ca560acaf77",
+            "label": "",
+            "isExecuted": false,
+            "uuid": "26e4ae4b-4882-4154-9348-0ebb839338e2"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Find Host Record -> Copy  of Does records exist",
+            "targetStep": "\/api\/3\/workflow_steps\/593c20e0-6eac-4cf4-804e-6ca560acaf77",
+            "sourceStep": "\/api\/3\/workflow_steps\/2e3025bd-e1a4-4b70-bf8c-f2438758e247",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "38f8bc27-cedc-46a4-bc10-3f826d87a544"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Does host record exist -> Create Host Record",
+            "targetStep": "\/api\/3\/workflow_steps\/672f9497-a094-43f2-aca7-8bbe5f4763f9",
+            "sourceStep": "\/api\/3\/workflow_steps\/593c20e0-6eac-4cf4-804e-6ca560acaf77",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "c8c1ad58-c63a-431c-885e-c704237ec5fd"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Does indicator exist -> Create New Indicator",
+            "targetStep": "\/api\/3\/workflow_steps\/4894884c-9b52-4fc0-a2cd-f557be413428",
+            "sourceStep": "\/api\/3\/workflow_steps\/8a5fbb0e-0383-41a3-ab8a-e32800e9e849",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "de1653d7-874d-4d0d-adfb-77f78f9e80ba"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Does records exist -> Do Nothing",
+            "targetStep": "\/api\/3\/workflow_steps\/1e46ede5-5f86-4fed-8cda-43c8c8c80c31",
+            "sourceStep": "\/api\/3\/workflow_steps\/8a5fbb0e-0383-41a3-ab8a-e32800e9e849",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "d8d931bc-408b-4aae-a082-565f5ac9a271"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Does indicator exist -> Link to Alert",
+            "targetStep": "\/api\/3\/workflow_steps\/ef7579f3-9ddc-4d11-b761-c3820ccd6291",
+            "sourceStep": "\/api\/3\/workflow_steps\/8a5fbb0e-0383-41a3-ab8a-e32800e9e849",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "a574a956-6c6e-4df5-a09d-c56f34b6be9b"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Host data in Alert -> No host data",
+            "targetStep": "\/api\/3\/workflow_steps\/ef55c88e-5c3b-4eeb-8a61-595158947258",
+            "sourceStep": "\/api\/3\/workflow_steps\/c18c6c0d-906a-4331-b14f-465ed9c0f652",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "89735392-4a8b-439a-8a98-17b2f06135db"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Host data in Alert -> Find Host Record",
+            "targetStep": "\/api\/3\/workflow_steps\/2e3025bd-e1a4-4b70-bf8c-f2438758e247",
+            "sourceStep": "\/api\/3\/workflow_steps\/c18c6c0d-906a-4331-b14f-465ed9c0f652",
+            "label": "",
+            "isExecuted": false,
+            "uuid": "fa4aafa3-bd91-441f-a22b-b6242d9b05d8"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Create New User -> Link User to Alert",
+            "targetStep": "\/api\/3\/workflow_steps\/34a13aa2-2c82-4a54-9c1e-213a2446b176",
+            "sourceStep": "\/api\/3\/workflow_steps\/4894884c-9b52-4fc0-a2cd-f557be413428",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "7c8bd218-3d00-432c-90ad-8665288fbc1f"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Link User to Alert -> Copy  of Set User IRI from link",
+            "targetStep": "\/api\/3\/workflow_steps\/4487c247-882c-4c18-a608-c82029742fde",
+            "sourceStep": "\/api\/3\/workflow_steps\/34a13aa2-2c82-4a54-9c1e-213a2446b176",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "4f547502-62f1-4d76-9575-0027b222d0fa"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Set User IRI from link -> Host data in Alert",
+            "targetStep": "\/api\/3\/workflow_steps\/c18c6c0d-906a-4331-b14f-465ed9c0f652",
+            "sourceStep": "\/api\/3\/workflow_steps\/f21c96c6-cf95-47e6-826d-cd17d61b8183",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "3c651a9c-7908-444c-9c4b-4bab6210c672"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Data present -> Retrieve existing records",
+            "targetStep": "\/api\/3\/workflow_steps\/8707b628-5e9d-48d6-9c71-d53ac822f44d",
+            "sourceStep": "\/api\/3\/workflow_steps\/068bd0d1-dd23-46b7-bc68-40ba118dfeb1",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "25eb4773-e0cf-42d2-95c0-f0f2a944d7da"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Check if indicator already exists -> Does indicator exist",
+            "targetStep": "\/api\/3\/workflow_steps\/8a5fbb0e-0383-41a3-ab8a-e32800e9e849",
+            "sourceStep": "\/api\/3\/workflow_steps\/8707b628-5e9d-48d6-9c71-d53ac822f44d",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "c41d46c3-0711-40c8-a58c-9885f7a90887"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Link User -> Copy  of Link User to Alert",
+            "targetStep": "\/api\/3\/workflow_steps\/f4548b49-ab75-4357-a922-05e2505700c6",
+            "sourceStep": "\/api\/3\/workflow_steps\/ef7579f3-9ddc-4d11-b761-c3820ccd6291",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "051ae5b9-700f-4887-8d9a-8a4fb7dd6afc"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Copy  of Link User to Alert -> Set User IRI from link",
+            "targetStep": "\/api\/3\/workflow_steps\/f21c96c6-cf95-47e6-826d-cd17d61b8183",
+            "sourceStep": "\/api\/3\/workflow_steps\/f4548b49-ab75-4357-a922-05e2505700c6",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "7c2b473c-29ac-4a31-8ab8-3a54a68cc9f6"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Set User IRI from Copy link -> Host data in Alert",
+            "targetStep": "\/api\/3\/workflow_steps\/c18c6c0d-906a-4331-b14f-465ed9c0f652",
+            "sourceStep": "\/api\/3\/workflow_steps\/4487c247-882c-4c18-a608-c82029742fde",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "b34080ef-ce9d-451c-996a-a52c714103a9"
+        }
+    ],
+    "priority": null,
+    "uuid": "b6b01cac-f181-4691-bb00-2300d999217d",
+    "recordTags": [],
+    "id": 1134,
+    "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "createDate": 1644164612,
+    "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "modifyDate": 1644164612,
+    "owners": [],
+    "isPrivate": false
+}

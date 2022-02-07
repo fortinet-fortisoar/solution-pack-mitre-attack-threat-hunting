@@ -1,0 +1,14 @@
+[
+    {
+        "id": 17,
+        "name": "mitre_version",
+        "value": "10.1",
+        "default_value": "9.0"
+    },
+    {
+        "id": 13,
+        "name": "Demo_mode",
+        "value": "true",
+        "default_value": "true"
+    }
+]

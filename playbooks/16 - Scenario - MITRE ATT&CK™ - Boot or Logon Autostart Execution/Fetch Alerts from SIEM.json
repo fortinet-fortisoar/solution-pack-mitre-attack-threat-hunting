@@ -1,0 +1,267 @@
+{
+    "@type": "Workflow",
+    "triggerLimit": null,
+    "name": "Fetch Alerts from SIEM",
+    "aliasName": null,
+    "tag": null,
+    "description": "Fetches alerts by querying to SIEM",
+    "isActive": true,
+    "debug": false,
+    "singleRecordExecution": false,
+    "remoteExecutableFlag": false,
+    "parameters": [
+        "huntStart",
+        "huntEnd"
+    ],
+    "synchronous": false,
+    "lastModifyDate": 1644164607,
+    "collection": "\/api\/3\/workflow_collections\/11dc1218-970f-4eaf-ad2f-0e9d353445e5",
+    "versions": [],
+    "triggerStep": "\/api\/3\/workflow_steps\/d7362950-8dae-42a3-a0c8-e9f25a6cd6b0",
+    "steps": [
+        {
+            "@type": "WorkflowStep",
+            "name": "Start",
+            "description": null,
+            "arguments": {
+                "step_variables": {
+                    "input": {
+                        "params": []
+                    }
+                }
+            },
+            "status": null,
+            "top": "30",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/b348f017-9a94-471f-87f8-ce88b6a7ad62",
+            "uuid": "d7362950-8dae-42a3-a0c8-e9f25a6cd6b0",
+            "id": 4323
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Configuration",
+            "description": null,
+            "arguments": {
+                "useMockOutput": "{{globalVars.Demo_mode}}",
+                "huntEndDateTime": "{{vars.input.params.huntEnd}}",
+                "huntStartDateTime": "{{vars.input.params.huntStart}}"
+            },
+            "status": null,
+            "top": "165",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "b5f0f5d1-c4c6-43b6-a96f-5fd7a7b98bad",
+            "id": 4324
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Query for WinLogHelper DLL",
+            "description": null,
+            "arguments": {
+                "name": "ElasticSearch",
+                "config": "8d610bda-c24f-447f-86a2-8ae6c2152678",
+                "params": {
+                    "index": "",
+                    "query": "{{vars.huntSearchQuery}}",
+                    "run_as_user": ""
+                },
+                "version": "2.2.1",
+                "connector": "elasticsearch",
+                "operation": "execute_lucene_query",
+                "mock_result": "{\n    \"data\": {\n      \"hits\": {\n        \"hits\": [\n          {\n            \"_id\": \"LL-EuGsBt8nuALoCJUwP\",\n            \"_type\": \"doc\",\n            \"_index\": \"logstash-beats-winlogon_helper_dll\",\n            \"_score\": 4.589139,\n            \"_source\": {\n              \"beat\": {\n                \"name\": \"win7-host1-PC\",\n                \"version\": \"6.5.3\",\n                \"hostname\": \"win7-host1-PC\"\n              },\n              \"tags\": [\n                \"beat\",\n                \"beats_input_codec_plain_applied\"\n              ],\n              \"task\": \"Registry value set (rule: RegistryEvent)\",\n              \"user\": {\n                \"name\": \"SYSTEM\",\n                \"type\": \"User\",\n                \"domain\": \"NT AUTHORITY\",\n                \"identifier\": \"S-1-5-18\"\n              },\n              \"level\": \"Information\",\n              \"opcode\": \"Info\",\n              \"message\": \"Registry value set:\\nRuleName: \\nEventType: SetValue\\nUtcTime: 2019-07-03 15:46:33.983\\nProcessGuid: {DA929735-CD39-5D1C-0000-0010A2610C00}\\nProcessId: 3628\\nImage: C:\\\\Windows\\\\regedit.exe\\nTargetObject: HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Winlogon\\\\Notify\\nDetails: C:\\\\Users\\\\superman\\\\Desktop\\\\invoice-156784.scr\",\n              \"version\": 2,\n              \"@version\": \"1\",\n              \"event_id\": 13,\n              \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n              \"beat_host\": {\n                \"id\": \"da929735-a8f9-4b38-8348-7664a570a0a2\",\n                \"os\": {\n                  \"build\": \"7601.24356\",\n                  \"family\": \"windows\",\n                  \"version\": \"6.1\",\n                  \"platform\": \"windows\"\n                },\n                \"name\": \"win7-host1-PC\",\n                \"architecture\": \"x86_64\"\n              },\n              \"thread_id\": 1412,\n              \"@timestamp\": \"2019-07-03T15:46:33.983Z\",\n              \"event_data\": {\n                \"Details\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\invoice-156784.scr\",\n                \"UtcTime\": \"2019-07-03 15:46:33.983\",\n                \"EventType\": \"SetValue\",\n                \"ProcessId\": \"3628\",\n                \"ProcessGuid\": \"{DA929735-CD39-5D1C-0000-0010A2610C00}\",\n                \"TargetObject\": \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Winlogon\\\\Notify\"\n              },\n              \"event_type\": \"sysmon\",\n              \"image_path\": \"C:\\\\Windows\\\\regedit.exe\",\n              \"process_id\": 1424,\n              \"source_name\": \"Microsoft-Windows-Sysmon\",\n              \"computer_name\": \"win7-host1-PC.batman.local\",\n              \"logstash_time\": 0.0013267993927001953,\n              \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n              \"record_number\": \"1983026\"\n            }\n          },\n          {\n            \"_id\": \"sL-CuGsBt8nuALoCZkdr\",\n            \"_type\": \"doc\",\n            \"_index\": \"logstash-beats-winlogon_helper_dll\",\n            \"_score\": 4.589139,\n            \"_source\": {\n              \"beat\": {\n                \"name\": \"win7-host1-PC\",\n                \"version\": \"6.5.3\",\n                \"hostname\": \"win7-host1-PC\"\n              },\n              \"tags\": [\n                \"beat\",\n                \"beats_input_codec_plain_applied\"\n              ],\n              \"task\": \"Registry value set (rule: RegistryEvent)\",\n              \"user\": {\n                \"name\": \"SYSTEM\",\n                \"type\": \"User\",\n                \"domain\": \"NT AUTHORITY\",\n                \"identifier\": \"S-1-5-18\"\n              },\n              \"level\": \"Information\",\n              \"opcode\": \"Info\",\n              \"message\": \"Registry value set:\\nRuleName: \\nEventType: SetValue\\nUtcTime: 2019-07-03 15:44:39.287\\nProcessGuid: {DA929735-CD39-5D1C-0000-0010A2610C00}\\nProcessId: 3628\\nImage: C:\\\\Windows\\\\regedit.exe\\nTargetObject: HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Winlogon\\\\Userinit\\nDetails: C:\\\\Windows\\\\system32\\\\userinit.exe, C:\\\\Users\\\\superman\\\\Desktop\\\\invoice-156784.scr\",\n              \"version\": 2,\n              \"@version\": \"1\",\n              \"event_id\": 13,\n              \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n              \"beat_host\": {\n                \"id\": \"da929735-a8f9-4b38-8348-7664a570a0a2\",\n                \"os\": {\n                  \"build\": \"7601.24356\",\n                  \"family\": \"windows\",\n                  \"version\": \"6.1\",\n                  \"platform\": \"windows\"\n                },\n                \"name\": \"win7-host1-PC\",\n                \"architecture\": \"x86_64\"\n              },\n              \"thread_id\": 1412,\n              \"@timestamp\": \"2019-07-03T15:44:39.287Z\",\n              \"event_data\": {\n                \"Details\": \"C:\\\\Windows\\\\system32\\\\userinit.exe, C:\\\\Users\\\\superman\\\\Desktop\\\\invoice-156784.scr\",\n                \"UtcTime\": \"2019-07-03 15:44:39.287\",\n                \"EventType\": \"SetValue\",\n                \"ProcessId\": \"3628\",\n                \"ProcessGuid\": \"{DA929735-CD39-5D1C-0000-0010A2610C00}\",\n                \"TargetObject\": \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Winlogon\\\\Userinit\"\n              },\n              \"event_type\": \"sysmon\",\n              \"image_path\": \"C:\\\\Windows\\\\regedit.exe\",\n              \"process_id\": 1424,\n              \"source_name\": \"Microsoft-Windows-Sysmon\",\n              \"computer_name\": \"win7-host1-PC.batman.local\",\n              \"logstash_time\": 0.0026199817657470703,\n              \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n              \"record_number\": \"1982857\"\n            }\n          },\n          {\n            \"_id\": \"2L9_uGsBt8nuALoC-juE\",\n            \"_type\": \"doc\",\n            \"_index\": \"logstash-beats-winlogon_helper_dll\",\n            \"_score\": 4.589139,\n            \"_source\": {\n              \"beat\": {\n                \"name\": \"win7-host1-PC\",\n                \"version\": \"6.5.3\",\n                \"hostname\": \"win7-host1-PC\"\n              },\n              \"tags\": [\n                \"beat\",\n                \"beats_input_codec_plain_applied\"\n              ],\n              \"task\": \"Registry value set (rule: RegistryEvent)\",\n              \"user\": {\n                \"name\": \"SYSTEM\",\n                \"type\": \"User\",\n                \"domain\": \"NT AUTHORITY\",\n                \"identifier\": \"S-1-5-18\"\n              },\n              \"level\": \"Information\",\n              \"opcode\": \"Info\",\n              \"message\": \"Registry value set:\\nRuleName: T1060\\nEventType: SetValue\\nUtcTime: 2019-07-03 15:41:59.572\\nProcessGuid: {DA929735-CCBD-5D1C-0000-001063A90800}\\nProcessId: 4032\\nImage: C:\\\\Windows\\\\regedit.exe\\nTargetObject: HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Winlogon\\\\Shell\\nDetails: explorer.exe\",\n              \"version\": 2,\n              \"@version\": \"1\",\n              \"event_id\": 13,\n              \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n              \"beat_host\": {\n                \"id\": \"da929735-a8f9-4b38-8348-7664a570a0a2\",\n                \"os\": {\n                  \"build\": \"7601.24356\",\n                  \"family\": \"windows\",\n                  \"version\": \"6.1\",\n                  \"platform\": \"windows\"\n                },\n                \"name\": \"win7-host1-PC\",\n                \"architecture\": \"x86_64\"\n              },\n              \"thread_id\": 1564,\n              \"@timestamp\": \"2019-07-03T15:41:59.753Z\",\n              \"event_data\": {\n                \"Details\": \"explorer.exe\",\n                \"UtcTime\": \"2019-07-03 15:41:59.572\",\n                \"RuleName\": \"T1060\",\n                \"EventType\": \"SetValue\",\n                \"ProcessId\": \"4032\",\n                \"ProcessGuid\": \"{DA929735-CCBD-5D1C-0000-001063A90800}\",\n                \"TargetObject\": \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Winlogon\\\\Shell\"\n              },\n              \"event_type\": \"sysmon\",\n              \"image_path\": \"C:\\\\Windows\\\\regedit.exe\",\n              \"process_id\": 1424,\n              \"source_name\": \"Microsoft-Windows-Sysmon\",\n              \"computer_name\": \"win7-host1-PC.batman.local\",\n              \"logstash_time\": 0.015459060668945312,\n              \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n              \"record_number\": \"1981795\"\n            }\n          },\n          {\n            \"_id\": \"NL-CuGsBt8nuALoClkjC\",\n            \"_type\": \"doc\",\n            \"_index\": \"logstash-beats-winlogon_helper_dll\",\n            \"_score\": 4.4837785,\n            \"_source\": {\n              \"beat\": {\n                \"name\": \"win7-host1-PC\",\n                \"version\": \"6.5.3\",\n                \"hostname\": \"win7-host1-PC\"\n              },\n              \"tags\": [\n                \"beat\",\n                \"beats_input_codec_plain_applied\"\n              ],\n              \"task\": \"Registry value set (rule: RegistryEvent)\",\n              \"user\": {\n                \"name\": \"SYSTEM\",\n                \"type\": \"User\",\n                \"domain\": \"NT AUTHORITY\",\n                \"identifier\": \"S-1-5-18\"\n              },\n              \"level\": \"Information\",\n              \"opcode\": \"Info\",\n              \"message\": \"Registry value set:\\nRuleName: \\nEventType: SetValue\\nUtcTime: 2019-07-03 15:44:52.900\\nProcessGuid: {DA929735-CD39-5D1C-0000-0010A2610C00}\\nProcessId: 3628\\nImage: C:\\\\Windows\\\\regedit.exe\\nTargetObject: HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Winlogon\\\\Userinit\\nDetails: C:\\\\Windows\\\\system32\\\\userinit.exe\",\n              \"version\": 2,\n              \"@version\": \"1\",\n              \"event_id\": 13,\n              \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n              \"beat_host\": {\n                \"id\": \"da929735-a8f9-4b38-8348-7664a570a0a2\",\n                \"os\": {\n                  \"build\": \"7601.24356\",\n                  \"family\": \"windows\",\n                  \"version\": \"6.1\",\n                  \"platform\": \"windows\"\n                },\n                \"name\": \"win7-host1-PC\",\n                \"architecture\": \"x86_64\"\n              },\n              \"thread_id\": 1412,\n              \"@timestamp\": \"2019-07-03T15:44:52.900Z\",\n              \"event_data\": {\n                \"Details\": \"C:\\\\Windows\\\\system32\\\\userinit.exe\",\n                \"UtcTime\": \"2019-07-03 15:44:52.900\",\n                \"EventType\": \"SetValue\",\n                \"ProcessId\": \"3628\",\n                \"ProcessGuid\": \"{DA929735-CD39-5D1C-0000-0010A2610C00}\",\n                \"TargetObject\": \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Winlogon\\\\Userinit\"\n              },\n              \"event_type\": \"sysmon\",\n              \"image_path\": \"C:\\\\Windows\\\\regedit.exe\",\n              \"process_id\": 1424,\n              \"source_name\": \"Microsoft-Windows-Sysmon\",\n              \"computer_name\": \"win7-host1-PC.batman.local\",\n              \"logstash_time\": 0.0010499954223632812,\n              \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n              \"record_number\": \"1982903\"\n            }\n          }\n        ],\n        \"total\": {\n          \"value\": 4,\n          \"relation\": \"eq\"\n        },\n        \"max_score\": 4.589139\n      },\n      \"took\": 256,\n      \"_shards\": {\n        \"total\": 95,\n        \"failed\": 0,\n        \"skipped\": 0,\n        \"successful\": 95\n      },\n      \"timed_out\": false\n    },\n    \"status\": \"Success\",\n    \"message\": \"\",\n    \"operation\": null\n  }",
+                "operationTitle": "Execute Lucene Query",
+                "pickFromTenant": false,
+                "step_variables": []
+            },
+            "status": null,
+            "top": "435",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "4d7f9101-ea24-4023-975a-d86980ffd898",
+            "id": 4325
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Build Hunt Query",
+            "description": null,
+            "arguments": {
+                "huntSearchQuery": "@timestamp:{ {{vars.huntStartDateTime}} TO {{vars.huntEndDateTime}} } AND event_id:1 AND (event_data.CommandLine:\"*misc\\:\\:addsid*\" OR event_data.CommandLine:\"*sid\\:\\:*\")"
+            },
+            "status": null,
+            "top": "300",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "8fcd4466-3def-40c8-ab1f-4d21c96ff8dd",
+            "id": 4326
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Query for Illegitimate LSASS",
+            "description": null,
+            "arguments": {
+                "name": "ElasticSearch",
+                "config": "8d03a01d-1cef-40a8-992a-63d8de2b339f",
+                "params": {
+                    "index": "logstash-beats-*",
+                    "query": "event_type:sysmon AND event_id:\"1\" AND @timestamp:{ {{vars.huntStartDateTime}} TO {{vars.huntEndDateTime}} } AND image_path:*lsass.exe NOT image_path:C\\:\\\\Windows\\\\System32\\\\lsass.exe NOT image_path:C\\:\\\\Windows\\\\SysWOW64\\\\lsass.exe",
+                    "run_as_user": ""
+                },
+                "version": "2.2.1",
+                "connector": "elasticsearch",
+                "operation": "execute_lucene_query",
+                "mock_result": "{\n  \"data\": {\n    \"hits\": {\n      \"hits\": [],\n      \"total\": {\n        \"value\": 0,\n        \"relation\": \"eq\"\n      },\n      \"max_score\": null\n    },\n    \"took\": 765,\n    \"_shards\": {\n      \"total\": 95,\n      \"failed\": 0,\n      \"skipped\": 0,\n      \"successful\": 95\n    },\n    \"timed_out\": false\n  },\n  \"status\": \"Success\",\n  \"message\": \"\",\n  \"operation\": null\n}",
+                "operationTitle": "Execute Lucene Query",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "570",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "01e21bd1-eea2-4017-9619-07a58c9e07b2",
+            "id": 4327
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Query for DLL load from illegitimate LSASS",
+            "description": null,
+            "arguments": {
+                "name": "ElasticSearch",
+                "config": "8d03a01d-1cef-40a8-992a-63d8de2b339f",
+                "params": {
+                    "index": "logstash-beats-*",
+                    "query": "event_type:sysmon AND event_id:\"7\" AND @timestamp:{ {{vars.huntStartDateTime}} TO {{vars.huntEndDateTime}} } AND image_path.keyword:*lsass.exe NOT image_path.keyword:C\\:\\\\Windows\\\\*ystem32\\\\* NOT image_path.keyword:C\\:\\\\Windows\\\\SysWOW64\\\\* NOT event_data.ImageLoaded.keyword:C\\:\\\\Windows\\\\*ystem32\\\\* NOT event_data.ImageLoaded:.keywordC\\:\\\\Windows\\\\SysWOW64\\\\* NOT event_data.ImageLoaded.keyword:C\\:\\\\Program\\ Files\\\\* NOT event_data.ImageLoaded.keyword:C\\:\\\\Program\\ Files\\ \\(x86\\)\\\\*",
+                    "run_as_user": ""
+                },
+                "version": "2.2.1",
+                "connector": "elasticsearch",
+                "operation": "execute_lucene_query",
+                "mock_result": "{\n    \"data\": {\n      \"hits\": {\n        \"hits\": [\n          {\n            \"_id\": \"Il1sdWsBlqecEBF3LUYC\",\n            \"_type\": \"doc\",\n            \"_index\": \"logstash-beats-lsassdriver\",\n            \"_score\": 3.287682,\n            \"_source\": {\n              \"beat\": {\n                \"name\": \"admin-PC4\",\n                \"version\": \"6.5.3\",\n                \"hostname\": \"admin-PC4\"\n              },\n              \"tags\": [\n                \"beat\",\n                \"beats_input_codec_plain_applied\"\n              ],\n              \"task\": \"Image loaded (rule: ImageLoad)\",\n              \"user\": {\n                \"name\": \"SYSTEM\",\n                \"type\": \"User\",\n                \"domain\": \"NT AUTHORITY\",\n                \"identifier\": \"S-1-5-18\"\n              },\n              \"level\": \"Information\",\n              \"opcode\": \"Info\",\n              \"message\": \"Image loaded:\\nRuleName: \\nUtcTime: 2019-06-20 15:05:52.933\\nProcessGuid: {D1BE7B41-0000-0000-0000-001067AA0501}\\nProcessId: 1888\\nImage: C:\\\\Users\\\\superman\\\\Desktop\\\\lsass.exe\\nImageLoaded: C:\\\\Users\\\\superman\\\\Desktop\\\\lsass.exe\\nFileVersion: 2.1.1.0\\nDescription: mimikatz for Windows\\nProduct: mimikatz\\nCompany: gentilkiwi (Benjamin DELPY)\\nOriginalFileName: mimikatz.exe\\nHashes: MD5=332A5371389A8953A96BF09B69EDCB6E,SHA256=E46BA4BDD4168A399EE5BC2161A8C918095FA30EB20AC88CAC6AB1D6DBEA2B4A\\nSigned: true\\nSignature: Open Source Developer, Benjamin Delpy\\nSignatureStatus: Valid\",\n              \"version\": 3,\n              \"@version\": \"1\",\n              \"event_id\": 7,\n              \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n              \"beat_host\": {\n                \"id\": \"d1be7b41-2fc5-49e3-9ff1-ec91443d27c3\",\n                \"os\": {\n                  \"build\": \"7601.0\",\n                  \"family\": \"windows\",\n                  \"version\": \"6.1\",\n                  \"platform\": \"windows\"\n                },\n                \"name\": \"admin-PC4\",\n                \"architecture\": \"x86_64\"\n              },\n              \"thread_id\": 2116,\n              \"@timestamp\": \"2019-06-20T15:05:52.995Z\",\n              \"event_data\": {\n                \"Hashes\": \"MD5=332A5371389A8953A96BF09B69EDCB6E,SHA256=E46BA4BDD4168A399EE5BC2161A8C918095FA30EB20AC88CAC6AB1D6DBEA2B4A\",\n                \"Signed\": \"true\",\n                \"Company\": \"gentilkiwi (Benjamin DELPY)\",\n                \"Product\": \"mimikatz\",\n                \"UtcTime\": \"2019-06-20 15:05:52.933\",\n                \"ProcessId\": \"1888\",\n                \"Signature\": \"Open Source Developer, Benjamin Delpy\",\n                \"Description\": \"mimikatz for Windows\",\n                \"FileVersion\": \"2.1.1.0\",\n                \"ImageLoaded\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\lsass.exe\",\n                \"ProcessGuid\": \"{D1BE7B41-0000-0000-0000-001067AA0501}\",\n                \"SignatureStatus\": \"Valid\",\n                \"OriginalFileName\": \"mimikatz.exe\"\n              },\n              \"event_type\": \"sysmon\",\n              \"image_path\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\lsass.exe\",\n              \"process_id\": 1408,\n              \"source_name\": \"Microsoft-Windows-Sysmon\",\n              \"computer_name\": \"admin-PC4.batman.local\",\n              \"logstash_time\": 0.0015377998352050781,\n              \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n              \"record_number\": \"402038\"\n            }\n          }\n        ],\n        \"total\": {\n          \"value\": 1,\n          \"relation\": \"eq\"\n        },\n        \"max_score\": 3.287682\n      },\n      \"took\": 863,\n      \"_shards\": {\n        \"total\": 95,\n        \"failed\": 0,\n        \"skipped\": 0,\n        \"successful\": 95\n      },\n      \"timed_out\": false\n    },\n    \"status\": \"Success\",\n    \"message\": \"\",\n    \"operation\": null\n  }",
+                "operationTitle": "Execute Lucene Query",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "705",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "8ca852d6-b2e5-4236-9127-a4c335d4dd3b",
+            "id": 4328
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Query for illegitimate DLL load",
+            "description": null,
+            "arguments": {
+                "name": "ElasticSearch",
+                "config": "8d03a01d-1cef-40a8-992a-63d8de2b339f",
+                "params": {
+                    "index": "logstash-beats-*",
+                    "query": "event_type:sysmon AND event_id:\"7\" AND @timestamp:{ {{vars.huntStartDateTime}} TO {{vars.huntEndDateTime}} } AND (image_path:\"C:\\\\Windows\\\\System32\\\\lsass.exe\" OR image_path:\"C:\\\\Windows\\\\SysWOW64\\\\lsass.exe\") NOT event_data.ImageLoaded:C\\:\\\\Windows\\\\System32\\\\*  NOT event_data.ImageLoaded:C\\:\\\\Windows\\\\SysWOW64\\\\* NOT event_data.ImageLoaded:C\\:\\\\Program\\ Files\\\\* NOT event_data.ImageLoaded:C\\:\\\\Program\\ Files\\ \\(x86\\)\\\\*",
+                    "run_as_user": ""
+                },
+                "version": "2.2.1",
+                "connector": "elasticsearch",
+                "operation": "execute_lucene_query",
+                "mock_result": "{\n  \"data\": {\n    \"hits\": {\n      \"hits\": [],\n      \"total\": {\n        \"value\": 0,\n        \"relation\": \"eq\"\n      },\n      \"max_score\": null\n    },\n    \"took\": 744,\n    \"_shards\": {\n      \"total\": 95,\n      \"failed\": 0,\n      \"skipped\": 0,\n      \"successful\": 95\n    },\n    \"timed_out\": false\n  },\n  \"status\": \"Success\",\n  \"message\": \"\",\n  \"operation\": null\n}",
+                "operationTitle": "Execute Lucene Query",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "840",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "64403210-556c-487f-af10-8b615c022579",
+            "id": 4329
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Step Output",
+            "description": null,
+            "arguments": {
+                "step_output": "{{vars.steps.Query_for_WinLogHelper_DLL.data.hits.hits | union(vars.steps.Query_for_Illegitimate_LSASS.data.hits.hits) | union(vars.steps.Query_for_DLL_load_from_illegitimate_LSASS.data.hits.hits) | union(vars.steps.Query_for_illegitimate_DLL_load.data.hits.hits) }}"
+            },
+            "status": null,
+            "top": "975",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "54433286-bc8f-475f-b936-8d69aa95452d",
+            "id": 4330
+        }
+    ],
+    "routes": [
+        {
+            "@type": "WorkflowRoute",
+            "name": "Query for WinLogHelper DLL -> Query for Illegitimate LSASS",
+            "targetStep": "\/api\/3\/workflow_steps\/01e21bd1-eea2-4017-9619-07a58c9e07b2",
+            "sourceStep": "\/api\/3\/workflow_steps\/4d7f9101-ea24-4023-975a-d86980ffd898",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "4507781a-0456-44a1-851f-9aecc5577778"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Query for DLL load from illegitimate LSASS -> Query for illegitimate DLL load",
+            "targetStep": "\/api\/3\/workflow_steps\/64403210-556c-487f-af10-8b615c022579",
+            "sourceStep": "\/api\/3\/workflow_steps\/8ca852d6-b2e5-4236-9127-a4c335d4dd3b",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "88f21eb3-47c1-4016-b305-cd560b6d8171"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Query for illegitimate DLL load -> Step Output",
+            "targetStep": "\/api\/3\/workflow_steps\/54433286-bc8f-475f-b936-8d69aa95452d",
+            "sourceStep": "\/api\/3\/workflow_steps\/64403210-556c-487f-af10-8b615c022579",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "5e8b4379-badf-4919-b8c9-1da2a46133c1"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Query for Illegitimate LSASS -> Query for DLL load from illegitimate LSASS",
+            "targetStep": "\/api\/3\/workflow_steps\/8ca852d6-b2e5-4236-9127-a4c335d4dd3b",
+            "sourceStep": "\/api\/3\/workflow_steps\/01e21bd1-eea2-4017-9619-07a58c9e07b2",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "c8531963-ed21-4975-aad0-6293fcb99dc6"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Build Hunt Query -> Run Elastic Query",
+            "targetStep": "\/api\/3\/workflow_steps\/4d7f9101-ea24-4023-975a-d86980ffd898",
+            "sourceStep": "\/api\/3\/workflow_steps\/8fcd4466-3def-40c8-ab1f-4d21c96ff8dd",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "022a49e2-f8e8-4a82-bb56-fbfc78ca29a7"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Start -> Configuration",
+            "targetStep": "\/api\/3\/workflow_steps\/b5f0f5d1-c4c6-43b6-a96f-5fd7a7b98bad",
+            "sourceStep": "\/api\/3\/workflow_steps\/d7362950-8dae-42a3-a0c8-e9f25a6cd6b0",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "95660433-7acf-4a4a-bde0-8aefaa0ac7c9"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Configuration -> Build Hunt Query",
+            "targetStep": "\/api\/3\/workflow_steps\/8fcd4466-3def-40c8-ab1f-4d21c96ff8dd",
+            "sourceStep": "\/api\/3\/workflow_steps\/b5f0f5d1-c4c6-43b6-a96f-5fd7a7b98bad",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "06b56103-171a-4ca7-bcf1-93517ee70e96"
+        }
+    ],
+    "priority": "\/api\/3\/picklists\/2b563c61-ae2c-41c0-a85a-c9709585e3f2",
+    "uuid": "8d77966a-d3f6-4c1a-a050-934065c23368",
+    "recordTags": [
+        "Referenced"
+    ],
+    "id": 1105,
+    "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "createDate": 1644164608,
+    "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "modifyDate": 1644164608,
+    "owners": [],
+    "isPrivate": false
+}

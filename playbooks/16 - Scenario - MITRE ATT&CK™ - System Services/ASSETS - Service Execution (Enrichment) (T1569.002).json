@@ -1,0 +1,1168 @@
+{
+    "@type": "Workflow",
+    "triggerLimit": null,
+    "name": "ASSETS - Service Execution (Enrichment) (T1569.002)",
+    "aliasName": null,
+    "tag": "ATT&CK, Execution, Service_Execution",
+    "description": "Enriches service data and query VirusTotal for reputation. Queries SIEM for all instances of any malicious hash observed.",
+    "isActive": false,
+    "debug": false,
+    "singleRecordExecution": false,
+    "remoteExecutableFlag": false,
+    "parameters": [
+        "md5",
+        "name",
+        "path",
+        "hostname",
+        "assetIRI",
+        "SIEM"
+    ],
+    "synchronous": false,
+    "lastModifyDate": 1644164607,
+    "collection": "\/api\/3\/workflow_collections\/edf2e401-21cf-4a1a-b2c5-f66fdd9e68e6",
+    "versions": [],
+    "triggerStep": "\/api\/3\/workflow_steps\/a624b7ba-601a-495b-a490-f4a364750ee3",
+    "steps": [
+        {
+            "@type": "WorkflowStep",
+            "name": "buffer",
+            "description": null,
+            "arguments": {
+                "params": [],
+                "version": "2.2.0",
+                "connector": "cyops_utilities",
+                "operation": "no_op",
+                "operationTitle": "Utils: No Operation",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "230",
+            "left": "688",
+            "stepType": "\/api\/3\/workflow_step_types\/0109f35d-090b-4a2b-bd8a-94cbc3508562",
+            "uuid": "d35ce4c1-3629-437c-9bb2-8271932981d3",
+            "id": 4821
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create unknown MD5 Indicator",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "tags": null,
+                    "hunts": null,
+                    "notes": null,
+                    "value": "{{vars.input.params.md5}}",
+                    "alerts": null,
+                    "assets": null,
+                    "emails": null,
+                    "events": null,
+                    "owners": null,
+                    "persons": null,
+                    "sources": "VirusTotal",
+                    "comments": null,
+                    "__replace": "true",
+                    "campaigns": null,
+                    "companies": null,
+                    "evidences": null,
+                    "incidents": null,
+                    "recordTags": null,
+                    "reputation": {
+                        "id": 7814,
+                        "@id": "\/api\/3\/picklists\/9a611980-1b5e-4ae9-8062-eb2c0c433cff",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": "#6a9169",
+                        "display": "No Reputation Available",
+                        "listName": "\/api\/3\/picklist_names\/e75ed3c3-9f23-4a43-832b-0daf236209ba",
+                        "itemValue": "No Reputation Available",
+                        "orderIndex": 4
+                    },
+                    "attachments": null,
+                    "description": null,
+                    "indicatorStatus": null,
+                    "typeofindicator": {
+                        "id": 4169,
+                        "@id": "\/api\/3\/picklists\/0ca054f2-d923-4992-a4a7-c516e6df281e",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": null,
+                        "display": "FileHash-MD5",
+                        "listName": "\/api\/3\/picklist_names\/50ee5bfa-e18f-49ba-8af9-dcca25b0f9c0",
+                        "itemValue": "FileHash-MD5",
+                        "orderIndex": 3
+                    },
+                    "vulnerabilities": null,
+                    "correlationGraph": null
+                },
+                "_showJson": false,
+                "operation": "Overwrite",
+                "collection": "\/api\/3\/upsert\/indicators",
+                "tagsOperation": "OverwriteTags",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "80",
+            "left": "1940",
+            "stepType": "\/api\/3\/workflow_step_types\/2597053c-e718-44b4-8394-4d40fe26d357",
+            "uuid": "4225faff-27c4-4c49-ba02-a3b82a6d2c3d",
+            "id": 4822
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Do nothing",
+            "description": null,
+            "arguments": {
+                "params": [],
+                "version": "2.2.0",
+                "connector": "cyops_utilities",
+                "operation": "no_op",
+                "operationTitle": "Utils: No Operation",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "700",
+            "left": "992",
+            "stepType": "\/api\/3\/workflow_step_types\/0109f35d-090b-4a2b-bd8a-94cbc3508562",
+            "uuid": "48a94e9c-4df8-4125-b411-dc6432dbd4e3",
+            "id": 4823
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Which SIEM",
+            "description": null,
+            "arguments": {
+                "conditions": [
+                    {
+                        "step_iri": "\/api\/3\/workflow_steps\/7e7a080c-586a-4ba2-b00f-265ed8da47ce",
+                        "condition": "{{ vars.input.params.SIEM == \"splunk\" }}"
+                    },
+                    {
+                        "step_iri": "\/api\/3\/workflow_steps\/5f695feb-2c6e-450c-a727-c37e80a89872",
+                        "condition": "{{ vars.input.params.SIEM == \"elastic\" }}"
+                    }
+                ]
+            },
+            "status": null,
+            "top": "591",
+            "left": "2550",
+            "stepType": "\/api\/3\/workflow_step_types\/12254cf5-5db7-4b1a-8cb1-3af081924b28",
+            "uuid": "ccc1fbda-65f3-4302-83df-5ebbc4c5f2e6",
+            "id": 4824
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Update MD5 with malicious reputation",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "__link": {
+                        "assets": "['{{vars.input.params.assetIRI}}']"
+                    },
+                    "sources": "VirusTotal",
+                    "reputation": {
+                        "id": 6433,
+                        "@id": "\/api\/3\/picklists\/7074e547-7785-4979-be32-c6d0c863e4bd",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": "#c42323",
+                        "display": "Malicious",
+                        "listName": "\/api\/3\/picklist_names\/e75ed3c3-9f23-4a43-832b-0daf236209ba",
+                        "itemValue": "Malicious",
+                        "orderIndex": 1
+                    },
+                    "typeofindicator": {
+                        "id": 4169,
+                        "@id": "\/api\/3\/picklists\/0ca054f2-d923-4992-a4a7-c516e6df281e",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": null,
+                        "display": "FileHash-MD5",
+                        "listName": "\/api\/3\/picklist_names\/50ee5bfa-e18f-49ba-8af9-dcca25b0f9c0",
+                        "itemValue": "FileHash-MD5",
+                        "orderIndex": 3
+                    },
+                    "virustotalReputation": "{{vars.steps.Check_MD5_Reputation.data.positives}}"
+                },
+                "_showJson": false,
+                "operation": "Append",
+                "collection": "{{vars.indicatorIRI}}",
+                "collectionType": "\/api\/3\/indicators",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "480",
+            "left": "1940",
+            "stepType": "\/api\/3\/workflow_step_types\/b593663d-7d13-40ce-a3a3-96dece928722",
+            "uuid": "ef8c8b2c-860a-4405-8802-bfb50bc9f505",
+            "id": 4825
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Update MD5 with unknown reputation",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "value": "{{vars.input.params.md5}}",
+                    "sources": "VirusTotal",
+                    "reputation": {
+                        "id": 7814,
+                        "@id": "\/api\/3\/picklists\/9a611980-1b5e-4ae9-8062-eb2c0c433cff",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": "#6a9169",
+                        "display": "No Reputation Available",
+                        "listName": "\/api\/3\/picklist_names\/e75ed3c3-9f23-4a43-832b-0daf236209ba",
+                        "itemValue": "No Reputation Available",
+                        "orderIndex": 4
+                    },
+                    "typeofindicator": {
+                        "id": 4169,
+                        "@id": "\/api\/3\/picklists\/0ca054f2-d923-4992-a4a7-c516e6df281e",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": null,
+                        "display": "FileHash-MD5",
+                        "listName": "\/api\/3\/picklist_names\/50ee5bfa-e18f-49ba-8af9-dcca25b0f9c0",
+                        "itemValue": "FileHash-MD5",
+                        "orderIndex": 3
+                    },
+                    "virustotalReputation": "No Reputation Data Found"
+                },
+                "_showJson": false,
+                "operation": "Append",
+                "collection": "{{vars.indicatorIRI}}",
+                "collectionType": "\/api\/3\/indicators",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "160",
+            "left": "1940",
+            "stepType": "\/api\/3\/workflow_step_types\/b593663d-7d13-40ce-a3a3-96dece928722",
+            "uuid": "b09c38aa-d8e8-47e8-9f75-26e0f2878985",
+            "id": 4826
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Set Indicator IRI",
+            "description": null,
+            "arguments": {
+                "indicatorIRI": "{% if vars.steps.Check_if_MD5_is_already_an_indicator %}{{vars.steps.Check_if_MD5_is_already_an_indicator[0]['@id']}}{% endif %}"
+            },
+            "status": null,
+            "top": "320",
+            "left": "320",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "fbcab397-6166-4126-8395-8b146038d182",
+            "id": 4827
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create Alert",
+            "description": null,
+            "arguments": {
+                "arguments": {
+                    "MD5": "{{vars.input.params.md5}}",
+                    "source": "Powershell",
+                    "comment": "",
+                    "service": "{{vars.input.params.name}}",
+                    "assetIRI": "{{vars.input.params.assetIRI}}",
+                    "filePath": "{{vars.input.params.path}}",
+                    "hostName": "{{vars.input.params.hostname}}",
+                    "sourceIP": "",
+                    "userName": "",
+                    "alertName": "ATT&CK-Service Execution-Malicious service {{vars.input.params.name}} running",
+                    "epochTime": "",
+                    "eventName": "",
+                    "eventTime": "",
+                    "processID": "",
+                    "technique": "Service Execution",
+                    "sourceTool": "Powershell",
+                    "commandline": "",
+                    "description": "A service whose executable poses a malicious reputation was discovered on the host. Additional linked alerts may be created if logs indicate this service has executed.",
+                    "mitreTechId": "T1035",
+                    "processGUID": "",
+                    "processName": "{{vars.input.params.path | regex_search('[^\\\\\\\/:*?\"<>|\\r\\n]+$') }}",
+                    "sourceImage": "",
+                    "targetImage": "",
+                    "destinationIP": "",
+                    "parentProcess": "",
+                    "scheduledTask": "",
+                    "parentProcessID": "",
+                    "parentCommandLine": ""
+                },
+                "apply_async": false,
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/5e4d1f4a-b109-40d3-9d36-4ff6de69b4ca"
+            },
+            "status": null,
+            "top": "591",
+            "left": "2260",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "b00376a8-deb1-4421-a472-4594de18ae10",
+            "id": 4828
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Start",
+            "description": null,
+            "arguments": {
+                "step_variables": {
+                    "input": {
+                        "params": {
+                            "md5": "{{ vars.md5 }}",
+                            "SIEM": "{{ vars.SIEM }}",
+                            "name": "{{ vars.name }}",
+                            "path": "{{ vars.path }}",
+                            "assetIRI": "{{ vars.assetIRI }}",
+                            "hostname": "{{ vars.hostname }}"
+                        }
+                    }
+                }
+            },
+            "status": null,
+            "top": "20",
+            "left": "20",
+            "stepType": "\/api\/3\/workflow_step_types\/b348f017-9a94-471f-87f8-ce88b6a7ad62",
+            "uuid": "a624b7ba-601a-495b-a490-f4a364750ee3",
+            "id": 4829
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create benign MD5 Indicator",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "tags": null,
+                    "hunts": null,
+                    "notes": null,
+                    "value": "{{vars.input.params.md5}}",
+                    "alerts": null,
+                    "assets": null,
+                    "emails": null,
+                    "events": null,
+                    "owners": null,
+                    "persons": null,
+                    "sources": "VirusTotal",
+                    "comments": null,
+                    "__replace": "true",
+                    "campaigns": null,
+                    "companies": null,
+                    "evidences": null,
+                    "incidents": null,
+                    "recordTags": null,
+                    "reputation": {
+                        "id": 6432,
+                        "@id": "\/api\/3\/picklists\/b19b42aa-aee4-47df-9cda-894537dacb2a",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": "#52c91a",
+                        "display": "Good",
+                        "listName": "\/api\/3\/picklist_names\/e75ed3c3-9f23-4a43-832b-0daf236209ba",
+                        "itemValue": "Good",
+                        "orderIndex": 0
+                    },
+                    "attachments": null,
+                    "description": null,
+                    "indicatorStatus": null,
+                    "typeofindicator": {
+                        "id": 4169,
+                        "@id": "\/api\/3\/picklists\/0ca054f2-d923-4992-a4a7-c516e6df281e",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": null,
+                        "display": "FileHash-MD5",
+                        "listName": "\/api\/3\/picklist_names\/50ee5bfa-e18f-49ba-8af9-dcca25b0f9c0",
+                        "itemValue": "FileHash-MD5",
+                        "orderIndex": 3
+                    },
+                    "vulnerabilities": null,
+                    "correlationGraph": null
+                },
+                "_showJson": false,
+                "operation": "Overwrite",
+                "collection": "\/api\/3\/upsert\/indicators",
+                "tagsOperation": "OverwriteTags",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "240",
+            "left": "1940",
+            "stepType": "\/api\/3\/workflow_step_types\/2597053c-e718-44b4-8394-4d40fe26d357",
+            "uuid": "5979c078-6780-4605-b62c-356acd915a4b",
+            "id": 4830
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Elastic Query for execution of service",
+            "description": null,
+            "arguments": {
+                "name": "ElasticSearch",
+                "config": "8d03a01d-1cef-40a8-992a-63d8de2b339f",
+                "params": {
+                    "index": "logstash-beats-*",
+                    "query": "event_id:1 AND event_data.Hashes:MD5={{vars.input.params.md5}}*",
+                    "run_as_user": ""
+                },
+                "version": "2.2.0",
+                "connector": "elasticsearch",
+                "operation": "execute_lucene_query",
+                "operationTitle": "Execute Lucene Query",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "646",
+            "left": "2840",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "5f695feb-2c6e-450c-a727-c37e80a89872",
+            "id": 4831
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create Elastic Alert for Service Execution",
+            "description": null,
+            "arguments": {
+                "for_each": {
+                    "item": "{{vars.steps.Elastic_Query_for_execution_of_service.data.hits.hits}}",
+                    "condition": ""
+                },
+                "arguments": {
+                    "MD5": "{{vars.item._source.event_data.Hashes.split(\"MD5=\")[1].split(',')[0]}}",
+                    "source": "{{vars.item._source.source_name}}",
+                    "comment": "SIEM query identified known malicious process {{vars.item._source.image_path.split(\"\\\\\")[-1] }} executing on host {{vars.item._source.beat.hostname}} at  {{vars.item._source.event_data.UtcTime}}. This process has also been observed as service {{vars.input.params.name}} on {{vars.input.params.hostname}}.",
+                    "service": "",
+                    "assetIRI": "{{vars.input.params.assetIRI}}",
+                    "filePath": "{{vars.item._source.image_path}}",
+                    "hostName": "{{vars.item._source.beat.hostname}}",
+                    "sourceIP": "",
+                    "userName": "{{vars.item._source.username}}",
+                    "alertName": "ATT&CK-Service Execution-{{vars.item._source.image_path.split(\"\\\\\")[-1] }}",
+                    "epochTime": "{{ arrow.get(vars.item._source.event_data.UtcTime).timestamp }}",
+                    "eventName": "",
+                    "eventTime": "{{vars.item._source.event_data.UtcTime}}",
+                    "processID": "{{vars.item._source.event_data.ProcessId}}",
+                    "technique": "Service Execution",
+                    "sourceTool": "{{vars.item._source.source_name}}",
+                    "commandline": "{{vars.item._source.event_data.CommandLine}}",
+                    "description": "Execution of a potentially malicious process was observed. This process has also been observed as a service. Attackers may utilize services to maintain persistence and execute malicious files at given intervals.",
+                    "mitreTechId": "T1035",
+                    "processGUID": "{{vars.item._source.event_data.ProcessGuid}}",
+                    "processName": "{{vars.item._source.image_path.split(\"\\\\\")[-1] }}",
+                    "sourceImage": "",
+                    "targetImage": "",
+                    "destinationIP": "",
+                    "parentProcess": "{{vars.item._source.parent_image_path}}",
+                    "scheduledTask": "",
+                    "parentProcessID": "{{vars.item._source.event_data.ParentProcessId}}",
+                    "parentCommandLine": "{{vars.item._source.event_data.ParentCommandLine}}"
+                },
+                "apply_async": false,
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/5e4d1f4a-b109-40d3-9d36-4ff6de69b4ca"
+            },
+            "status": null,
+            "top": "646",
+            "left": "3414",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "6f6eb9de-8571-4558-b19d-b54e92d3dcec",
+            "id": 4832
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Was Indicator found",
+            "description": null,
+            "arguments": {
+                "conditions": [
+                    {
+                        "option": "Indicator found",
+                        "step_iri": "\/api\/3\/workflow_steps\/8f41baf5-d33b-484b-afd7-0b51e39c969e",
+                        "condition": "{{ vars.steps.Check_if_MD5_is_already_an_indicator|  length > 0 }}"
+                    },
+                    {
+                        "option": "Indicator was not found",
+                        "step_iri": "\/api\/3\/workflow_steps\/d35ce4c1-3629-437c-9bb2-8271932981d3",
+                        "condition": "{{ vars.steps.Check_if_MD5_is_already_an_indicator |  length == 0 }}"
+                    }
+                ]
+            },
+            "status": null,
+            "top": "453",
+            "left": "320",
+            "stepType": "\/api\/3\/workflow_step_types\/12254cf5-5db7-4b1a-8cb1-3af081924b28",
+            "uuid": "f1edbcd9-7b5b-4f77-b164-3b33662651ac",
+            "id": 4833
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create malicious MD5 Indicator and link to asset",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "tags": null,
+                    "hunts": null,
+                    "notes": null,
+                    "value": "{{vars.input.params.md5}}",
+                    "alerts": null,
+                    "assets": "['{{vars.input.params.assetIRI}}']",
+                    "emails": null,
+                    "events": null,
+                    "owners": null,
+                    "persons": null,
+                    "sources": "VirusTotal",
+                    "comments": null,
+                    "__replace": "true",
+                    "campaigns": null,
+                    "companies": null,
+                    "evidences": null,
+                    "incidents": null,
+                    "recordTags": null,
+                    "reputation": {
+                        "id": 6433,
+                        "@id": "\/api\/3\/picklists\/7074e547-7785-4979-be32-c6d0c863e4bd",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": "#c42323",
+                        "display": "Malicious",
+                        "listName": "\/api\/3\/picklist_names\/e75ed3c3-9f23-4a43-832b-0daf236209ba",
+                        "itemValue": "Malicious",
+                        "orderIndex": 1
+                    },
+                    "attachments": null,
+                    "description": null,
+                    "indicatorStatus": null,
+                    "typeofindicator": {
+                        "id": 4169,
+                        "@id": "\/api\/3\/picklists\/0ca054f2-d923-4992-a4a7-c516e6df281e",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": null,
+                        "display": "FileHash-MD5",
+                        "listName": "\/api\/3\/picklist_names\/50ee5bfa-e18f-49ba-8af9-dcca25b0f9c0",
+                        "itemValue": "FileHash-MD5",
+                        "orderIndex": 3
+                    },
+                    "vulnerabilities": null,
+                    "correlationGraph": null
+                },
+                "_showJson": false,
+                "operation": "Overwrite",
+                "collection": "\/api\/3\/upsert\/indicators",
+                "tagsOperation": "OverwriteTags",
+                "step_variables": {
+                    "indicatorIRI": "{{vars.result['@id']}}"
+                }
+            },
+            "status": null,
+            "top": "400",
+            "left": "1940",
+            "stepType": "\/api\/3\/workflow_step_types\/2597053c-e718-44b4-8394-4d40fe26d357",
+            "uuid": "6c0839b4-bfe5-4a86-acc6-fc933b5eda73",
+            "id": 4834
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Check if MD5 is already an indicator",
+            "description": null,
+            "arguments": {
+                "query": {
+                    "sort": [],
+                    "limit": 30,
+                    "logic": "AND",
+                    "filters": [
+                        {
+                            "type": "object",
+                            "field": "typeofindicator",
+                            "value": "\/api\/3\/picklists\/0ca054f2-d923-4992-a4a7-c516e6df281e",
+                            "_value": {
+                                "itemValue": "FileHash-MD5"
+                            },
+                            "operator": "eq"
+                        },
+                        {
+                            "type": "primitive",
+                            "field": "value",
+                            "value": "{{vars.input.params.md5}}",
+                            "operator": "eq"
+                        }
+                    ]
+                },
+                "module": "indicators?$limit=30",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "200",
+            "left": "320",
+            "stepType": "\/api\/3\/workflow_step_types\/b593663d-7d13-40ce-a3a3-96dece928770",
+            "uuid": "d3eadfcc-9b6f-4d82-a3b9-586b6f27c0ea",
+            "id": 4835
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Query for execution of service",
+            "description": null,
+            "arguments": {
+                "name": "Splunk",
+                "config": "9ab494b3-68d1-424f-9f76-0693bd787483",
+                "params": {
+                    "query": "index=sysmon EventCode=1 MD5={{vars.input.params.md5}} | table host Image MD5 ParentImage User CommandLine process_exec vendor_product TimeCreated ParentProcessId ProcessId ParentCommandLine ProcessGuid UtcTime EventChannel",
+                    "exec_mode": "",
+                    "auto_cancel": "",
+                    "latest_time": "",
+                    "earliest_time": "",
+                    "additional_search_args": "{\"A\":\"B\"}"
+                },
+                "version": "1.5.0",
+                "connector": "splunk",
+                "operation": "invoke_search",
+                "operationTitle": "Invoke Search",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "520",
+            "left": "2840",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "7e7a080c-586a-4ba2-b00f-265ed8da47ce",
+            "id": 4836
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Update MD5 with benign reputation",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "sources": "VirusTotal",
+                    "reputation": {
+                        "id": 6432,
+                        "@id": "\/api\/3\/picklists\/b19b42aa-aee4-47df-9cda-894537dacb2a",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": "#52c91a",
+                        "display": "Good",
+                        "listName": "\/api\/3\/picklist_names\/e75ed3c3-9f23-4a43-832b-0daf236209ba",
+                        "itemValue": "Good",
+                        "orderIndex": 0
+                    },
+                    "virustotalReputation": "{{vars.steps.Check_MD5_Reputation.data.positives}}"
+                },
+                "_showJson": false,
+                "operation": "Append",
+                "collection": "{{vars.indicatorIRI}}",
+                "collectionType": "\/api\/3\/indicators",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "326",
+            "left": "1940",
+            "stepType": "\/api\/3\/workflow_step_types\/b593663d-7d13-40ce-a3a3-96dece928722",
+            "uuid": "aad5ff23-f514-4476-bd02-7292203175e5",
+            "id": 4837
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Has indicator been submitted to VirusTotal before",
+            "description": null,
+            "arguments": {
+                "conditions": [
+                    {
+                        "step_iri": "\/api\/3\/workflow_steps\/605359c6-d708-4061-b2ee-74d7449ab72e",
+                        "condition": "{{ vars.steps.Check_MD5_Reputation.data.response_code != 0 }}"
+                    },
+                    {
+                        "step_iri": "\/api\/3\/workflow_steps\/4225faff-27c4-4c49-ba02-a3b82a6d2c3d",
+                        "condition": "{{ (vars.steps.Check_MD5_Reputation.data.response_code == 0) and  (vars.indicatorIRI == \"\") }}"
+                    },
+                    {
+                        "option": "",
+                        "step_iri": "\/api\/3\/workflow_steps\/b09c38aa-d8e8-47e8-9f75-26e0f2878985",
+                        "condition": "{{ (vars.steps.Check_MD5_Reputation.data.response_code == 0) and  (vars.indicatorIRI != \"\") }}"
+                    }
+                ]
+            },
+            "status": null,
+            "top": "240",
+            "left": "1272",
+            "stepType": "\/api\/3\/workflow_step_types\/12254cf5-5db7-4b1a-8cb1-3af081924b28",
+            "uuid": "7fad89c7-376d-4de2-987d-a054a0098a69",
+            "id": 4838
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Return query results",
+            "description": null,
+            "arguments": {
+                "name": "Splunk",
+                "config": "9ab494b3-68d1-424f-9f76-0693bd787483",
+                "params": {
+                    "sid": "{'value': '{{vars.steps.Query_for_execution_of_service.data.sid}}'}",
+                    "additional_args": "{\"A\":\"B\"}"
+                },
+                "version": "1.4.0",
+                "do_until": {
+                    "delay": "1",
+                    "retries": "300",
+                    "condition": "{{\"results\" in vars.result.data}}"
+                },
+                "connector": "splunk",
+                "operation": "get_results",
+                "operationTitle": "Get Results for a Search",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "520",
+            "left": "3111",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "2facfade-44a3-4cf5-8bc6-4b79f1854702",
+            "id": 4839
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Check MD5 Reputation",
+            "description": null,
+            "arguments": {
+                "name": "VirusTotal",
+                "config": "40bc830c-105c-4fb7-bf43-1abb91925144",
+                "params": {
+                    "file_hash": "{{vars.input.params.md5}}"
+                },
+                "version": "1.0.1",
+                "connector": "virustotal",
+                "operation": "file_reputation",
+                "operationTitle": "Get File Reputation",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "234",
+            "left": "980",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "caaf83cf-646d-43e9-8b49-e2edf83830c3",
+            "id": 4840
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create Additional Analysis Task",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "name": "Service Identified With Unknown Reputation",
+                    "type": {
+                        "id": 5268,
+                        "@id": "\/api\/3\/picklists\/826ad76d-e418-4928-9bc9-ea552ebcc5f9",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": null,
+                        "display": "Incident Response",
+                        "listName": "\/api\/3\/picklist_names\/b837e375-76af-4ba5-b6a1-bd1c3cd27292",
+                        "itemValue": "Incident Response",
+                        "orderIndex": 12
+                    },
+                    "dueBy": null,
+                    "hunts": null,
+                    "notes": null,
+                    "alerts": null,
+                    "assets": "['{{vars.input.params.assetIRI}}']",
+                    "owners": null,
+                    "status": null,
+                    "persons": null,
+                    "comments": null,
+                    "priority": {
+                        "id": 109,
+                        "@id": "\/api\/3\/picklists\/539083a6-01f6-4ff9-a588-778cfdad4671",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": "#d1b524",
+                        "display": "Medium",
+                        "listName": "\/api\/3\/picklist_names\/bea9a490-50d1-4597-8ad9-24422e10676e",
+                        "itemValue": "Medium",
+                        "orderIndex": 3
+                    },
+                    "taskdata": null,
+                    "tasktype": null,
+                    "companies": null,
+                    "incidents": null,
+                    "startDate": null,
+                    "workflowid": null,
+                    "attachments": null,
+                    "description": "<p>A&nbsp;Windows Service was identified with a hash whose reputation is unknown.&nbsp;<\/p>\n<p>Task Details:<br \/>Name:&nbsp;{{vars.input.params.name}}<br \/>Path:&nbsp;{{vars.input.params.path}}<br \/>MD5:&nbsp;{{vars.input.params.md5}}<br \/>Host:&nbsp;{{vars.input.params.hostname}}<\/p>\n<p>It is recommended that the file and hash associated with this service be investigated to determine whether the service is legitimate.<\/p>",
+                    "approvalhost": null,
+                    "actualMinutes": null,
+                    "assignedOnDate": null,
+                    "completedOnDate": null,
+                    "vulnerabilities": null,
+                    "assignedToPerson": null,
+                    "systemAssignedQueue": null
+                },
+                "_showJson": false,
+                "collection": "\/api\/3\/tasks",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "120",
+            "left": "2230",
+            "stepType": "\/api\/3\/workflow_step_types\/2597053c-e718-44b4-8394-4d40fe26d357",
+            "uuid": "223e5f87-858d-4d89-ad38-4a8738e74b46",
+            "id": 4841
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "What is existing indicator reputation",
+            "description": null,
+            "arguments": {
+                "conditions": [
+                    {
+                        "step_iri": "\/api\/3\/workflow_steps\/48a94e9c-4df8-4125-b411-dc6432dbd4e3",
+                        "condition": "{{ (vars.steps.Check_if_MD5_is_already_an_indicator[0].reputation.itemValue == \"Good\")  or (vars.steps.Check_if_MD5_is_already_an_indicator[0].reputation.itemValue == \"Neutral\") }}"
+                    },
+                    {
+                        "step_iri": "\/api\/3\/workflow_steps\/b00376a8-deb1-4421-a472-4594de18ae10",
+                        "condition": "{{ (vars.steps.Check_if_MD5_is_already_an_indicator[0].reputation.itemValue == \"Malicious\")  or (vars.steps.Check_if_MD5_is_already_an_indicator[0].reputation.itemValue == \"Suspicious\") }}"
+                    },
+                    {
+                        "step_iri": "\/api\/3\/workflow_steps\/caaf83cf-646d-43e9-8b49-e2edf83830c3",
+                        "condition": "{{ true }}"
+                    }
+                ]
+            },
+            "status": null,
+            "top": "606",
+            "left": "660",
+            "stepType": "\/api\/3\/workflow_step_types\/12254cf5-5db7-4b1a-8cb1-3af081924b28",
+            "uuid": "8f41baf5-d33b-484b-afd7-0b51e39c969e",
+            "id": 4842
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create Alert for Service Execution",
+            "description": null,
+            "arguments": {
+                "for_each": {
+                    "item": "{{vars.steps.Return_query_results.data.results}}",
+                    "condition": ""
+                },
+                "arguments": {
+                    "MD5": "{{vars.item.MD5}}",
+                    "source": "{{vars.item.EventChannel}}",
+                    "comment": "SIEM query identified known malicious process {{vars.item.process_exec}} executing on host {{vars.item.host}} at {{vars.item.UtcTime}}. This process has also been observed as service {{vars.input.params.name}} on {{vars.input.params.hostname}}.",
+                    "service": "",
+                    "assetIRI": "{{vars.input.params.assetIRI}}",
+                    "filePath": "{{vars.item.Image}}",
+                    "hostName": "{{vars.item.host}}",
+                    "sourceIP": "null",
+                    "userName": "{{vars.item.User}}",
+                    "alertName": "ATT&CK-Service Execution-Malicious service {{vars.input.params.name}} executed",
+                    "epochTime": "{{ arrow.get(vars.item.UtcTime).timestamp }}",
+                    "eventName": "",
+                    "eventTime": "{{vars.item.UtcTime}}",
+                    "processID": "{{vars.item.ProcessId}}",
+                    "technique": "Service Execution",
+                    "sourceTool": "{{vars.item.EventChannel}}",
+                    "commandline": "{{vars.item.CommandLine}}",
+                    "description": "Execution of a potentially malicious process was observed. This process has also been observed as a service. Attackers may utilize services to maintain persistence and execute malicious files at given intervals.",
+                    "mitreTechId": "T1035",
+                    "processGUID": "{{vars.item.ProcessGuid}}",
+                    "processName": "{{vars.item.process_exec}}",
+                    "sourceImage": "",
+                    "targetImage": "",
+                    "destinationIP": "null",
+                    "parentProcess": "{{vars.item.ParentImage}}",
+                    "scheduledTask": "",
+                    "parentProcessID": "{{vars.item.ParentProcessId}}",
+                    "parentCommandLine": "{{vars.item.ParentCommandLine}}"
+                },
+                "apply_async": false,
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/5e4d1f4a-b109-40d3-9d36-4ff6de69b4ca"
+            },
+            "status": null,
+            "top": "520",
+            "left": "3410",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "92f89029-2258-46c2-9bab-52c62036b961",
+            "id": 4843
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Is indicator malicious",
+            "description": null,
+            "arguments": {
+                "conditions": [
+                    {
+                        "step_iri": "\/api\/3\/workflow_steps\/aad5ff23-f514-4476-bd02-7292203175e5",
+                        "condition": "{{ (vars.steps.Check_MD5_Reputation.data.positives == 0) and (vars.indicatorIRI != \"\") }}"
+                    },
+                    {
+                        "step_iri": "\/api\/3\/workflow_steps\/ef8c8b2c-860a-4405-8802-bfb50bc9f505",
+                        "condition": "{{ (vars.steps.Check_MD5_Reputation.data.positives > 0) and  (vars.indicatorIRI != \"\") }}"
+                    },
+                    {
+                        "step_iri": "\/api\/3\/workflow_steps\/5979c078-6780-4605-b62c-356acd915a4b",
+                        "condition": "{{ (vars.steps.Check_MD5_Reputation.data.positives == 0) and (vars.indicatorIRI == \"\") }}"
+                    },
+                    {
+                        "step_iri": "\/api\/3\/workflow_steps\/6c0839b4-bfe5-4a86-acc6-fc933b5eda73",
+                        "condition": "{{ (vars.steps.Check_MD5_Reputation.data.positives > 0) and  (vars.indicatorIRI == \"\") }}"
+                    }
+                ]
+            },
+            "status": null,
+            "top": "329",
+            "left": "1580",
+            "stepType": "\/api\/3\/workflow_step_types\/12254cf5-5db7-4b1a-8cb1-3af081924b28",
+            "uuid": "605359c6-d708-4061-b2ee-74d7449ab72e",
+            "id": 4844
+        }
+    ],
+    "routes": [
+        {
+            "@type": "WorkflowRoute",
+            "name": "Has indicator been submitted to VirusTotal before -> Create unknown MD5 Indicator",
+            "targetStep": "\/api\/3\/workflow_steps\/4225faff-27c4-4c49-ba02-a3b82a6d2c3d",
+            "sourceStep": "\/api\/3\/workflow_steps\/7fad89c7-376d-4de2-987d-a054a0098a69",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "1c26f245-f47e-49ed-8251-24434a26f848"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Update MD5 with unknown reputation -> Create Additional Analysis Task",
+            "targetStep": "\/api\/3\/workflow_steps\/223e5f87-858d-4d89-ad38-4a8738e74b46",
+            "sourceStep": "\/api\/3\/workflow_steps\/b09c38aa-d8e8-47e8-9f75-26e0f2878985",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "18f99dee-ded8-42bd-851c-363b6bba8d1c"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Is indicator malicious -> Create malicious MD5 Indicator and link to asset",
+            "targetStep": "\/api\/3\/workflow_steps\/6c0839b4-bfe5-4a86-acc6-fc933b5eda73",
+            "sourceStep": "\/api\/3\/workflow_steps\/605359c6-d708-4061-b2ee-74d7449ab72e",
+            "label": "",
+            "isExecuted": false,
+            "uuid": "fd3bb505-1b89-4f23-8a9a-dc0e85e35105"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Elastic Query for execution of service -> Copy  of Create Alert for Service Execution",
+            "targetStep": "\/api\/3\/workflow_steps\/6f6eb9de-8571-4558-b19d-b54e92d3dcec",
+            "sourceStep": "\/api\/3\/workflow_steps\/5f695feb-2c6e-450c-a727-c37e80a89872",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "4553d711-20d6-4634-8dfe-634a03902449"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "What is existing indicator reputation -> Create Alert",
+            "targetStep": "\/api\/3\/workflow_steps\/b00376a8-deb1-4421-a472-4594de18ae10",
+            "sourceStep": "\/api\/3\/workflow_steps\/8f41baf5-d33b-484b-afd7-0b51e39c969e",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "629df379-5ceb-48db-96ba-8a441ac3356c"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Create unknown MD5 Indicator -> Create Additional Analysis Task",
+            "targetStep": "\/api\/3\/workflow_steps\/223e5f87-858d-4d89-ad38-4a8738e74b46",
+            "sourceStep": "\/api\/3\/workflow_steps\/4225faff-27c4-4c49-ba02-a3b82a6d2c3d",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "38fb4d50-8b70-44c2-a9f8-6e3ae3bf7d55"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Create malicious MD5 Indicator and link to asset -> Create Alert",
+            "targetStep": "\/api\/3\/workflow_steps\/b00376a8-deb1-4421-a472-4594de18ae10",
+            "sourceStep": "\/api\/3\/workflow_steps\/6c0839b4-bfe5-4a86-acc6-fc933b5eda73",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "bb887d7c-420f-499b-a9a1-9e4be3b570ce"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Start -> Check if MD5 is already an indicator",
+            "targetStep": "\/api\/3\/workflow_steps\/d3eadfcc-9b6f-4d82-a3b9-586b6f27c0ea",
+            "sourceStep": "\/api\/3\/workflow_steps\/a624b7ba-601a-495b-a490-f4a364750ee3",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "011692f1-af67-4de4-b427-cf0a27bf482e"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Return query results -> Copy  of Create Alert",
+            "targetStep": "\/api\/3\/workflow_steps\/92f89029-2258-46c2-9bab-52c62036b961",
+            "sourceStep": "\/api\/3\/workflow_steps\/2facfade-44a3-4cf5-8bc6-4b79f1854702",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "32f0c399-eeab-4ac1-aa5f-d2fedad8d473"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Has indicator been submitted to VirusTotal before -> Update MD5 with unknown reputation",
+            "targetStep": "\/api\/3\/workflow_steps\/b09c38aa-d8e8-47e8-9f75-26e0f2878985",
+            "sourceStep": "\/api\/3\/workflow_steps\/7fad89c7-376d-4de2-987d-a054a0098a69",
+            "label": "",
+            "isExecuted": false,
+            "uuid": "555885f2-9d2c-4ed6-8ef1-7ef29bcb5c9b"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Was Indicator found -> Do Nothing2",
+            "targetStep": "\/api\/3\/workflow_steps\/d35ce4c1-3629-437c-9bb2-8271932981d3",
+            "sourceStep": "\/api\/3\/workflow_steps\/f1edbcd9-7b5b-4f77-b164-3b33662651ac",
+            "label": "Indicator was not found",
+            "isExecuted": false,
+            "uuid": "cbfecd4b-3384-4606-95e5-3b5f5d1f77bd"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Do Nothing2 -> Check MD5 Reputation",
+            "targetStep": "\/api\/3\/workflow_steps\/caaf83cf-646d-43e9-8b49-e2edf83830c3",
+            "sourceStep": "\/api\/3\/workflow_steps\/d35ce4c1-3629-437c-9bb2-8271932981d3",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "de5a3d71-ade0-457f-8354-4b3c4a0fc224"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Was Indicator found -> Is existing indicator malicious",
+            "targetStep": "\/api\/3\/workflow_steps\/8f41baf5-d33b-484b-afd7-0b51e39c969e",
+            "sourceStep": "\/api\/3\/workflow_steps\/f1edbcd9-7b5b-4f77-b164-3b33662651ac",
+            "label": "Indicator found",
+            "isExecuted": false,
+            "uuid": "7b20a2fe-a051-45b3-844d-9e3af60c2b5e"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Which SIEM -> Elastic Query for execution of service",
+            "targetStep": "\/api\/3\/workflow_steps\/5f695feb-2c6e-450c-a727-c37e80a89872",
+            "sourceStep": "\/api\/3\/workflow_steps\/ccc1fbda-65f3-4302-83df-5ebbc4c5f2e6",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "a0e5aedd-20b7-4926-b43e-26c8044991ed"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Is indicator malicious -> Copy  of Update MD5 with malicious reputation",
+            "targetStep": "\/api\/3\/workflow_steps\/aad5ff23-f514-4476-bd02-7292203175e5",
+            "sourceStep": "\/api\/3\/workflow_steps\/605359c6-d708-4061-b2ee-74d7449ab72e",
+            "label": "",
+            "isExecuted": false,
+            "uuid": "5fc08b19-f7d1-4476-aa0e-2845aa237b89"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Is indicator malicious -> Update MD5 with malicious reputation",
+            "targetStep": "\/api\/3\/workflow_steps\/ef8c8b2c-860a-4405-8802-bfb50bc9f505",
+            "sourceStep": "\/api\/3\/workflow_steps\/605359c6-d708-4061-b2ee-74d7449ab72e",
+            "label": "",
+            "isExecuted": false,
+            "uuid": "c5467331-993b-4c75-b346-201fe1ead353"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Set Indicator IRI -> Was Indicator found",
+            "targetStep": "\/api\/3\/workflow_steps\/f1edbcd9-7b5b-4f77-b164-3b33662651ac",
+            "sourceStep": "\/api\/3\/workflow_steps\/fbcab397-6166-4126-8395-8b146038d182",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "f6483849-2dd6-4f8d-af3e-752340a7cad9"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Create Alert -> Which SIEM",
+            "targetStep": "\/api\/3\/workflow_steps\/ccc1fbda-65f3-4302-83df-5ebbc4c5f2e6",
+            "sourceStep": "\/api\/3\/workflow_steps\/b00376a8-deb1-4421-a472-4594de18ae10",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "4b361446-6a0b-4cab-a3eb-5726d117c0eb"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Has indicator been submitted to VirusTotal before -> Is indicator malicious",
+            "targetStep": "\/api\/3\/workflow_steps\/605359c6-d708-4061-b2ee-74d7449ab72e",
+            "sourceStep": "\/api\/3\/workflow_steps\/7fad89c7-376d-4de2-987d-a054a0098a69",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "16962988-1d12-4f09-aa43-397e7d76f97e"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "What is existing indicator reputation -> Do nothing",
+            "targetStep": "\/api\/3\/workflow_steps\/48a94e9c-4df8-4125-b411-dc6432dbd4e3",
+            "sourceStep": "\/api\/3\/workflow_steps\/8f41baf5-d33b-484b-afd7-0b51e39c969e",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "bf241346-9568-4e8b-9352-2926b3cee882"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Check if MD5 is already an indicator -> Set Indicator IRI",
+            "targetStep": "\/api\/3\/workflow_steps\/fbcab397-6166-4126-8395-8b146038d182",
+            "sourceStep": "\/api\/3\/workflow_steps\/d3eadfcc-9b6f-4d82-a3b9-586b6f27c0ea",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "42ed86db-e13b-4626-b337-a0bb8b3a0eb8"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Query for execution of service -> Return query results",
+            "targetStep": "\/api\/3\/workflow_steps\/2facfade-44a3-4cf5-8bc6-4b79f1854702",
+            "sourceStep": "\/api\/3\/workflow_steps\/7e7a080c-586a-4ba2-b00f-265ed8da47ce",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "ed5728f9-6f0b-498d-9e32-998f2bab28c2"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Check MD5 Reputation -> Has indicator been submitted to VirusTotal before",
+            "targetStep": "\/api\/3\/workflow_steps\/7fad89c7-376d-4de2-987d-a054a0098a69",
+            "sourceStep": "\/api\/3\/workflow_steps\/caaf83cf-646d-43e9-8b49-e2edf83830c3",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "386bd0f9-be4e-4374-95df-3dd7d87aaecf"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "What is existing indicator reputation -> Check MD5 Reputation",
+            "targetStep": "\/api\/3\/workflow_steps\/caaf83cf-646d-43e9-8b49-e2edf83830c3",
+            "sourceStep": "\/api\/3\/workflow_steps\/8f41baf5-d33b-484b-afd7-0b51e39c969e",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "57323b62-d317-45b6-83b5-465cc76b7fbf"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Update MD5 with malicious reputation -> Create Alert",
+            "targetStep": "\/api\/3\/workflow_steps\/b00376a8-deb1-4421-a472-4594de18ae10",
+            "sourceStep": "\/api\/3\/workflow_steps\/ef8c8b2c-860a-4405-8802-bfb50bc9f505",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "1468b7bb-6eec-4db3-9aff-305deaa5f185"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Is indicator malicious -> Create benign MD5 Indicator",
+            "targetStep": "\/api\/3\/workflow_steps\/5979c078-6780-4605-b62c-356acd915a4b",
+            "sourceStep": "\/api\/3\/workflow_steps\/605359c6-d708-4061-b2ee-74d7449ab72e",
+            "label": "",
+            "isExecuted": false,
+            "uuid": "0e505f2a-4366-416a-8b69-c459b90402d0"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Which SIEM -> Query for execution of service",
+            "targetStep": "\/api\/3\/workflow_steps\/7e7a080c-586a-4ba2-b00f-265ed8da47ce",
+            "sourceStep": "\/api\/3\/workflow_steps\/ccc1fbda-65f3-4302-83df-5ebbc4c5f2e6",
+            "label": "",
+            "isExecuted": false,
+            "uuid": "a086e76c-02d6-47cf-aa19-3e5a08f399df"
+        }
+    ],
+    "priority": null,
+    "uuid": "fa42ac5d-e29c-4654-94f7-40c3a10f3a46",
+    "recordTags": [],
+    "id": 1150,
+    "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "createDate": 1644164616,
+    "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "modifyDate": 1644164616,
+    "owners": [],
+    "isPrivate": false
+}

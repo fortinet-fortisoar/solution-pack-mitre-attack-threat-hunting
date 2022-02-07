@@ -1,0 +1,531 @@
+{
+    "@type": "Workflow",
+    "triggerLimit": null,
+    "name": "HUNTS - Rundll32 (T1218.011)",
+    "aliasName": null,
+    "tag": "ATT&CK, Execution, Defense_Evasion, Rundll32",
+    "description": "Identifies Processes spawned by rundll32.exe where the DLL loaded exists outside of System32\/SysWOW64 or Program Files. This playbook may require additional tuning to reduce false positives.",
+    "isActive": true,
+    "debug": false,
+    "singleRecordExecution": false,
+    "remoteExecutableFlag": false,
+    "parameters": [
+        "sourceIP",
+        "destinationIP",
+        "processname",
+        "processID",
+        "processGUID",
+        "parentprocessname",
+        "parentprocessGUID",
+        "accountname",
+        "computername",
+        "commandline",
+        "sourcetool"
+    ],
+    "synchronous": false,
+    "lastModifyDate": 1644164607,
+    "collection": "\/api\/3\/workflow_collections\/c926f317-8aba-41c5-8f71-2f0f23d992fb",
+    "versions": [],
+    "triggerStep": "\/api\/3\/workflow_steps\/35ff6e09-a27d-4133-be4b-310ae98ef23d",
+    "steps": [
+        {
+            "@type": "WorkflowStep",
+            "name": "Set Elastic hunt times",
+            "description": null,
+            "arguments": {
+                "elasticHuntEnd": "{% if vars.input.records[0].huntEnd %} {{ arrow.get(vars.input.records[0].huntEnd).format('YYYY-MM-DDTHH:mm:ss.SSSSSSSSSZ') }} {% else %} now {% endif %}",
+                "elasticHuntStart": "{{ arrow.get(vars.input.records[0].huntStart).format('YYYY-MM-DDTHH:mm:ss.SSSSSSSSSZ') }}"
+            },
+            "status": null,
+            "top": "30",
+            "left": "1100",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "13074922-91ed-40aa-a901-f0dec018bfed",
+            "id": 4811
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Get Results for Sysmon Rundll32",
+            "description": null,
+            "arguments": {
+                "name": "Splunk",
+                "config": "55bf97af-75c2-45ca-ae75-f4d27220cc52",
+                "params": {
+                    "sid": "{'value': \"{{vars.steps.Splunk_query_for_Sysmon_Rundll32.data.sid}}\"}",
+                    "additional_args": "{\"a\":\"B\"}"
+                },
+                "version": "1.4.0",
+                "do_until": {
+                    "delay": "1",
+                    "retries": "300",
+                    "condition": "{{\"results\" in vars.result.data}}"
+                },
+                "connector": "splunk",
+                "operation": "get_results",
+                "operationTitle": "Get Results for a Search",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "190",
+            "left": "1425",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "77c9ba4c-855a-4f82-9c47-a2ea2f3fe1a9",
+            "id": 4812
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Elastic query for Sysmon Rundll32",
+            "description": null,
+            "arguments": {
+                "name": "ElasticSearch",
+                "config": "8d03a01d-1cef-40a8-992a-63d8de2b339f",
+                "params": {
+                    "index": "logstash-beats-*",
+                    "query": "event_type:sysmon AND event_id:\"1\" AND @timestamp:{ {{vars.elasticHuntStart}} TO {{vars.elasticHuntEnd}} } AND (parent_image_path:\"C:\\\\Windows\\\\System32\\\\rundll32.exe\" OR parent_image_path:\"C:\\\\Windows\\\\SysWOW64\\\\rundll32.exe\") NOT (parent_image_path:\"C:\\\\Windows\\\\SysWOW64\\\\*\" OR parent_image_path:\"C:\\\\Program Files \\(x86\\)\\\\*\" OR parent_image_path:\"C:\\\\Program Files\\\\*\")",
+                    "run_as_user": ""
+                },
+                "version": "2.2.1",
+                "connector": "elasticsearch",
+                "operation": "execute_lucene_query",
+                "mock_result": "{\n  \"data\": {\n    \"hits\": {\n      \"hits\": [\n        {\n          \"_id\": \"rr5auGsBt8nuALoCa90l\",\n          \"_type\": \"doc\",\n          \"_index\": \"logstash-beats-rundll32\",\n          \"_score\": 3.7260923,\n          \"_source\": {\n            \"beat\": {\n              \"name\": \"admin-PC4\",\n              \"version\": \"6.5.3\",\n              \"hostname\": \"admin-PC4\"\n            },\n            \"tags\": [\n              \"beat\",\n              \"beats_input_codec_plain_applied\"\n            ],\n            \"task\": \"Process Create (rule: ProcessCreate)\",\n            \"user\": {\n              \"name\": \"SYSTEM\",\n              \"type\": \"User\",\n              \"domain\": \"NT AUTHORITY\",\n              \"identifier\": \"S-1-5-18\"\n            },\n            \"level\": \"Information\",\n            \"opcode\": \"Info\",\n            \"message\": \"Process Create:\\nRuleName: \\nUtcTime: 2019-07-03 15:00:59.949\\nProcessGuid: {D1BE7B41-0000-0000-0000-00102CE8F70F}\\nProcessId: 1328\\nImage: C:\\\\Windows\\\\System32\\\\notepad.exe\\nFileVersion: 6.1.7600.16385 (win7_rtm.090713-1255)\\nDescription: Notepad\\nProduct: Microsoft\u00ae Windows\u00ae Operating System\\nCompany: Microsoft Corporation\\nOriginalFileName: NOTEPAD.EXE\\nCommandLine: \\\"C:\\\\Windows\\\\system32\\\\NOTEPAD.EXE\\\" C:\\\\Users\\\\superman\\\\Desktop\\\\ath\\\\x64\\\\Release\\\\AllTheThings.dll\\nCurrentDirectory: C:\\\\Users\\\\superman\\\\Desktop\\\\ath\\\\x64\\\\Release\\\\\\nUser: batman\\\\superman\\nLogonGuid: {D1BE7B41-0000-0000-0000-0020C9B70500}\\nLogonId: 0x5b7c9\\nTerminalSessionId: 1\\nIntegrityLevel: High\\nHashes: MD5=F2C7BB8ACC97F92E987A2D4087D021B1,SHA256=142E1D688EF0568370C37187FD9F2351D7DDEDA574F8BFA9B0FA4EF42DB85AA2\\nParentProcessGuid: {D1BE7B41-0000-0000-0000-00103EACF70F}\\nParentProcessId: 780\\nParentImage: C:\\\\Windows\\\\System32\\\\rundll32.exe\\nParentCommandLine: \\\"C:\\\\Windows\\\\system32\\\\rundll32.exe\\\" C:\\\\Windows\\\\system32\\\\shell32.dll,OpenAs_RunDLL C:\\\\Users\\\\superman\\\\Desktop\\\\ath\\\\x64\\\\Release\\\\AllTheThings.dll\",\n            \"version\": 5,\n            \"@version\": \"1\",\n            \"event_id\": 1,\n            \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n            \"username\": \"batman\\\\superman\",\n            \"beat_host\": {\n              \"id\": \"d1be7b41-2fc5-49e3-9ff1-ec91443d27c3\",\n              \"os\": {\n                \"build\": \"7601.0\",\n                \"family\": \"windows\",\n                \"version\": \"6.1\",\n                \"platform\": \"windows\"\n              },\n              \"name\": \"admin-PC4\",\n              \"architecture\": \"x86_64\"\n            },\n            \"thread_id\": 2116,\n            \"@timestamp\": \"2019-07-03T15:01:00.167Z\",\n            \"event_data\": {\n              \"Hashes\": \"MD5=F2C7BB8ACC97F92E987A2D4087D021B1,SHA256=142E1D688EF0568370C37187FD9F2351D7DDEDA574F8BFA9B0FA4EF42DB85AA2\",\n              \"Company\": \"Microsoft Corporation\",\n              \"LogonId\": \"0x5b7c9\",\n              \"Product\": \"Microsoft\u00ae Windows\u00ae Operating System\",\n              \"UtcTime\": \"2019-07-03 15:00:59.949\",\n              \"LogonGuid\": \"{D1BE7B41-0000-0000-0000-0020C9B70500}\",\n              \"ProcessId\": \"1328\",\n              \"CommandLine\": \"\\\"C:\\\\Windows\\\\system32\\\\NOTEPAD.EXE\\\" C:\\\\Users\\\\superman\\\\Desktop\\\\ath\\\\x64\\\\Release\\\\AllTheThings.dll\",\n              \"Description\": \"Notepad\",\n              \"FileVersion\": \"6.1.7600.16385 (win7_rtm.090713-1255)\",\n              \"ProcessGuid\": \"{D1BE7B41-0000-0000-0000-00102CE8F70F}\",\n              \"IntegrityLevel\": \"High\",\n              \"ParentProcessId\": \"780\",\n              \"CurrentDirectory\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\ath\\\\x64\\\\Release\\\\\",\n              \"OriginalFileName\": \"NOTEPAD.EXE\",\n              \"ParentCommandLine\": \"\\\"C:\\\\Windows\\\\system32\\\\rundll32.exe\\\" C:\\\\Windows\\\\system32\\\\shell32.dll,OpenAs_RunDLL C:\\\\Users\\\\superman\\\\Desktop\\\\ath\\\\x64\\\\Release\\\\AllTheThings.dll\",\n              \"ParentProcessGuid\": \"{D1BE7B41-0000-0000-0000-00103EACF70F}\",\n              \"TerminalSessionId\": \"1\"\n            },\n            \"event_type\": \"sysmon\",\n            \"image_path\": \"C:\\\\Windows\\\\System32\\\\notepad.exe\",\n            \"process_id\": 1408,\n            \"source_name\": \"Microsoft-Windows-Sysmon\",\n            \"computer_name\": \"admin-PC4.batman.local\",\n            \"logstash_time\": 0.000888824462890625,\n            \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n            \"record_number\": \"535173\",\n            \"parent_image_path\": \"C:\\\\Windows\\\\System32\\\\rundll32.exe\"\n          }\n        }\n      ],\n      \"total\": {\n        \"value\": 1,\n        \"relation\": \"eq\"\n      },\n      \"max_score\": 3.7260923\n    },\n    \"took\": 318,\n    \"_shards\": {\n      \"total\": 95,\n      \"failed\": 0,\n      \"skipped\": 0,\n      \"successful\": 95\n    },\n    \"timed_out\": false\n  },\n  \"status\": \"Success\",\n  \"message\": \"\",\n  \"operation\": null\n}",
+                "operationTitle": "Execute Lucene Query",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "30",
+            "left": "1425",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "1de83e7f-5677-4ff3-83cd-42d103651653",
+            "id": 4813
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Which SIEM",
+            "description": null,
+            "arguments": {
+                "conditions": [
+                    {
+                        "option": "Elasticsearch",
+                        "step_iri": "\/api\/3\/workflow_steps\/13074922-91ed-40aa-a901-f0dec018bfed",
+                        "condition": "{{ vars.input.params.siem.itemValue == \"Elastic\" }}"
+                    },
+                    {
+                        "option": "Splunk",
+                        "step_iri": "\/api\/3\/workflow_steps\/c503bb51-c30e-4b5d-a98e-02ec440ac272",
+                        "condition": "{{ vars.input.params.siem.itemValue == \"Splunk\" }}"
+                    }
+                ]
+            },
+            "status": null,
+            "top": "110",
+            "left": "450",
+            "stepType": "\/api\/3\/workflow_step_types\/12254cf5-5db7-4b1a-8cb1-3af081924b28",
+            "uuid": "256e430f-9bed-426b-b3e6-a53a3ff2f848",
+            "id": 4814
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create and Link Alert",
+            "description": null,
+            "arguments": {
+                "for_each": {
+                    "item": "{{vars.steps.Get_Results_for_Sysmon_Rundll32.data.results}}",
+                    "parallel": false,
+                    "condition": ""
+                },
+                "arguments": {
+                    "MD5": "{{vars.item.MD5}}",
+                    "url": "",
+                    "source": "{{vars.item.EventChannel}}",
+                    "comment": "SIEM query identified rundll32.exe spawned child process {{vars.item.process_exec}} from a nonstandard directory on {{vars.item.host}} at {{vars.item.TimeCreated}}.",
+                    "huntIRI": "{{vars.input.records[0]['@id']}}",
+                    "service": "",
+                    "filePath": "{{vars.item.Image}}",
+                    "hostName": "{{vars.item.host}}",
+                    "sourceIP": "null",
+                    "userName": "{{vars.item.User}}",
+                    "alertName": "ATT&CK-Rundll32-{{vars.item.Image}} executed by Rundll32.exe",
+                    "alertType": "{{\"AlertType\" | picklist(\"Signed Binary Proxy Execution\", \"@id\")}}",
+                    "epochTime": "{{ arrow.get(vars.item.UtcTime).timestamp }}",
+                    "eventName": "",
+                    "eventTime": "{{vars.item.UtcTime}}",
+                    "processID": "{{vars.item.ProcessId}}",
+                    "technique": "Rundll32",
+                    "sourceData": "{{vars.item}}",
+                    "sourceTool": "{{vars.item.vendor_product}}",
+                    "commandline": "{{vars.item.CommandLine}}",
+                    "description": "An attempt to invoke Rundll32.exe was observed. Rundll32 can be used to load arbitrary DLL files. Use of this technique may bypass application whitelisting and allow an attacker to bypass other defenses. Attention should be paid to the commands passed to Rundll32 as well as processes spawned.",
+                    "processGUID": "",
+                    "processName": "{{vars.item.process_exec}}",
+                    "registryKey": "",
+                    "sourceImage": "",
+                    "targetImage": "",
+                    "computerName": "{{vars.item.Computer}}",
+                    "destinationIP": "null",
+                    "mitre_tech_id": "T1218.011",
+                    "parentProcess": "{{vars.item.ParentImage}}",
+                    "scheduledTask": "",
+                    "bitstransferid": "",
+                    "parentProcessID": "{{vars.item.ParentProcessId}}",
+                    "bytestransferred": "",
+                    "registryKeyValue": "",
+                    "parentCommandLine": "{{vars.item.ParentCommandLine}}",
+                    "decodedCommandLine": ""
+                },
+                "apply_async": false,
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/bf7d418b-7ff3-44c1-b473-90d0a03c4641"
+            },
+            "status": null,
+            "top": "190",
+            "left": "1750",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "5f82825c-f1e2-4c9f-9bb2-a272aee9a6cd",
+            "id": 4815
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Splunk query for Sysmon Rundll32",
+            "description": null,
+            "arguments": {
+                "name": "Splunk",
+                "config": "55bf97af-75c2-45ca-ae75-f4d27220cc52",
+                "params": {
+                    "query": "index=sysmon EventCode=1 {{vars.splunkHuntStart}} {{vars.splunkHuntEnd}} ParentImage=\"C:\\\\Windows\\\\System32\\\\rundll32.exe\" OR ParentImage=\"C:\\\\Windows\\\\SysWOW64\\\\rundll32.exe\" Image!=\"C:\\\\Windows\\\\System32\\\\*\" Image!=\"C:\\\\Windows\\\\SysWOW64\\\\*\" Image!=\"C:\\\\Program Files \\(x86\\)\\\\*\" Image!=\"C:\\\\Program Files\\\\*\" | table host Image MD5 ParentImage User CommandLine process_exec vendor_product TimeCreated ParentProcessId ProcessId ParentCommandLine ProcessGuid UtcTime EventChannel Computer",
+                    "exec_mode": "",
+                    "auto_cancel": "",
+                    "latest_time": "",
+                    "earliest_time": "",
+                    "additional_search_args": "{\"a\":\"B\"}"
+                },
+                "version": "1.5.0",
+                "connector": "splunk",
+                "operation": "invoke_search",
+                "operationTitle": "Invoke Search",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "190",
+            "left": "1100",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "2bec8914-4c5b-4e3f-bb9b-44e676d11606",
+            "id": 4816
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Deduplicate Comments",
+            "description": null,
+            "arguments": {
+                "arguments": {
+                    "hunt_iri": "{{vars.input.records[0]['@id']}}"
+                },
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/3fd311be-a1c6-41c7-99a3-8794b33d8f8a"
+            },
+            "status": null,
+            "top": "110",
+            "left": "2075",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "a19803de-a4ef-4b14-b7e4-488a7cb6ad95",
+            "id": 4817
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Set Splunk hunt times",
+            "description": null,
+            "arguments": {
+                "splunkHuntEnd": "{% if vars.input.records[0].huntEnd %}latest={{vars.input.records[0].huntEnd}}{% endif %}",
+                "splunkHuntStart": "earliest={{vars.input.records[0].huntStart}}"
+            },
+            "status": null,
+            "top": "190",
+            "left": "775",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "c503bb51-c30e-4b5d-a98e-02ec440ac272",
+            "id": 4818
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Hunt for Rundll32",
+            "description": null,
+            "arguments": {
+                "route": "e62e1aae-11a6-4338-a3e9-e8c669c88c95",
+                "title": "T1218.011 - Hunt for Rundll32",
+                "resources": [
+                    "hunt"
+                ],
+                "inputVariables": [
+                    {
+                        "name": "siem",
+                        "type": "picklists",
+                        "label": "SIEM",
+                        "title": "Picklist",
+                        "usable": true,
+                        "tooltip": "Choose your SIEM",
+                        "dataType": "picklist",
+                        "formType": "picklist",
+                        "required": true,
+                        "_expanded": true,
+                        "collection": false,
+                        "dataSource": {
+                            "model": "picklists",
+                            "query": {
+                                "sort": [
+                                    {
+                                        "field": "orderIndex",
+                                        "direction": "ASC"
+                                    }
+                                ],
+                                "logic": "AND",
+                                "filters": [
+                                    {
+                                        "field": "listName__name",
+                                        "value": "SIEMs",
+                                        "operator": "eq"
+                                    }
+                                ]
+                            },
+                            "displayConditions": {
+                                "876c1483-416b-4d2f-8138-15769ae16d5c": {
+                                    "conditions": null,
+                                    "visibility": "visible"
+                                },
+                                "bcebcab1-3f93-468a-9f3f-91e5c511a0b5": {
+                                    "conditions": null,
+                                    "visibility": "visible"
+                                }
+                            }
+                        },
+                        "searchable": false,
+                        "templateUrl": "app\/components\/form\/fields\/typeahead.html",
+                        "_nameTouched": true,
+                        "defaultValue": {
+                            "id": 280,
+                            "@id": "\/api\/3\/picklists\/876c1483-416b-4d2f-8138-15769ae16d5c",
+                            "icon": null,
+                            "@type": "Picklist",
+                            "color": null,
+                            "display": "Elastic",
+                            "listName": "\/api\/3\/picklist_names\/98830189-afff-40e6-bed1-94012551dc67",
+                            "itemValue": "Elastic",
+                            "orderIndex": 1
+                        },
+                        "useModuleField": false,
+                        "displayTemplate": "{{ itemValue }}",
+                        "allowedEncryption": false,
+                        "allowedGridColumn": true,
+                        "useRecordFieldDefault": false
+                    }
+                ],
+                "step_variables": {
+                    "input": {
+                        "params": {
+                            "siem": "{{vars.request.data[\"siem\"]}}",
+                            "sourceIP": "{{ vars.sourceIP }}",
+                            "processID": "{{ vars.processID }}",
+                            "sourcetool": "{{ vars.sourcetool }}",
+                            "accountname": "{{ vars.accountname }}",
+                            "commandline": "{{ vars.commandline }}",
+                            "processGUID": "{{ vars.processGUID }}",
+                            "processname": "{{ vars.processname }}",
+                            "computername": "{{ vars.computername }}",
+                            "destinationIP": "{{ vars.destinationIP }}",
+                            "parentprocessGUID": "{{ vars.parentprocessGUID }}",
+                            "parentprocessname": "{{ vars.parentprocessname }}"
+                        },
+                        "records": "{{vars.input.records}}"
+                    },
+                    "useMockOutput": "{{globalVars.Demo_mode}}"
+                },
+                "_promptexpanded": true,
+                "displayConditions": {
+                    "hunt": {
+                        "sort": [],
+                        "limit": 30,
+                        "logic": "AND",
+                        "filters": []
+                    },
+                    "alerts": {
+                        "sort": [],
+                        "limit": 30,
+                        "logic": "AND",
+                        "filters": []
+                    }
+                },
+                "executeButtonText": "Execute",
+                "noRecordExecution": false,
+                "singleRecordExecution": false
+            },
+            "status": null,
+            "top": "110",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/f414d039-bb0d-4e59-9c39-a8f1e880b18a",
+            "uuid": "35ff6e09-a27d-4133-be4b-310ae98ef23d",
+            "id": 4819
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Copy  of Create and Link Alert",
+            "description": null,
+            "arguments": {
+                "for_each": {
+                    "item": "{{vars.steps.Elastic_query_for_Sysmon_Rundll32.data.hits.hits}}",
+                    "parallel": false,
+                    "condition": ""
+                },
+                "arguments": {
+                    "MD5": "{{vars.item._source.event_data.Hashes.split(\"MD5=\")[1].split(',')[0]}}",
+                    "url": "",
+                    "source": "{{vars.item._source.source_name}}",
+                    "comment": "SIEM query identified rundll32.exe spawned child process {{vars.item._source.image_path.split(\"\\\\\")[-1] }} from a nonstandard directory on {{vars.item._source.beat.hostname}} at {{vars.item._source.event_data.UtcTime}}.",
+                    "huntIRI": "{{vars.input.records[0]['@id']}}",
+                    "service": "",
+                    "filePath": "{{vars.item._source.image_path}}",
+                    "hostName": "{{vars.item._source.beat.hostname}}",
+                    "sourceIP": "",
+                    "userName": "{{vars.item._source.username}}",
+                    "alertName": "ATT&CK-Rundll32-{{vars.item._source.image_path.split(\"\\\\\")[-1] }} executed by Rundll32.exe",
+                    "alertType": "{{\"AlertType\" | picklist(\"Signed Binary Proxy Execution\", \"@id\")}}",
+                    "epochTime": "{{ arrow.get(vars.item._source.event_data.UtcTime).timestamp }}",
+                    "eventName": "",
+                    "eventTime": "{{vars.item._source.event_data.UtcTime}}",
+                    "processID": "{{vars.item._source.event_data.ProcessId}}",
+                    "technique": "Rundll32",
+                    "sourceData": "{{vars.item}}",
+                    "sourceTool": "{{vars.item._source.source_name}}",
+                    "commandline": "{{vars.item._source.event_data.CommandLine}}",
+                    "description": "An attempt to invoke Rundll32.exe was observed. Rundll32 can be used to load arbitrary DLL files. Use of this technique may bypass application whitelisting and allow an attacker to bypass other defenses. Attention should be paid to the commands passed to Rundll32 as well as processes spawned.",
+                    "processGUID": "{{vars.item._source.event_data.ProcessGuid}}",
+                    "processName": "{{vars.item._source.image_path.split(\"\\\\\")[-1] }}",
+                    "registryKey": "",
+                    "sourceImage": "",
+                    "targetImage": "",
+                    "computerName": "{{vars.item._source.computer_name}}",
+                    "destinationIP": "",
+                    "mitre_tech_id": "T1218.011",
+                    "parentProcess": "{{vars.item._source.parent_image_path}}",
+                    "scheduledTask": "",
+                    "bitstransferid": "",
+                    "parentProcessID": "{{vars.item._source.event_data.ParentProcessId}}",
+                    "bytestransferred": "",
+                    "registryKeyValue": "",
+                    "parentCommandLine": "{{vars.item._source.event_data.ParentCommandLine}}",
+                    "decodedCommandLine": ""
+                },
+                "apply_async": false,
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/bf7d418b-7ff3-44c1-b473-90d0a03c4641"
+            },
+            "status": null,
+            "top": "30",
+            "left": "1750",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "fc983537-8180-4f27-9e53-36f435839078",
+            "id": 4820
+        }
+    ],
+    "routes": [
+        {
+            "@type": "WorkflowRoute",
+            "name": "Hunt for Rundll32 -> Which SIEM",
+            "targetStep": "\/api\/3\/workflow_steps\/256e430f-9bed-426b-b3e6-a53a3ff2f848",
+            "sourceStep": "\/api\/3\/workflow_steps\/35ff6e09-a27d-4133-be4b-310ae98ef23d",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "31bd6307-b251-4125-ade2-67456868a9bd"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Elastic query for Sysmon Rundll32 -> Copy  of Create and Link Alert",
+            "targetStep": "\/api\/3\/workflow_steps\/fc983537-8180-4f27-9e53-36f435839078",
+            "sourceStep": "\/api\/3\/workflow_steps\/1de83e7f-5677-4ff3-83cd-42d103651653",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "164072d9-daaf-42d9-be9f-3c61a2718450"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Set Elastic hunt times -> elalstic",
+            "targetStep": "\/api\/3\/workflow_steps\/1de83e7f-5677-4ff3-83cd-42d103651653",
+            "sourceStep": "\/api\/3\/workflow_steps\/13074922-91ed-40aa-a901-f0dec018bfed",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "dbb36387-5538-4e55-b39f-5cf11891a858"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Get Results for Sysmon CMSTP -> Create Splunk Alert",
+            "targetStep": "\/api\/3\/workflow_steps\/5f82825c-f1e2-4c9f-9bb2-a272aee9a6cd",
+            "sourceStep": "\/api\/3\/workflow_steps\/77c9ba4c-855a-4f82-9c47-a2ea2f3fe1a9",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "5385719c-4a2e-469f-ac1d-65a4d4a38b89"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Which SIEM -> Set Splunk hunt times",
+            "targetStep": "\/api\/3\/workflow_steps\/c503bb51-c30e-4b5d-a98e-02ec440ac272",
+            "sourceStep": "\/api\/3\/workflow_steps\/256e430f-9bed-426b-b3e6-a53a3ff2f848",
+            "label": "Splunk",
+            "isExecuted": false,
+            "uuid": "9e7372c5-cfa9-4221-9263-52cfdaad4b22"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Which SIEM -> Set Elastic hunt times",
+            "targetStep": "\/api\/3\/workflow_steps\/13074922-91ed-40aa-a901-f0dec018bfed",
+            "sourceStep": "\/api\/3\/workflow_steps\/256e430f-9bed-426b-b3e6-a53a3ff2f848",
+            "label": "Elasticsearch",
+            "isExecuted": false,
+            "uuid": "4a9cffe6-f1c9-4224-9736-79f30617b53a"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Copy  of Create and Link Alert -> Deduplicate Comments",
+            "targetStep": "\/api\/3\/workflow_steps\/a19803de-a4ef-4b14-b7e4-488a7cb6ad95",
+            "sourceStep": "\/api\/3\/workflow_steps\/fc983537-8180-4f27-9e53-36f435839078",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "0a8750c9-519a-4859-9ff3-d7de8247fd0a"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Create and Link Alert -> Deduplicate Comments",
+            "targetStep": "\/api\/3\/workflow_steps\/a19803de-a4ef-4b14-b7e4-488a7cb6ad95",
+            "sourceStep": "\/api\/3\/workflow_steps\/5f82825c-f1e2-4c9f-9bb2-a272aee9a6cd",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "d13a1c07-4238-498b-8bd2-27db35f7d606"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Splunk query for Sysmon CMSTP -> Get Results for Sysmon CMSTP",
+            "targetStep": "\/api\/3\/workflow_steps\/77c9ba4c-855a-4f82-9c47-a2ea2f3fe1a9",
+            "sourceStep": "\/api\/3\/workflow_steps\/2bec8914-4c5b-4e3f-bb9b-44e676d11606",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "fca44167-3be3-41dd-9b71-5abee0f26cf0"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Set Splunk hunt times -> Splunk query for Sysmon Rundll32",
+            "targetStep": "\/api\/3\/workflow_steps\/2bec8914-4c5b-4e3f-bb9b-44e676d11606",
+            "sourceStep": "\/api\/3\/workflow_steps\/c503bb51-c30e-4b5d-a98e-02ec440ac272",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "4deba291-ecbf-4582-9967-64d1e89aadea"
+        }
+    ],
+    "priority": null,
+    "uuid": "38f9b332-8f68-4cae-99d0-e7b01bdf6d90",
+    "recordTags": [
+        "ManualTrigger"
+    ],
+    "id": 1149,
+    "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "createDate": 1644164614,
+    "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "modifyDate": 1644164614,
+    "owners": [],
+    "isPrivate": false
+}

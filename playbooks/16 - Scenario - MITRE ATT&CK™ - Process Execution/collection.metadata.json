@@ -1,0 +1,15 @@
+{
+    "@context": "\/api\/3\/contexts\/WorkflowCollection",
+    "@type": "WorkflowCollection",
+    "name": "16 - Scenario - MITRE ATT&CK\u2122 - Process Execution",
+    "description": null,
+    "visible": true,
+    "image": null,
+    "uuid": "897f9d35-4fcb-4933-92d4-d2ef8c1f7478",
+    "id": 96,
+    "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "createDate": 1644164613,
+    "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "modifyDate": 1644164613,
+    "recordTags": []
+}

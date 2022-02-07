@@ -1,0 +1,202 @@
+{
+    "@type": "Workflow",
+    "triggerLimit": null,
+    "name": "Fetch Alerts from SIEM",
+    "aliasName": null,
+    "tag": null,
+    "description": "Fetches alerts by querying to SIEM",
+    "isActive": true,
+    "debug": false,
+    "singleRecordExecution": false,
+    "remoteExecutableFlag": false,
+    "parameters": [
+        "huntStart",
+        "huntEnd"
+    ],
+    "synchronous": false,
+    "lastModifyDate": 1644164607,
+    "collection": "\/api\/3\/workflow_collections\/2d31bc0f-81b6-482b-91ac-2629def1c7ac",
+    "versions": [],
+    "triggerStep": "\/api\/3\/workflow_steps\/ceeef724-b91a-4c82-b3f4-779140981e73",
+    "steps": [
+        {
+            "@type": "WorkflowStep",
+            "name": "Start",
+            "description": null,
+            "arguments": {
+                "step_variables": {
+                    "input": {
+                        "params": []
+                    }
+                }
+            },
+            "status": null,
+            "top": "30",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/b348f017-9a94-471f-87f8-ce88b6a7ad62",
+            "uuid": "ceeef724-b91a-4c82-b3f4-779140981e73",
+            "id": 4374
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Configuration",
+            "description": null,
+            "arguments": {
+                "useMockOutput": "{{globalVars.Demo_mode}}",
+                "huntEndDateTime": "{{ arrow.get(vars.input.params.huntEnd).format('YYYY-MM-DDTHH:mm:ss.SSSSSSSSSZ') }}",
+                "huntStartDateTime": "{{ arrow.get(vars.input.params.huntStart).format('YYYY-MM-DDTHH:mm:ss.SSSSSSSSSZ') }}"
+            },
+            "status": null,
+            "top": "165",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "1fb274a6-0745-439e-8c46-904da487d1f7",
+            "id": 4375
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "LSASS Access Query",
+            "description": null,
+            "arguments": {
+                "name": "ElasticSearch",
+                "config": "8d610bda-c24f-447f-86a2-8ae6c2152678",
+                "params": {
+                    "index": "",
+                    "query": "{{vars.huntSearchQuery}}",
+                    "run_as_user": ""
+                },
+                "version": "2.2.1",
+                "connector": "elasticsearch",
+                "operation": "execute_lucene_query",
+                "mock_result": "{\n    \"data\": {\n      \"hits\": {\n        \"hits\": [\n          {\n            \"_id\": \"GjCpdGoBhEY99dtF4t9K\",\n            \"_type\": \"doc\",\n            \"_index\": \"logstash-beats-credentialdumping\",\n            \"_score\": 3.33305,\n            \"_source\": {\n              \"beat\": {\n                \"name\": \"admin-PC4\",\n                \"version\": \"6.5.3\",\n                \"hostname\": \"admin-PC4\"\n              },\n              \"tags\": [\n                \"beat\",\n                \"beats_input_codec_plain_applied\"\n              ],\n              \"task\": \"Process accessed (rule: ProcessAccess)\",\n              \"user\": {\n                \"name\": \"SYSTEM\",\n                \"type\": \"User\",\n                \"domain\": \"NT AUTHORITY\",\n                \"identifier\": \"S-1-5-18\"\n              },\n              \"level\": \"Information\",\n              \"opcode\": \"Info\",\n              \"message\": \"Process accessed:\\nRuleName: \\nUtcTime: 2019-05-01 21:27:19.083\\nSourceProcessGUID: {D1BE7B41-0F36-5CCA-0000-00101C0DB701}\\nSourceProcessId: 3852\\nSourceThreadId: 3504\\nSourceImage: C:\\\\Users\\\\superman\\\\AppData\\\\Local\\\\Temp\\\\info.exe\\nTargetProcessGUID: {D1BE7B41-D726-5CC8-0000-001023B30000}\\nTargetProcessId: 516\\nTargetImage: C:\\\\Windows\\\\system32\\\\lsass.exe\\nGrantedAccess: 0x1410\\nCallTrace: C:\\\\Windows\\\\SYSTEM32\\\\ntdll.dll+5157a|C:\\\\Windows\\\\SYSTEM32\\\\wow64.dll+14c94|C:\\\\Windows\\\\SYSTEM32\\\\wow64.dll+cf87|C:\\\\Windows\\\\SYSTEM32\\\\wow64cpu.dll+2776|C:\\\\Windows\\\\SYSTEM32\\\\wow64.dll+d07e|C:\\\\Windows\\\\SYSTEM32\\\\wow64.dll+c549|C:\\\\Windows\\\\SYSTEM32\\\\ntdll.dll+44956|C:\\\\Windows\\\\SYSTEM32\\\\ntdll.dll+41a17|C:\\\\Windows\\\\SYSTEM32\\\\ntdll.dll+2c32e|C:\\\\Windows\\\\SysWOW64\\\\ntdll.dll+1fc22(wow64)|C:\\\\Windows\\\\syswow64\\\\KERNELBASE.dll+e54e(wow64)|UNKNOWN(000000000029AE4F)|C:\\\\Windows\\\\assembly\\\\NativeImages_v2.0.50727_32\\\\System\\\\9e0a3b9b9f457233a335d7fba8f95419\\\\System.ni.dll+5bf730(wow64)|C:\\\\Windows\\\\assembly\\\\NativeImages_v2.0.50727_32\\\\System\\\\9e0a3b9b9f457233a335d7fba8f95419\\\\System.ni.dll+5c016b(wow64)|C:\\\\Windows\\\\assembly\\\\NativeImages_v2.0.50727_32\\\\System\\\\9e0a3b9b9f457233a335d7fba8f95419\\\\System.ni.dll+5c00be(wow64)|C:\\\\Windows\\\\assembly\\\\NativeImages_v2.0.50727_32\\\\System\\\\9e0a3b9b9f457233a335d7fba8f95419\\\\System.ni.dll+586161(wow64)|UNKNOWN(00000000008B04E0)|UNKNOWN(00000000008B0456)|C:\\\\Windows\\\\Microsoft.NET\\\\Framework\\\\v2.0.50727\\\\mscorwks.dll+1b4c(wow64)|C:\\\\Windows\\\\Microsoft.NET\\\\Framework\\\\v2.0.50727\\\\mscorwks.dll+18dde(wow64)|C:\\\\Windows\\\\Microsoft.NET\\\\Framework\\\\v2.0.50727\\\\mscorwks.dll+26a2c(wow64)|C:\\\\Windows\\\\Microsoft.NET\\\\Framework\\\\v2.0.50727\\\\mscorwks.dll+26a5f(wow64)|C:\\\\Windows\\\\Microsoft.NET\\\\Framework\\\\v2.0.50727\\\\mscorwks.dll+26a7d(wow64)|C:\\\\Windows\\\\Microsoft.NET\\\\Framework\\\\v2.0.50727\\\\mscorwks.dll+c6a8d(wow64)\",\n              \"version\": 3,\n              \"@version\": \"1\",\n              \"event_id\": 10,\n              \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n              \"beat_host\": {\n                \"id\": \"d1be7b41-2fc5-49e3-9ff1-ec91443d27c3\",\n                \"os\": {\n                  \"build\": \"7601.0\",\n                  \"family\": \"windows\",\n                  \"version\": \"6.1\",\n                  \"platform\": \"windows\"\n                },\n                \"name\": \"admin-PC4\",\n                \"architecture\": \"x86_64\"\n              },\n              \"thread_id\": 1288,\n              \"@timestamp\": \"2019-05-01T21:27:19.083Z\",\n              \"event_data\": {\n                \"UtcTime\": \"2019-05-01 21:27:19.083\",\n                \"CallTrace\": \"C:\\\\Windows\\\\SYSTEM32\\\\ntdll.dll+5157a|C:\\\\Windows\\\\SYSTEM32\\\\wow64.dll+14c94|C:\\\\Windows\\\\SYSTEM32\\\\wow64.dll+cf87|C:\\\\Windows\\\\SYSTEM32\\\\wow64cpu.dll+2776|C:\\\\Windows\\\\SYSTEM32\\\\wow64.dll+d07e|C:\\\\Windows\\\\SYSTEM32\\\\wow64.dll+c549|C:\\\\Windows\\\\SYSTEM32\\\\ntdll.dll+44956|C:\\\\Windows\\\\SYSTEM32\\\\ntdll.dll+41a17|C:\\\\Windows\\\\SYSTEM32\\\\ntdll.dll+2c32e|C:\\\\Windows\\\\SysWOW64\\\\ntdll.dll+1fc22(wow64)|C:\\\\Windows\\\\syswow64\\\\KERNELBASE.dll+e54e(wow64)|UNKNOWN(000000000029AE4F)|C:\\\\Windows\\\\assembly\\\\NativeImages_v2.0.50727_32\\\\System\\\\9e0a3b9b9f457233a335d7fba8f95419\\\\System.ni.dll+5bf730(wow64)|C:\\\\Windows\\\\assembly\\\\NativeImages_v2.0.50727_32\\\\System\\\\9e0a3b9b9f457233a335d7fba8f95419\\\\System.ni.dll+5c016b(wow64)|C:\\\\Windows\\\\assembly\\\\NativeImages_v2.0.50727_32\\\\System\\\\9e0a3b9b9f457233a335d7fba8f95419\\\\System.ni.dll+5c00be(wow64)|C:\\\\Windows\\\\assembly\\\\NativeImages_v2.0.50727_32\\\\System\\\\9e0a3b9b9f457233a335d7fba8f95419\\\\System.ni.dll+586161(wow64)|UNKNOWN(00000000008B04E0)|UNKNOWN(00000000008B0456)|C:\\\\Windows\\\\Microsoft.NET\\\\Framework\\\\v2.0.50727\\\\mscorwks.dll+1b4c(wow64)|C:\\\\Windows\\\\Microsoft.NET\\\\Framework\\\\v2.0.50727\\\\mscorwks.dll+18dde(wow64)|C:\\\\Windows\\\\Microsoft.NET\\\\Framework\\\\v2.0.50727\\\\mscorwks.dll+26a2c(wow64)|C:\\\\Windows\\\\Microsoft.NET\\\\Framework\\\\v2.0.50727\\\\mscorwks.dll+26a5f(wow64)|C:\\\\Windows\\\\Microsoft.NET\\\\Framework\\\\v2.0.50727\\\\mscorwks.dll+26a7d(wow64)|C:\\\\Windows\\\\Microsoft.NET\\\\Framework\\\\v2.0.50727\\\\mscorwks.dll+c6a8d(wow64)\",\n                \"SourceImage\": \"C:\\\\Users\\\\superman\\\\AppData\\\\Local\\\\Temp\\\\info.exe\",\n                \"TargetImage\": \"C:\\\\Windows\\\\system32\\\\lsass.exe\",\n                \"GrantedAccess\": \"0x1410\",\n                \"SourceThreadId\": \"3504\",\n                \"SourceProcessId\": \"3852\",\n                \"TargetProcessId\": \"516\",\n                \"SourceProcessGUID\": \"{D1BE7B41-0F36-5CCA-0000-00101C0DB701}\",\n                \"TargetProcessGUID\": \"{D1BE7B41-D726-5CC8-0000-001023B30000}\"\n              },\n              \"event_type\": \"sysmon\",\n              \"process_id\": 1468,\n              \"source_name\": \"Microsoft-Windows-Sysmon\",\n              \"computer_name\": \"admin-PC4.batman.local\",\n              \"logstash_time\": 0.0008580684661865234,\n              \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n              \"record_number\": \"343101\"\n            }\n          },\n          {\n            \"_id\": \"7jCpdGoBhEY99dtFyt7H\",\n            \"_type\": \"doc\",\n            \"_index\": \"logstash-beats-credentialdumping\",\n            \"_score\": 3.33305,\n            \"_source\": {\n              \"beat\": {\n                \"name\": \"admin-PC4\",\n                \"version\": \"6.5.3\",\n                \"hostname\": \"admin-PC4\"\n              },\n              \"tags\": [\n                \"beat\",\n                \"beats_input_codec_plain_applied\"\n              ],\n              \"task\": \"Process accessed (rule: ProcessAccess)\",\n              \"user\": {\n                \"name\": \"SYSTEM\",\n                \"type\": \"User\",\n                \"domain\": \"NT AUTHORITY\",\n                \"identifier\": \"S-1-5-18\"\n              },\n              \"level\": \"Information\",\n              \"opcode\": \"Info\",\n              \"message\": \"Process accessed:\\nRuleName: \\nUtcTime: 2019-05-01 21:27:12.498\\nSourceProcessGUID: {D1BE7B41-0F2E-5CCA-0000-001086D3B601}\\nSourceProcessId: 3528\\nSourceThreadId: 3916\\nSourceImage: C:\\\\Users\\\\superman\\\\AppData\\\\Local\\\\Temp\\\\IXP000.TMP\\\\@.cmd\\nTargetProcessGUID: {D1BE7B41-D726-5CC8-0000-001023B30000}\\nTargetProcessId: 516\\nTargetImage: C:\\\\Windows\\\\system32\\\\lsass.exe\\nGrantedAccess: 0x1410\\nCallTrace: C:\\\\Windows\\\\SYSTEM32\\\\ntdll.dll+5157a|C:\\\\Windows\\\\SYSTEM32\\\\wow64.dll+14c94|C:\\\\Windows\\\\SYSTEM32\\\\wow64.dll+cf87|C:\\\\Windows\\\\SYSTEM32\\\\wow64cpu.dll+2776|C:\\\\Windows\\\\SYSTEM32\\\\wow64.dll+d07e|C:\\\\Windows\\\\SYSTEM32\\\\wow64.dll+c549|C:\\\\Windows\\\\SYSTEM32\\\\ntdll.dll+44956|C:\\\\Windows\\\\SYSTEM32\\\\ntdll.dll+41a17|C:\\\\Windows\\\\SYSTEM32\\\\ntdll.dll+2c32e|C:\\\\Windows\\\\SysWOW64\\\\ntdll.dll+1fc22(wow64)|C:\\\\Windows\\\\syswow64\\\\KERNELBASE.dll+e54e(wow64)|UNKNOWN(00000000002DAE4F)|C:\\\\Windows\\\\assembly\\\\NativeImages_v2.0.50727_32\\\\System\\\\9e0a3b9b9f457233a335d7fba8f95419\\\\System.ni.dll+5bf730(wow64)|C:\\\\Windows\\\\assembly\\\\NativeImages_v2.0.50727_32\\\\System\\\\9e0a3b9b9f457233a335d7fba8f95419\\\\System.ni.dll+5c016b(wow64)|C:\\\\Windows\\\\assembly\\\\NativeImages_v2.0.50727_32\\\\System\\\\9e0a3b9b9f457233a335d7fba8f95419\\\\System.ni.dll+5c00be(wow64)|C:\\\\Windows\\\\assembly\\\\NativeImages_v2.0.50727_32\\\\System\\\\9e0a3b9b9f457233a335d7fba8f95419\\\\System.ni.dll+586161(wow64)|UNKNOWN(00000000008F04E0)|UNKNOWN(00000000008F0456)|C:\\\\Windows\\\\Microsoft.NET\\\\Framework\\\\v2.0.50727\\\\mscorwks.dll+1b4c(wow64)|C:\\\\Windows\\\\Microsoft.NET\\\\Framework\\\\v2.0.50727\\\\mscorwks.dll+18dde(wow64)|C:\\\\Windows\\\\Microsoft.NET\\\\Framework\\\\v2.0.50727\\\\mscorwks.dll+26a2c(wow64)|C:\\\\Windows\\\\Microsoft.NET\\\\Framework\\\\v2.0.50727\\\\mscorwks.dll+26a5f(wow64)|C:\\\\Windows\\\\Microsoft.NET\\\\Framework\\\\v2.0.50727\\\\mscorwks.dll+26a7d(wow64)|C:\\\\Windows\\\\Microsoft.NET\\\\Framework\\\\v2.0.50727\\\\mscorwks.dll+c6a8d(wow64)\",\n              \"version\": 3,\n              \"@version\": \"1\",\n              \"event_id\": 10,\n              \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n              \"beat_host\": {\n                \"id\": \"d1be7b41-2fc5-49e3-9ff1-ec91443d27c3\",\n                \"os\": {\n                  \"build\": \"7601.0\",\n                  \"family\": \"windows\",\n                  \"version\": \"6.1\",\n                  \"platform\": \"windows\"\n                },\n                \"name\": \"admin-PC4\",\n                \"architecture\": \"x86_64\"\n              },\n              \"thread_id\": 1288,\n              \"@timestamp\": \"2019-05-01T21:27:12.498Z\",\n              \"event_data\": {\n                \"UtcTime\": \"2019-05-01 21:27:12.498\",\n                \"CallTrace\": \"C:\\\\Windows\\\\SYSTEM32\\\\ntdll.dll+5157a|C:\\\\Windows\\\\SYSTEM32\\\\wow64.dll+14c94|C:\\\\Windows\\\\SYSTEM32\\\\wow64.dll+cf87|C:\\\\Windows\\\\SYSTEM32\\\\wow64cpu.dll+2776|C:\\\\Windows\\\\SYSTEM32\\\\wow64.dll+d07e|C:\\\\Windows\\\\SYSTEM32\\\\wow64.dll+c549|C:\\\\Windows\\\\SYSTEM32\\\\ntdll.dll+44956|C:\\\\Windows\\\\SYSTEM32\\\\ntdll.dll+41a17|C:\\\\Windows\\\\SYSTEM32\\\\ntdll.dll+2c32e|C:\\\\Windows\\\\SysWOW64\\\\ntdll.dll+1fc22(wow64)|C:\\\\Windows\\\\syswow64\\\\KERNELBASE.dll+e54e(wow64)|UNKNOWN(00000000002DAE4F)|C:\\\\Windows\\\\assembly\\\\NativeImages_v2.0.50727_32\\\\System\\\\9e0a3b9b9f457233a335d7fba8f95419\\\\System.ni.dll+5bf730(wow64)|C:\\\\Windows\\\\assembly\\\\NativeImages_v2.0.50727_32\\\\System\\\\9e0a3b9b9f457233a335d7fba8f95419\\\\System.ni.dll+5c016b(wow64)|C:\\\\Windows\\\\assembly\\\\NativeImages_v2.0.50727_32\\\\System\\\\9e0a3b9b9f457233a335d7fba8f95419\\\\System.ni.dll+5c00be(wow64)|C:\\\\Windows\\\\assembly\\\\NativeImages_v2.0.50727_32\\\\System\\\\9e0a3b9b9f457233a335d7fba8f95419\\\\System.ni.dll+586161(wow64)|UNKNOWN(00000000008F04E0)|UNKNOWN(00000000008F0456)|C:\\\\Windows\\\\Microsoft.NET\\\\Framework\\\\v2.0.50727\\\\mscorwks.dll+1b4c(wow64)|C:\\\\Windows\\\\Microsoft.NET\\\\Framework\\\\v2.0.50727\\\\mscorwks.dll+18dde(wow64)|C:\\\\Windows\\\\Microsoft.NET\\\\Framework\\\\v2.0.50727\\\\mscorwks.dll+26a2c(wow64)|C:\\\\Windows\\\\Microsoft.NET\\\\Framework\\\\v2.0.50727\\\\mscorwks.dll+26a5f(wow64)|C:\\\\Windows\\\\Microsoft.NET\\\\Framework\\\\v2.0.50727\\\\mscorwks.dll+26a7d(wow64)|C:\\\\Windows\\\\Microsoft.NET\\\\Framework\\\\v2.0.50727\\\\mscorwks.dll+c6a8d(wow64)\",\n                \"SourceImage\": \"C:\\\\Users\\\\superman\\\\AppData\\\\Local\\\\Temp\\\\IXP000.TMP\\\\@.cmd\",\n                \"TargetImage\": \"C:\\\\Windows\\\\system32\\\\lsass.exe\",\n                \"GrantedAccess\": \"0x1410\",\n                \"SourceThreadId\": \"3916\",\n                \"SourceProcessId\": \"3528\",\n                \"TargetProcessId\": \"516\",\n                \"SourceProcessGUID\": \"{D1BE7B41-0F2E-5CCA-0000-001086D3B601}\",\n                \"TargetProcessGUID\": \"{D1BE7B41-D726-5CC8-0000-001023B30000}\"\n              },\n              \"event_type\": \"sysmon\",\n              \"process_id\": 1468,\n              \"source_name\": \"Microsoft-Windows-Sysmon\",\n              \"computer_name\": \"admin-PC4.batman.local\",\n              \"logstash_time\": 0.0007719993591308594,\n              \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n              \"record_number\": \"343089\"\n            }\n          }\n        ],\n        \"total\": {\n          \"value\": 2,\n          \"relation\": \"eq\"\n        },\n        \"max_score\": 3.33305\n      },\n      \"took\": 65,\n      \"_shards\": {\n        \"total\": 138,\n        \"failed\": 0,\n        \"skipped\": 0,\n        \"successful\": 138\n      },\n      \"timed_out\": false\n    },\n    \"status\": \"Success\",\n    \"message\": \"\",\n    \"operation\": null\n  }",
+                "operationTitle": "Execute Lucene Query",
+                "pickFromTenant": false,
+                "step_variables": []
+            },
+            "status": null,
+            "top": "435",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "aed5dbc8-24ea-41d9-a084-b70fed79cb32",
+            "id": 4376
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Build Hunt Query",
+            "description": null,
+            "arguments": {
+                "huntSearchQuery": "@timestamp:{ {{vars.huntStartDateTime}} TO {{vars.huntEndDateTime}} } AND event_type:\"sysmon\" AND event_id:\"10\" AND event_data.TargetImage:\"C:\\\\Windows\\\\system32\\\\lsass.exe\""
+            },
+            "status": null,
+            "top": "300",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "583f6b36-79f7-462a-8b68-72619977df63",
+            "id": 4377
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Query for Accessor Info",
+            "description": null,
+            "arguments": {
+                "name": "ElasticSearch",
+                "config": "8d03a01d-1cef-40a8-992a-63d8de2b339f",
+                "params": {
+                    "index": "logstash-beats-*",
+                    "query": "event_type:sysmon AND event_id:\"1\" AND ((image_path:\"{{ vars.item._source.event_data.SourceImage | replace( \"\\\\\", \"\\\\\\\\\" )}}\" AND event_data.ProcessId:\"{{ vars.item._source.event_data.SourceProcessId }}\") OR (parent_image_path:\"{{ vars.item._source.event_data.SourceImage | replace( \"\\\\\", \"\\\\\\\\\" )}}\" AND event_data.ParentProcessId:\"{{ vars.item._source.event_data.SourceProcessId }}\")) AND  computer_name:\"{{vars.item._source.computer_name}}\"",
+                    "run_as_user": ""
+                },
+                "version": "2.2.1",
+                "for_each": {
+                    "item": "{{vars.steps.LSASS_Access_Query.data.hits.hits}}",
+                    "parallel": false,
+                    "condition": ""
+                },
+                "connector": "elasticsearch",
+                "operation": "execute_lucene_query",
+                "mock_result": "{\n    \"result\": [\n      {\n        \"data\": {\n          \"hits\": {\n            \"hits\": [\n              {\n                \"_id\": \"DzCpdGoBhEY99dtF2t98\",\n                \"_type\": \"doc\",\n                \"_index\": \"logstash-beats-credentialdumping\",\n                \"_score\": 4.030743,\n                \"_source\": {\n                  \"beat\": {\n                    \"name\": \"admin-PC4\",\n                    \"version\": \"6.5.3\",\n                    \"hostname\": \"admin-PC4\"\n                  },\n                  \"tags\": [\n                    \"beat\",\n                    \"beats_input_codec_plain_applied\"\n                  ],\n                  \"task\": \"Process Create (rule: ProcessCreate)\",\n                  \"user\": {\n                    \"name\": \"SYSTEM\",\n                    \"type\": \"User\",\n                    \"domain\": \"NT AUTHORITY\",\n                    \"identifier\": \"S-1-5-18\"\n                  },\n                  \"level\": \"Information\",\n                  \"opcode\": \"Info\",\n                  \"message\": \"Process Create:\\nRuleName: \\nUtcTime: 2019-05-01 21:27:18.228\\nProcessGuid: {D1BE7B41-0F36-5CCA-0000-00101C0DB701}\\nProcessId: 3852\\nImage: C:\\\\Users\\\\superman\\\\AppData\\\\Local\\\\Temp\\\\info.exe\\nFileVersion: 1, 0, 0, 1\\nDescription: Tree Microsoft \\nProduct: Tree \u00d3\u00a6\u00d3\u00c3\u00b3\u00cc\u00d0\u00f2\\nCompany: \\nCommandLine: C:\\\\Users\\\\superman\\\\AppData\\\\Local\\\\Temp\\\\info.exe\\nCurrentDirectory: C:\\\\Users\\\\superman\\\\AppData\\\\Local\\\\Temp\\\\IXP000.TMP\\\\\\nUser: batman\\\\superman\\nLogonGuid: {D1BE7B41-D82C-5CC9-0000-00204A087001}\\nLogonId: 0x170084a\\nTerminalSessionId: 1\\nIntegrityLevel: High\\nHashes: MD5=8C21849EDF723D2F31716595FC473F1E,SHA256=2C12B65E4BD11C690272586C2177ED096D2BED05C55619C9DFFFE650BAE90ABD\\nParentProcessGuid: {D1BE7B41-0F36-5CCA-0000-0010F8FEB601}\\nParentProcessId: 3548\\nParentImage: C:\\\\Users\\\\superman\\\\AppData\\\\Local\\\\Temp\\\\info.exe\\nParentCommandLine: \\\"C:\\\\Users\\\\superman\\\\AppData\\\\Local\\\\Temp\\\\info.exe\\\" \",\n                  \"version\": 5,\n                  \"@version\": \"1\",\n                  \"event_id\": 1,\n                  \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n                  \"username\": \"batman\\\\superman\",\n                  \"beat_host\": {\n                    \"id\": \"d1be7b41-2fc5-49e3-9ff1-ec91443d27c3\",\n                    \"os\": {\n                      \"build\": \"7601.0\",\n                      \"family\": \"windows\",\n                      \"version\": \"6.1\",\n                      \"platform\": \"windows\"\n                    },\n                    \"name\": \"admin-PC4\",\n                    \"architecture\": \"x86_64\"\n                  },\n                  \"thread_id\": 1288,\n                  \"@timestamp\": \"2019-05-01T21:27:18.275Z\",\n                  \"event_data\": {\n                    \"Hashes\": \"MD5=8C21849EDF723D2F31716595FC473F1E,SHA256=2C12B65E4BD11C690272586C2177ED096D2BED05C55619C9DFFFE650BAE90ABD\",\n                    \"LogonId\": \"0x170084a\",\n                    \"Product\": \"Tree \u00d3\u00a6\u00d3\u00c3\u00b3\u00cc\u00d0\u00f2\",\n                    \"UtcTime\": \"2019-05-01 21:27:18.228\",\n                    \"LogonGuid\": \"{D1BE7B41-D82C-5CC9-0000-00204A087001}\",\n                    \"ProcessId\": \"3852\",\n                    \"CommandLine\": \"C:\\\\Users\\\\superman\\\\AppData\\\\Local\\\\Temp\\\\info.exe\",\n                    \"Description\": \"Tree Microsoft \",\n                    \"FileVersion\": \"1, 0, 0, 1\",\n                    \"ProcessGuid\": \"{D1BE7B41-0F36-5CCA-0000-00101C0DB701}\",\n                    \"IntegrityLevel\": \"High\",\n                    \"ParentProcessId\": \"3548\",\n                    \"CurrentDirectory\": \"C:\\\\Users\\\\superman\\\\AppData\\\\Local\\\\Temp\\\\IXP000.TMP\\\\\",\n                    \"ParentCommandLine\": \"\\\"C:\\\\Users\\\\superman\\\\AppData\\\\Local\\\\Temp\\\\info.exe\\\" \",\n                    \"ParentProcessGuid\": \"{D1BE7B41-0F36-5CCA-0000-0010F8FEB601}\",\n                    \"TerminalSessionId\": \"1\"\n                  },\n                  \"event_type\": \"sysmon\",\n                  \"image_path\": \"C:\\\\Users\\\\superman\\\\AppData\\\\Local\\\\Temp\\\\info.exe\",\n                  \"process_id\": 1468,\n                  \"source_name\": \"Microsoft-Windows-Sysmon\",\n                  \"computer_name\": \"admin-PC4.batman.local\",\n                  \"logstash_time\": 0.0022699832916259766,\n                  \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n                  \"record_number\": \"343097\",\n                  \"parent_image_path\": \"C:\\\\Users\\\\superman\\\\AppData\\\\Local\\\\Temp\\\\info.exe\"\n                }\n              }\n            ],\n            \"total\": {\n              \"value\": 1,\n              \"relation\": \"eq\"\n            },\n            \"max_score\": 4.030743\n          },\n          \"took\": 29,\n          \"_shards\": {\n            \"total\": 95,\n            \"failed\": 0,\n            \"skipped\": 0,\n            \"successful\": 95\n          },\n          \"timed_out\": false\n        },\n        \"status\": \"Success\",\n        \"message\": \"\",\n        \"operation\": null\n      },\n      {\n        \"data\": {\n          \"hits\": {\n            \"hits\": [\n              {\n                \"_id\": \"4zCpdGoBhEY99dtFwt72\",\n                \"_type\": \"doc\",\n                \"_index\": \"logstash-beats-credentialdumping\",\n                \"_score\": 4.606107,\n                \"_source\": {\n                  \"beat\": {\n                    \"name\": \"admin-PC4\",\n                    \"version\": \"6.5.3\",\n                    \"hostname\": \"admin-PC4\"\n                  },\n                  \"tags\": [\n                    \"beat\",\n                    \"beats_input_codec_plain_applied\"\n                  ],\n                  \"task\": \"Process Create (rule: ProcessCreate)\",\n                  \"user\": {\n                    \"name\": \"SYSTEM\",\n                    \"type\": \"User\",\n                    \"domain\": \"NT AUTHORITY\",\n                    \"identifier\": \"S-1-5-18\"\n                  },\n                  \"level\": \"Information\",\n                  \"opcode\": \"Info\",\n                  \"message\": \"Process Create:\\nRuleName: \\nUtcTime: 2019-05-01 21:27:10.275\\nProcessGuid: {D1BE7B41-0F2E-5CCA-0000-001086D3B601}\\nProcessId: 3528\\nImage: C:\\\\Users\\\\superman\\\\AppData\\\\Local\\\\Temp\\\\IXP000.TMP\\\\@.cmd\\nFileVersion: 2.0.50727.5420 (Win7SP1.050727-5400)\\nDescription: Microsoft .NET Framework CAS Policy Manager\\nProduct: Microsoft\u00ae .NET Framework\\nCompany: Microsoft Corporation\\nCommandLine: C:\\\\Users\\\\superman\\\\AppData\\\\Local\\\\Temp\\\\IXP000.TMP\\\\@.cmd\\nCurrentDirectory: C:\\\\Users\\\\superman\\\\AppData\\\\Local\\\\Temp\\\\IXP000.TMP\\\\\\nUser: batman\\\\superman\\nLogonGuid: {D1BE7B41-D82C-5CC9-0000-00204A087001}\\nLogonId: 0x170084a\\nTerminalSessionId: 1\\nIntegrityLevel: High\\nHashes: MD5=8C21849EDF723D2F31716595FC473F1E,SHA256=2C12B65E4BD11C690272586C2177ED096D2BED05C55619C9DFFFE650BAE90ABD\\nParentProcessGuid: {D1BE7B41-0F2E-5CCA-0000-0010ABC1B601}\\nParentProcessId: 2880\\nParentImage: C:\\\\Users\\\\superman\\\\AppData\\\\Local\\\\Temp\\\\IXP000.TMP\\\\@.cmd\\nParentCommandLine: C:\\\\Users\\\\superman\\\\AppData\\\\Local\\\\Temp\\\\IXP000.TMP\\\\@.cmd\",\n                  \"version\": 5,\n                  \"@version\": \"1\",\n                  \"event_id\": 1,\n                  \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n                  \"username\": \"batman\\\\superman\",\n                  \"beat_host\": {\n                    \"id\": \"d1be7b41-2fc5-49e3-9ff1-ec91443d27c3\",\n                    \"os\": {\n                      \"build\": \"7601.0\",\n                      \"family\": \"windows\",\n                      \"version\": \"6.1\",\n                      \"platform\": \"windows\"\n                    },\n                    \"name\": \"admin-PC4\",\n                    \"architecture\": \"x86_64\"\n                  },\n                  \"thread_id\": 1288,\n                  \"@timestamp\": \"2019-05-01T21:27:10.580Z\",\n                  \"event_data\": {\n                    \"Hashes\": \"MD5=8C21849EDF723D2F31716595FC473F1E,SHA256=2C12B65E4BD11C690272586C2177ED096D2BED05C55619C9DFFFE650BAE90ABD\",\n                    \"Company\": \"Microsoft Corporation\",\n                    \"LogonId\": \"0x170084a\",\n                    \"Product\": \"Microsoft\u00ae .NET Framework\",\n                    \"UtcTime\": \"2019-05-01 21:27:10.275\",\n                    \"LogonGuid\": \"{D1BE7B41-D82C-5CC9-0000-00204A087001}\",\n                    \"ProcessId\": \"3528\",\n                    \"CommandLine\": \"C:\\\\Users\\\\superman\\\\AppData\\\\Local\\\\Temp\\\\IXP000.TMP\\\\@.cmd\",\n                    \"Description\": \"Microsoft .NET Framework CAS Policy Manager\",\n                    \"FileVersion\": \"2.0.50727.5420 (Win7SP1.050727-5400)\",\n                    \"ProcessGuid\": \"{D1BE7B41-0F2E-5CCA-0000-001086D3B601}\",\n                    \"IntegrityLevel\": \"High\",\n                    \"ParentProcessId\": \"2880\",\n                    \"CurrentDirectory\": \"C:\\\\Users\\\\superman\\\\AppData\\\\Local\\\\Temp\\\\IXP000.TMP\\\\\",\n                    \"ParentCommandLine\": \"C:\\\\Users\\\\superman\\\\AppData\\\\Local\\\\Temp\\\\IXP000.TMP\\\\@.cmd\",\n                    \"ParentProcessGuid\": \"{D1BE7B41-0F2E-5CCA-0000-0010ABC1B601}\",\n                    \"TerminalSessionId\": \"1\"\n                  },\n                  \"event_type\": \"sysmon\",\n                  \"image_path\": \"C:\\\\Users\\\\superman\\\\AppData\\\\Local\\\\Temp\\\\IXP000.TMP\\\\@.cmd\",\n                  \"process_id\": 1468,\n                  \"source_name\": \"Microsoft-Windows-Sysmon\",\n                  \"computer_name\": \"admin-PC4.batman.local\",\n                  \"logstash_time\": 0.0012030601501464844,\n                  \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n                  \"record_number\": \"343082\",\n                  \"parent_image_path\": \"C:\\\\Users\\\\superman\\\\AppData\\\\Local\\\\Temp\\\\IXP000.TMP\\\\@.cmd\"\n                }\n              }\n            ],\n            \"total\": {\n              \"value\": 1,\n              \"relation\": \"eq\"\n            },\n            \"max_score\": 4.606107\n          },\n          \"took\": 64,\n          \"_shards\": {\n            \"total\": 95,\n            \"failed\": 0,\n            \"skipped\": 0,\n            \"successful\": 95\n          },\n          \"timed_out\": false\n        },\n        \"status\": \"Success\",\n        \"message\": \"\",\n        \"operation\": null\n      }\n    ],\n    \"status\": \"finished\"\n  }",
+                "operationTitle": "Execute Lucene Query",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "570",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "d869bce7-63a1-46e2-8d1a-cdf85be0095f",
+            "id": 4378
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Step Output",
+            "description": null,
+            "arguments": {
+                "step_output": "{{vars.steps.Query_for_Accessor_Info.result | json_query(\"[].data.hits.hits\") | flatten(levels=1)}}"
+            },
+            "status": null,
+            "top": "705",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "c8a9fbfe-86bd-47f6-996a-8d27ab91e6d0",
+            "id": 4379
+        }
+    ],
+    "routes": [
+        {
+            "@type": "WorkflowRoute",
+            "name": "Elastic Query for Accessor Info -> Step Output",
+            "targetStep": "\/api\/3\/workflow_steps\/c8a9fbfe-86bd-47f6-996a-8d27ab91e6d0",
+            "sourceStep": "\/api\/3\/workflow_steps\/d869bce7-63a1-46e2-8d1a-cdf85be0095f",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "8be1d0e2-3fff-4bf7-8bf3-1ff5cb69794f"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Build Hunt Query -> Run Elastic Query",
+            "targetStep": "\/api\/3\/workflow_steps\/aed5dbc8-24ea-41d9-a084-b70fed79cb32",
+            "sourceStep": "\/api\/3\/workflow_steps\/583f6b36-79f7-462a-8b68-72619977df63",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "2999ad07-ed47-48f6-871c-d9d918b2baaf"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "LSASS Access Query -> Elastic Query for Accessor Info",
+            "targetStep": "\/api\/3\/workflow_steps\/d869bce7-63a1-46e2-8d1a-cdf85be0095f",
+            "sourceStep": "\/api\/3\/workflow_steps\/aed5dbc8-24ea-41d9-a084-b70fed79cb32",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "19616fa9-8407-4b66-b948-9d355a8d9306"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Configuration -> Build Hunt Query",
+            "targetStep": "\/api\/3\/workflow_steps\/583f6b36-79f7-462a-8b68-72619977df63",
+            "sourceStep": "\/api\/3\/workflow_steps\/1fb274a6-0745-439e-8c46-904da487d1f7",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "ead1e99e-9b39-4a49-8af2-355e3de13aa0"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Start -> Configuration",
+            "targetStep": "\/api\/3\/workflow_steps\/1fb274a6-0745-439e-8c46-904da487d1f7",
+            "sourceStep": "\/api\/3\/workflow_steps\/ceeef724-b91a-4c82-b3f4-779140981e73",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "7d7f732f-7866-409b-9eab-7eae5b5dd6f9"
+        }
+    ],
+    "priority": "\/api\/3\/picklists\/2b563c61-ae2c-41c0-a85a-c9709585e3f2",
+    "uuid": "81afad73-c03f-4830-97e8-6d28d716ea73",
+    "recordTags": [
+        "Referenced"
+    ],
+    "id": 1109,
+    "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "createDate": 1644164609,
+    "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "modifyDate": 1644164609,
+    "owners": [],
+    "isPrivate": false
+}
