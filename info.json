@@ -4,19 +4,34 @@
     "type": "solutionpack",
     "local": true,
     "label": "MITRE ATT&CK Threat Hunting",
-    "dependencies": [],
+    "dependencies": [
+        {
+            "name": "incidentResponse",
+            "type": "solutionpack",
+            "label": "Incident Response",
+            "version": "1.0.0",
+            "minVersion": null
+        },
+        {
+            "name": "socSimulator",
+            "type": "solutionpack",
+            "label": "SOC Simulator",
+            "version": "1.0.0",
+            "minVersion": null
+        }
+    ],
     "prerequisite": [
-        "Deploy SOAR Essentials Solution Pack",
+        "Deploy Incident Response Solution Pack",
         "Deploy SOC Simulator Solution Pack",
         "Ensure that SOC Simulator connector is configured",
-        "Deploy MITRE ATT&CK Enrichment Framework 2.0.2",
+        "Deploy MITRE ATT&CK Solution Pack",
         "Ensure that MITRE ATT&CK Connector is configured",
         "Ensure that MITRE ingestion is done"
     ],
     "publisher": "Fortinet",
     "description": "The solution pack demonstrates users a variety of scenarios and use cases around threat hunting based on using the information provided by the MITRE ATT&CK Framework.",
     "fsrMinCompatibility": "7.2.0",
-    "date": "2022-02-09T14:28:32+00:00",
+    "date": "2022-02-09T19:25:29+00:00",
     "exported_from": "master.fortisoar.com",
     "exported_by": "CS Admin",
     "contents": {
