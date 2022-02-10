@@ -1,0 +1,90 @@
+{
+    "name": "mITREATT&CKThreatHunting",
+    "version": "1.0.0",
+    "type": "solutionpack",
+    "local": true,
+    "label": "MITRE ATT&CK Threat Hunting",
+    "dependencies": [
+        {
+            "name": "incidentResponse",
+            "type": "solutionpack",
+            "label": "Incident Response",
+            "version": "1.0.0",
+            "minVersion": null
+        },
+        {
+            "name": "socSimulator",
+            "type": "solutionpack",
+            "label": "SOC Simulator",
+            "version": "1.0.0",
+            "minVersion": null
+        }
+    ],
+    "prerequisite": [
+        "Deploy Incident Response Solution Pack",
+        "Deploy SOC Simulator Solution Pack",
+        "Ensure that SOC Simulator connector is configured",
+        "Deploy MITRE ATT&CK Solution Pack",
+        "Ensure that MITRE ATT&CK Connector is configured",
+        "Ensure that MITRE ingestion is done"
+    ],
+    "publisher": "Fortinet",
+    "description": "The solution pack demonstrates users a variety of scenarios and use cases around threat hunting based on using the information provided by the MITRE ATT&CK Framework.",
+    "fsrMinCompatibility": "7.2.0",
+    "date": "2022-02-09T19:25:29+00:00",
+    "exported_from": "master.fortisoar.com",
+    "exported_by": "CS Admin",
+    "contents": {
+        "module": {
+            "scenario": []
+        },
+        "viewTemplates": {
+            "scenario": [
+                "list",
+                "detail",
+                "form"
+            ]
+        },
+        "playbookCollections": [
+            {
+                "name": "16 - Scenario - MITRE ATT&CK\u2122 - Access Token Manipulation"
+            },
+            {
+                "name": "16 - Scenario - MITRE ATT&CK\u2122 - Boot or Logon Autostart Execution"
+            },
+            {
+                "name": "16 - Scenario - MITRE ATT&CK\u2122 - Credential Access"
+            },
+            {
+                "name": "16 - Scenario - MITRE ATT&CK\u2122 - Defense Evasion"
+            },
+            {
+                "name": "16 - Scenario - MITRE ATT&CK\u2122 - Event Triggered Execution"
+            },
+            {
+                "name": "16 - Scenario - MITRE ATT&CK\u2122 - Link Techniques to Alerts and Incidents"
+            },
+            {
+                "name": "16 - Scenario - MITRE ATT&CK\u2122 - Modulars"
+            },
+            {
+                "name": "16 - Scenario - MITRE ATT&CK\u2122 - Process Execution"
+            },
+            {
+                "name": "16 - Scenario - MITRE ATT&CK\u2122 - Signed Binary Proxy Execution"
+            },
+            {
+                "name": "16 - Scenario - MITRE ATT&CK\u2122 - System Services"
+            }
+        ],
+        "connectors": [
+            {
+                "name": "elasticsearch",
+                "version": "2.2.1"
+            }
+        ],
+        "recordSets": {
+            "scenario": 7
+        }
+    }
+}

@@ -1,0 +1,336 @@
+{
+    "@type": "Workflow",
+    "triggerLimit": null,
+    "name": "Generates Alerts for Boot or Logon Autostart Execution",
+    "aliasName": null,
+    "tag": null,
+    "description": "Demonstrates threat hunting scenario for the attacks using MITRE technique Boot or Logon Autostart Execution [T1547] and Generates demo Hunt, Alert and Technique\/Sub-Technique records for the same",
+    "isActive": true,
+    "debug": false,
+    "singleRecordExecution": false,
+    "remoteExecutableFlag": false,
+    "parameters": [],
+    "synchronous": false,
+    "lastModifyDate": 1644164607,
+    "collection": "\/api\/3\/workflow_collections\/11dc1218-970f-4eaf-ad2f-0e9d353445e5",
+    "versions": [],
+    "triggerStep": "\/api\/3\/workflow_steps\/5ab91b4c-66b7-4e7e-ac24-d75228d3664f",
+    "steps": [
+        {
+            "@type": "WorkflowStep",
+            "name": "Start",
+            "description": null,
+            "arguments": {
+                "step_variables": {
+                    "input": {
+                        "params": []
+                    }
+                }
+            },
+            "status": null,
+            "top": "30",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/b348f017-9a94-471f-87f8-ce88b6a7ad62",
+            "uuid": "5ab91b4c-66b7-4e7e-ac24-d75228d3664f",
+            "id": 4331
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Configuration",
+            "description": null,
+            "arguments": {
+                "scenarioTitle": "{{vars.input.records[0].title}}",
+                "useMockOutput": "{{globalVars.Demo_mode}}"
+            },
+            "status": null,
+            "top": "165",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "a86782c3-8b55-4848-9749-b0d4d0dc763e",
+            "id": 4332
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Get Alert from SIEM",
+            "description": null,
+            "arguments": {
+                "arguments": {
+                    "huntEnd": "{{vars.steps.Get_Hunt_Time_Range.input.huntEndDate}}",
+                    "huntStart": "{{vars.steps.Get_Hunt_Time_Range.input.huntStartDate}}"
+                },
+                "apply_async": false,
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/8d77966a-d3f6-4c1a-a050-934065c23368"
+            },
+            "status": null,
+            "top": "570",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "d6df6636-cd12-4270-bc22-b5e37519389d",
+            "id": 4333
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Get Created Alert Data",
+            "description": null,
+            "arguments": {
+                "@id": "{{((vars.steps.Create_and_Link_Alert | json_query('[].alert_data.\"@id\"')) | union([vars.steps.Create_Hunt_Record['@id']]) | union(vars.steps.Create_and_Link_Alert | json_query('[].technique_data'))) | flatten(levels=1) }}"
+            },
+            "status": null,
+            "top": "840",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "3f6ba215-b5d1-4885-94c0-ecce69abdbec",
+            "id": 4334
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Get Hunt Time Range",
+            "description": null,
+            "arguments": {
+                "type": "InputBased",
+                "input": {
+                    "schema": {
+                        "title": "Enter Hunt Time Range",
+                        "description": "Hunt Time Range",
+                        "inputVariables": [
+                            {
+                                "name": "huntStartDate",
+                                "type": "integer",
+                                "label": "Hunt Start Date",
+                                "title": "Date\/Time Field",
+                                "usable": true,
+                                "tooltip": "",
+                                "dataType": "datetime",
+                                "formType": "datetime",
+                                "required": true,
+                                "_expanded": true,
+                                "mmdUpdate": true,
+                                "collection": false,
+                                "searchable": true,
+                                "templateUrl": "app\/components\/form\/fields\/datetime.html",
+                                "defaultValue": {
+                                    "differenceType": "months",
+                                    "differenceValue": -1
+                                },
+                                "_previousName": "untStartDate",
+                                "lengthConstraint": false,
+                                "allowedEncryption": false,
+                                "allowedGridColumn": true,
+                                "useRecordFieldDefault": false
+                            },
+                            {
+                                "name": "huntEndDate",
+                                "type": "integer",
+                                "label": "Hunt End Date",
+                                "title": "Date\/Time Field",
+                                "usable": true,
+                                "tooltip": "",
+                                "dataType": "datetime",
+                                "formType": "datetime",
+                                "required": true,
+                                "_expanded": true,
+                                "mmdUpdate": true,
+                                "collection": false,
+                                "searchable": true,
+                                "templateUrl": "app\/components\/form\/fields\/datetime.html",
+                                "defaultValue": {
+                                    "differenceType": "mins",
+                                    "differenceValue": 1
+                                },
+                                "_previousName": "huntStartDate",
+                                "lengthConstraint": false,
+                                "allowedEncryption": false,
+                                "allowedGridColumn": true,
+                                "useRecordFieldDefault": false
+                            }
+                        ]
+                    }
+                },
+                "record": "{{vars.input.records[0]['@id']}}",
+                "resources": "scenario",
+                "owner_detail": {
+                    "isAssigned": false
+                },
+                "step_variables": [],
+                "response_mapping": {
+                    "options": [
+                        {
+                            "option": "Submit",
+                            "primary": true,
+                            "step_iri": "\/api\/3\/workflow_steps\/f1a286c5-5437-44db-997f-3265d8d8ef88"
+                        }
+                    ],
+                    "duplicateOption": false
+                },
+                "email_notification": {
+                    "enabled": false,
+                    "smtpParameters": []
+                }
+            },
+            "status": null,
+            "top": "300",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/fc04082a-d7dc-4299-96fb-6837b1baa0fe",
+            "uuid": "648bc7af-3ca1-4395-b545-c9b7df3ec134",
+            "id": 4335
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create and Link Alert",
+            "description": null,
+            "arguments": {
+                "for_each": {
+                    "item": "{{vars.steps.Get_Alert_from_SIEM.step_output}}",
+                    "parallel": false,
+                    "condition": ""
+                },
+                "arguments": {
+                    "MD5": "",
+                    "url": "",
+                    "source": "{{vars.item._source.source_name}}",
+                    "comment": "{% if 'lsassdriver' in vars.item._index %}SIEM query indicated that a file named LSASS.exe was executed from a nonstandard directory and attempted to load a DLL from a non-standard directory on {{vars.item._source.beat.hostname}} at {{vars.item._source.event_data.UtcTime}}.{% else %}SIEM query indicated Winlogon helper DLL key value {{vars.item._source.event_data.Details}} was added to key {{vars.item._source.event_data.TargetObject}} on {{vars.item._source.beat.hostname}} at {{vars.item._source.event_data.UtcTime}}.{% endif %}",
+                    "huntIRI": "{{vars.steps.Create_Hunt_Record['@id']}}",
+                    "service": "",
+                    "filePath": "{{vars.item._source.image_path}}",
+                    "hostName": "{{vars.item._source.beat.hostname}}",
+                    "sourceIP": "",
+                    "userName": "{{vars.item._source.username}}",
+                    "alertName": "{% if 'lsassdriver' in vars.item._index %}ATT&CK-LSASS Driver-{{vars.item._source.event_data.Image}} loaded as illegitimate Lsass{% else %} ATT&CK-Winlogon Helper DLL-Winlogon Registry Key value modified to {{vars.item._source.event_data.Details}}{% endif %}",
+                    "alertType": "{{\"AlertType\" | picklist(\"Boot or Logon Autostart Execution\", \"@id\")}}",
+                    "epochTime": "{{ arrow.get(vars.item._source.event_data.UtcTime).timestamp }}",
+                    "eventName": "",
+                    "eventTime": "{{vars.item._source.event_data.UtcTime}}",
+                    "processID": "{{vars.item._source.event_data.ProcessId}}",
+                    "technique": "{% if 'lsassdriver' in vars.item._index %}LSASS Driver-DLL Loaded by Illegitimate LSASS{% else %}Winlogon Helper DLL (Key Add\/Mod){% endif %}",
+                    "sourceData": "{{vars.item}}",
+                    "sourceTool": "{{vars.item._source.source_name}}",
+                    "commandline": "{{vars.item._source.event_data.CommandLine}}",
+                    "description": "{% if 'lsassdriver' in vars.item._index %}A process named LSASS.exe was invoked from a nonstandard directory and attempted to load a DLL file. This may be an attempt by an adversary to execute their own code while masquerading as a legitimate process. The suspicious LSASS.exe process and the DLL file it attempted to execute should be investigated.{% else %} A Winlogon DLL helper registry key was modified\/added. This is potentially unusual behavior in most networks and could be used by an adversary to achieve persistence. The added\/modified registry key value should be evaluated to determine its legitimacy.{% endif %}",
+                    "processGUID": "{{vars.item._source.event_data.ProcessGuid}}",
+                    "processName": "{{vars.item._source.image_path.split(\"\\\\\")[-1] }}",
+                    "registryKey": "{{vars.item._source.event_data.TargetObject}}",
+                    "sourceImage": "",
+                    "targetImage": "",
+                    "computerName": "{{vars.item._source.computer_name}}",
+                    "destinationIP": "",
+                    "mitre_tech_id": "{% if 'lsassdriver' in vars.item._index %}T1547.008{% else %}T1547.004{% endif %}",
+                    "parentProcess": "{{vars.item._source.parent_image_path}}",
+                    "scheduledTask": "",
+                    "bitstransferid": "",
+                    "parentProcessID": "{{vars.item._source.event_data.ParentProcessId}}",
+                    "bytestransferred": "",
+                    "registryKeyValue": "{{vars.item._source.event_data.Details}}",
+                    "parentCommandLine": "{{vars.item._source.event_data.ParentCommandLine}}",
+                    "decodedCommandLine": "",
+                    "mitreTechniqueData": "{% if 'lsassdriver' in vars.item._index %}{\n    \"id\": 454,\n    \"@id\": \"\/api\/3\/mitre_sub_techniques\/f0589bc3-a6ae-425a-a3d5-5659bfee07f4\",\n    \"name\": \"LSASS Driver\",\n    \"uuid\": \"f0589bc3-a6ae-425a-a3d5-5659bfee07f4\",\n    \"@type\": \"Subtechnique\",\n    \"capecId\": null,\n    \"created\": 1579891135,\n    \"mitreId\": \"T1547.008\",\n    \"myNotes\": null,\n    \"version\": \"1.0\",\n    \"detection\": \"With LSA Protection enabled, monitor the event logs (Events 3033 and 3063) for failed attempts to load LSA plug-ins and drivers. (Citation: Microsoft LSA Protection Mar 2014) Also monitor DLL load operations in lsass.exe. (Citation: Microsoft DLL Security)\\n\\nUtilize the Sysinternals Autoruns\/Autorunsc utility (Citation: TechNet Autoruns) to examine loaded drivers associated with the LSA. \",\n    \"platforms\": \"Windows\",\n    \"recordTags\": [],\n    \"dataSources\": \"Module: Module Load, Driver: Driver Load, File: File Modification, File: File Creation\",\n    \"description\": \"Adversaries may modify or add LSASS drivers to obtain persistence on compromised systems. The Windows security subsystem is a set of components that manage and enforce the security policy for a computer or domain. The Local Security Authority (LSA) is the main component responsible for local security policy and user authentication. The LSA includes multiple dynamic link libraries (DLLs) associated with various other security functions, all of which run in the context of the LSA Subsystem Service (LSASS) lsass.exe process. (Citation: Microsoft Security Subsystem)\\n\\nAdversaries may target LSASS drivers to obtain persistence. By either replacing or adding illegitimate drivers (e.g., [Hijack Execution Flow](https:\/\/attack.mitre.org\/techniques\/T1574)), an adversary can use LSA operations to continuously execute malicious payloads.\",\n    \"lastModified\": 1619707779,\n    \"parentTechnique\": {\n      \"id\": 104,\n      \"@id\": \"\/api\/3\/mitre_techniques\/1ecb2399-e8ba-4f6b-8ba7-5c27d49405cf\",\n      \"name\": \"Boot or Logon Autostart Execution\",\n      \"uuid\": \"1ecb2399-e8ba-4f6b-8ba7-5c27d49405cf\",\n      \"@type\": \"Technique\",\n      \"notes\": null,\n      \"capecId\": null,\n      \"created\": 1579801619,\n      \"mitreId\": \"T1547\",\n      \"version\": \"1.1\",\n      \"detection\": \"Monitor for additions or modifications of mechanisms that could be used to trigger autostart execution, such as relevant additions to the Registry. Look for changes that are not correlated with known updates, patches, or other planned administrative activity. Tools such as Sysinternals Autoruns may also be used to detect system autostart configuration changes that could be attempts at persistence.(Citation: TechNet Autoruns)  Changes to some autostart configuration settings may happen under normal conditions when legitimate software is installed. \\n\\nSuspicious program execution as autostart programs may show up as outlier processes that have not been seen before when compared against historical data.To increase confidence of malicious activity, data and events should not be viewed in isolation, but as part of a chain of behavior that could lead to other activities, such as network connections made for Command and Control, learning details about the environment through Discovery, and Lateral Movement.\\n\\nMonitor DLL loads by processes, specifically looking for DLLs that are not recognized or not normally loaded into a process. Look for abnormal process behavior that may be due to a process loading a malicious DLL.\\n\\nMonitor for abnormal usage of utilities and command-line parameters involved in kernel modification or driver installation.\",\n      \"platforms\": \"Linux, macOS, Windows\",\n      \"recordTags\": [],\n      \"dataSources\": \"File: File Creation, Windows Registry: Windows Registry Key Creation, Windows Registry: Windows Registry Key Modification, File: File Modification, Command: Command Execution, Process: Process Creation, Module: Module Load, Kernel: Kernel Module Load, Driver: Driver Load, Process: OS API Execution\",\n      \"description\": \"Adversaries may configure system settings to automatically execute a program during system boot or logon to maintain persistence or gain higher-level privileges on compromised systems. Operating systems may have mechanisms for automatically running a program on system boot or account logon.(Citation: Microsoft Run Key)(Citation: MSDN Authentication Packages)(Citation: Microsoft TimeProvider)(Citation: Cylance Reg Persistence Sept 2013)(Citation: Linux Kernel Programming)\u00a0 These mechanisms may include automatically executing programs that are placed in specially designated directories or are referenced by repositories that store configuration information, such as the Windows Registry. An adversary may achieve the same goal by modifying or extending features of the kernel.\\n\\nSince some boot or logon autostart programs run with higher privileges, an adversary may leverage these to elevate privileges.\",\n      \"lastModified\": 1634616227,\n      \"permissionsRequired\": \"User, Administrator, root\"\n    },\n    \"permissionsRequired\": \"SYSTEM, Administrator\"\n  }{% else %}{\n    \"id\": 267,\n    \"@id\": \"\/api\/3\/mitre_sub_techniques\/6836813e-8ec8-4375-b459-abb388cb1a35\",\n    \"name\": \"Winlogon Helper DLL\",\n    \"uuid\": \"6836813e-8ec8-4375-b459-abb388cb1a35\",\n    \"@type\": \"Subtechnique\",\n    \"capecId\": null,\n    \"created\": 1579885199,\n    \"mitreId\": \"T1547.004\",\n    \"myNotes\": null,\n    \"version\": \"1.0\",\n    \"detection\": \"Monitor for changes to Registry entries associated with Winlogon that do not correlate with known software, patch cycles, etc. Tools such as Sysinternals Autoruns may also be used to detect system changes that could be attempts at persistence, including listing current Winlogon helper values. (Citation: TechNet Autoruns)  New DLLs written to System32 that do not correlate with known good software or patching may also be suspicious.\\n\\nLook for abnormal process behavior that may be due to a process loading a malicious DLL. Data and events should not be viewed in isolation, but as part of a chain of behavior that could lead to other activities, such as network connections made for Command and Control, learning details about the environment through Discovery, and Lateral Movement.\",\n    \"platforms\": \"Windows\",\n    \"recordTags\": [],\n    \"dataSources\": \"Windows Registry: Windows Registry Key Modification, Module: Module Load, Command: Command Execution\",\n    \"description\": \"Adversaries may abuse features of Winlogon to execute DLLs and\/or executables when a user logs in. Winlogon.exe is a Windows component responsible for actions at logon\/logoff as well as the secure attention sequence (SAS) triggered by Ctrl-Alt-Delete. Registry entries in <code>HKLM\\\\Software[\\\\\\\\Wow6432Node\\\\\\\\]\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Winlogon\\\\<\/code> and <code>HKCU\\\\Software\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Winlogon\\\\<\/code> are used to manage additional helper programs and functionalities that support Winlogon. (Citation: Cylance Reg Persistence Sept 2013) \\n\\nMalicious modifications to these Registry keys may cause Winlogon to load and execute malicious DLLs and\/or executables. Specifically, the following subkeys have been known to be possibly vulnerable to abuse: (Citation: Cylance Reg Persistence Sept 2013)\\n\\n* Winlogon\\\\Notify - points to notification package DLLs that handle Winlogon events\\n* Winlogon\\\\Userinit - points to userinit.exe, the user initialization program executed when a user logs on\\n* Winlogon\\\\Shell - points to explorer.exe, the system shell executed when a user logs on\\n\\nAdversaries may take advantage of these features to repeatedly execute malicious code and establish persistence.\",\n    \"lastModified\": 1619707779,\n    \"parentTechnique\": {\n      \"id\": 104,\n      \"@id\": \"\/api\/3\/mitre_techniques\/1ecb2399-e8ba-4f6b-8ba7-5c27d49405cf\",\n      \"name\": \"Boot or Logon Autostart Execution\",\n      \"uuid\": \"1ecb2399-e8ba-4f6b-8ba7-5c27d49405cf\",\n      \"@type\": \"Technique\",\n      \"notes\": null,\n      \"capecId\": null,\n      \"created\": 1579801619,\n      \"mitreId\": \"T1547\",\n      \"version\": \"1.1\",\n      \"detection\": \"Monitor for additions or modifications of mechanisms that could be used to trigger autostart execution, such as relevant additions to the Registry. Look for changes that are not correlated with known updates, patches, or other planned administrative activity. Tools such as Sysinternals Autoruns may also be used to detect system autostart configuration changes that could be attempts at persistence.(Citation: TechNet Autoruns)  Changes to some autostart configuration settings may happen under normal conditions when legitimate software is installed. \\n\\nSuspicious program execution as autostart programs may show up as outlier processes that have not been seen before when compared against historical data.To increase confidence of malicious activity, data and events should not be viewed in isolation, but as part of a chain of behavior that could lead to other activities, such as network connections made for Command and Control, learning details about the environment through Discovery, and Lateral Movement.\\n\\nMonitor DLL loads by processes, specifically looking for DLLs that are not recognized or not normally loaded into a process. Look for abnormal process behavior that may be due to a process loading a malicious DLL.\\n\\nMonitor for abnormal usage of utilities and command-line parameters involved in kernel modification or driver installation.\",\n      \"platforms\": \"Linux, macOS, Windows\",\n      \"recordTags\": [],\n      \"dataSources\": \"File: File Creation, Windows Registry: Windows Registry Key Creation, Windows Registry: Windows Registry Key Modification, File: File Modification, Command: Command Execution, Process: Process Creation, Module: Module Load, Kernel: Kernel Module Load, Driver: Driver Load, Process: OS API Execution\",\n      \"description\": \"Adversaries may configure system settings to automatically execute a program during system boot or logon to maintain persistence or gain higher-level privileges on compromised systems. Operating systems may have mechanisms for automatically running a program on system boot or account logon.(Citation: Microsoft Run Key)(Citation: MSDN Authentication Packages)(Citation: Microsoft TimeProvider)(Citation: Cylance Reg Persistence Sept 2013)(Citation: Linux Kernel Programming)\u00a0 These mechanisms may include automatically executing programs that are placed in specially designated directories or are referenced by repositories that store configuration information, such as the Windows Registry. An adversary may achieve the same goal by modifying or extending features of the kernel.\\n\\nSince some boot or logon autostart programs run with higher privileges, an adversary may leverage these to elevate privileges.\",\n      \"lastModified\": 1634616227,\n      \"permissionsRequired\": \"User, Administrator, root\"\n    },\n    \"permissionsRequired\": \"SYSTEM, Administrator\"\n  }{% endif %}"
+                },
+                "apply_async": false,
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/8f61e7f7-955b-4a81-947e-be12568e66b8"
+            },
+            "status": null,
+            "top": "705",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "a21552db-a46e-4313-8fb1-063d36e82f30",
+            "id": 4336
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create Hunt Record",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "name": "Demo Hunt - {{vars.scenarioTitle}}",
+                    "huntEnd": "{{arrow.get(vars.steps.Get_Hunt_Time_Range.input.huntEndDate).int_timestamp}}",
+                    "__replace": "",
+                    "huntStart": "{{arrow.get(vars.steps.Get_Hunt_Time_Range.input.huntStartDate).int_timestamp}}",
+                    "timeCreated": "{{arrow.utcnow().int_timestamp}}"
+                },
+                "_showJson": false,
+                "operation": "Overwrite",
+                "collection": "\/api\/3\/hunt",
+                "__recommend": [],
+                "fieldOperation": {
+                    "recordTags": "Overwrite"
+                },
+                "step_variables": []
+            },
+            "status": null,
+            "top": "435",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/2597053c-e718-44b4-8394-4d40fe26d357",
+            "uuid": "f1a286c5-5437-44db-997f-3265d8d8ef88",
+            "id": 4337
+        }
+    ],
+    "routes": [
+        {
+            "@type": "WorkflowRoute",
+            "name": "Get Alert from SIEM -> Elastic1 Create and Link Alert",
+            "targetStep": "\/api\/3\/workflow_steps\/a21552db-a46e-4313-8fb1-063d36e82f30",
+            "sourceStep": "\/api\/3\/workflow_steps\/d6df6636-cd12-4270-bc22-b5e37519389d",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "0fb138e6-0989-48ec-8361-529b536bdc97"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Start -> Configuration",
+            "targetStep": "\/api\/3\/workflow_steps\/a86782c3-8b55-4848-9749-b0d4d0dc763e",
+            "sourceStep": "\/api\/3\/workflow_steps\/5ab91b4c-66b7-4e7e-ac24-d75228d3664f",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "4265580a-a52b-4517-ae01-a7fd939bbe34"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Get Hunt Time Range -> Create Hunt Record",
+            "targetStep": "\/api\/3\/workflow_steps\/f1a286c5-5437-44db-997f-3265d8d8ef88",
+            "sourceStep": "\/api\/3\/workflow_steps\/648bc7af-3ca1-4395-b545-c9b7df3ec134",
+            "label": "Submit",
+            "isExecuted": false,
+            "uuid": "106fddb4-b0f9-4473-9d4c-45851f15e0a9"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Create Hunt Record -> Get Alert from SIEM",
+            "targetStep": "\/api\/3\/workflow_steps\/d6df6636-cd12-4270-bc22-b5e37519389d",
+            "sourceStep": "\/api\/3\/workflow_steps\/f1a286c5-5437-44db-997f-3265d8d8ef88",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "5d6855ce-b288-4a65-9323-72a3d9dca592"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Elastic1 Create and Link Alert -> Get Created Alert Data",
+            "targetStep": "\/api\/3\/workflow_steps\/3f6ba215-b5d1-4885-94c0-ecce69abdbec",
+            "sourceStep": "\/api\/3\/workflow_steps\/a21552db-a46e-4313-8fb1-063d36e82f30",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "32bf9823-cd03-417e-a373-cbce748a95a9"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Configuration -> Get Hunt Time Range",
+            "targetStep": "\/api\/3\/workflow_steps\/648bc7af-3ca1-4395-b545-c9b7df3ec134",
+            "sourceStep": "\/api\/3\/workflow_steps\/a86782c3-8b55-4848-9749-b0d4d0dc763e",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "3c0ee5dd-fc20-4ffc-a664-39aace644342"
+        }
+    ],
+    "priority": "\/api\/3\/picklists\/2b563c61-ae2c-41c0-a85a-c9709585e3f2",
+    "uuid": "631eba5d-adc3-4915-a34e-04398e4784eb",
+    "recordTags": [
+        "Referenced"
+    ],
+    "id": 1106,
+    "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "createDate": 1644164608,
+    "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "modifyDate": 1644164608,
+    "owners": [],
+    "isPrivate": false
+}

@@ -1,0 +1,336 @@
+{
+    "@type": "Workflow",
+    "triggerLimit": null,
+    "name": "Generates Alerts for Access Token Manipulation",
+    "aliasName": null,
+    "tag": null,
+    "description": "Demonstrates threat hunting scenario for SID-History injection via mimikatz and other tools. Generates demo Hunt, Alert and Technique\/Sub-Technique records for the same",
+    "isActive": true,
+    "debug": false,
+    "singleRecordExecution": false,
+    "remoteExecutableFlag": false,
+    "parameters": [],
+    "synchronous": false,
+    "lastModifyDate": 1644164607,
+    "collection": "\/api\/3\/workflow_collections\/36a5df59-b132-4031-8c94-4fdd0d88e857",
+    "versions": [],
+    "triggerStep": "\/api\/3\/workflow_steps\/c293fae8-cec5-474a-83fb-5d5fbb35da29",
+    "steps": [
+        {
+            "@type": "WorkflowStep",
+            "name": "Start",
+            "description": null,
+            "arguments": {
+                "step_variables": {
+                    "input": {
+                        "params": []
+                    }
+                }
+            },
+            "status": null,
+            "top": "30",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/b348f017-9a94-471f-87f8-ce88b6a7ad62",
+            "uuid": "c293fae8-cec5-474a-83fb-5d5fbb35da29",
+            "id": 4301
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Configuration",
+            "description": null,
+            "arguments": {
+                "scenarioTitle": "{{vars.input.records[0].title}}",
+                "useMockOutput": "{{globalVars.Demo_mode}}"
+            },
+            "status": null,
+            "top": "165",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "af45ea39-1578-4de3-af99-abcfb909f824",
+            "id": 4302
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Get Alert from SIEM",
+            "description": null,
+            "arguments": {
+                "arguments": {
+                    "huntEnd": "{{vars.steps.Get_Hunt_Time_Range.input.huntEndDate}}",
+                    "huntStart": "{{vars.steps.Get_Hunt_Time_Range.input.huntStartDate}}"
+                },
+                "apply_async": false,
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/7453fd94-9af3-414b-be96-546eff40b174"
+            },
+            "status": null,
+            "top": "570",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "79b7965b-0e0f-47ae-b416-7d3a12f015b4",
+            "id": 4303
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Get Created Alert Data",
+            "description": null,
+            "arguments": {
+                "@id": "{{((vars.steps.Create_and_Link_Alert | json_query('[].alert_data.\"@id\"')) | union([vars.steps.Create_Hunt_Record['@id']]) | union(vars.steps.Create_and_Link_Alert | json_query('[].technique_data'))) | flatten(levels=1) }}"
+            },
+            "status": null,
+            "top": "840",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "c40df72e-02d2-4df9-9736-224bf2729ab4",
+            "id": 4304
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Get Hunt Time Range",
+            "description": null,
+            "arguments": {
+                "type": "InputBased",
+                "input": {
+                    "schema": {
+                        "title": "Enter Hunt Time Range",
+                        "description": "Hunt Time Range",
+                        "inputVariables": [
+                            {
+                                "name": "huntStartDate",
+                                "type": "integer",
+                                "label": "Hunt Start Date",
+                                "title": "Date\/Time Field",
+                                "usable": true,
+                                "tooltip": "",
+                                "dataType": "datetime",
+                                "formType": "datetime",
+                                "required": true,
+                                "_expanded": true,
+                                "mmdUpdate": true,
+                                "collection": false,
+                                "searchable": true,
+                                "templateUrl": "app\/components\/form\/fields\/datetime.html",
+                                "defaultValue": {
+                                    "differenceType": "months",
+                                    "differenceValue": -1
+                                },
+                                "_previousName": "untStartDate",
+                                "lengthConstraint": false,
+                                "allowedEncryption": false,
+                                "allowedGridColumn": true,
+                                "useRecordFieldDefault": false
+                            },
+                            {
+                                "name": "huntEndDate",
+                                "type": "integer",
+                                "label": "Hunt End Date",
+                                "title": "Date\/Time Field",
+                                "usable": true,
+                                "tooltip": "",
+                                "dataType": "datetime",
+                                "formType": "datetime",
+                                "required": true,
+                                "_expanded": true,
+                                "mmdUpdate": true,
+                                "collection": false,
+                                "searchable": true,
+                                "templateUrl": "app\/components\/form\/fields\/datetime.html",
+                                "defaultValue": {
+                                    "differenceType": "mins",
+                                    "differenceValue": 1
+                                },
+                                "_previousName": "huntStartDate",
+                                "lengthConstraint": false,
+                                "allowedEncryption": false,
+                                "allowedGridColumn": true,
+                                "useRecordFieldDefault": false
+                            }
+                        ]
+                    }
+                },
+                "record": "{{vars.input.records[0]['@id']}}",
+                "resources": "scenario",
+                "owner_detail": {
+                    "isAssigned": false
+                },
+                "step_variables": [],
+                "response_mapping": {
+                    "options": [
+                        {
+                            "option": "Submit",
+                            "primary": true,
+                            "step_iri": "\/api\/3\/workflow_steps\/bf451807-6719-42af-8b24-c017737c1272"
+                        }
+                    ],
+                    "duplicateOption": false
+                },
+                "email_notification": {
+                    "enabled": false,
+                    "smtpParameters": []
+                }
+            },
+            "status": null,
+            "top": "300",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/fc04082a-d7dc-4299-96fb-6837b1baa0fe",
+            "uuid": "f6357122-d9e0-4ba1-8c1f-205ef04cb2f2",
+            "id": 4305
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create Hunt Record",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "name": "Demo Hunt - {{vars.scenarioTitle}}",
+                    "huntEnd": "{{arrow.get(vars.steps.Get_Hunt_Time_Range.input.huntEndDate).int_timestamp}}",
+                    "__replace": "",
+                    "huntStart": "{{arrow.get(vars.steps.Get_Hunt_Time_Range.input.huntStartDate).int_timestamp}}",
+                    "timeCreated": "{{arrow.utcnow().int_timestamp}}"
+                },
+                "_showJson": false,
+                "operation": "Overwrite",
+                "collection": "\/api\/3\/hunt",
+                "__recommend": [],
+                "fieldOperation": {
+                    "recordTags": "Overwrite"
+                },
+                "step_variables": []
+            },
+            "status": null,
+            "top": "435",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/2597053c-e718-44b4-8394-4d40fe26d357",
+            "uuid": "bf451807-6719-42af-8b24-c017737c1272",
+            "id": 4306
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create and Link Alert",
+            "description": null,
+            "arguments": {
+                "for_each": {
+                    "item": "{{vars.steps.Get_Alert_from_SIEM.data.hits.hits}}",
+                    "parallel": false,
+                    "condition": ""
+                },
+                "arguments": {
+                    "MD5": "{{vars.item._source.event_data.Hashes.split(\"MD5=\")[1].split(',')[0]}}",
+                    "url": "",
+                    "source": "{{vars.item._source.source_name}}",
+                    "comment": "SIEM query identified potential SID-History Injection (Mimikatz) originating from {{vars.item._source.image_path.split(\"\\\\\")[-1]}} on {{vars.item._source.beat.hostname}} at {{vars.item._source.event_data.UtcTime}}.",
+                    "huntIRI": "{{vars.steps.Create_Hunt_Record['@id']}}",
+                    "service": "",
+                    "filePath": "{{vars.item._source.image_path}}",
+                    "hostName": "{{vars.item._source.beat.hostname}}",
+                    "sourceIP": "null",
+                    "userName": "{{vars.item._source.username}}",
+                    "alertName": "ATT&CK-SID-History Injection-Mimikatz command line arguments observed",
+                    "alertType": "{{\"AlertType\" | picklist(\"Access Token Manipulation\", \"@id\")}}",
+                    "epochTime": "{{arrow.get(vars.item._source.event_data.UtcTime).timestamp}}",
+                    "eventName": "",
+                    "eventTime": "{{vars.item._source.event_data.UtcTime}}",
+                    "processID": "{{vars.item._source.event_data.ProcessId}}",
+                    "technique": "SID-History Injection (Mimikatz)",
+                    "sourceData": "{{vars.item}}",
+                    "sourceTool": "{{vars.item._source.source_name}}",
+                    "commandline": "{{vars.item._source.event_data.CommandLine}}",
+                    "description": "An attempt to execute Mimikatz with command line arguments indicative of Mimikatz's AddSid module was observed. SID-History manipulation allows an adversary to escalate their privileges and impersonate privileged user groups. The host where this command was executed should be investigated. Additionally, the command line arguments associated with this alert should be analyzed to determine the intent of the attacker.",
+                    "processGUID": "{{vars.item._source.event_data.ProcessGuid}}",
+                    "processName": "{{vars.item._source.image_path.split(\"\\\\\")[-1]}}",
+                    "registryKey": "",
+                    "sourceImage": "",
+                    "targetImage": "",
+                    "computerName": "{{vars.item._source.computer_name}}",
+                    "destinationIP": "null",
+                    "mitre_tech_id": "T1134.005",
+                    "parentProcess": "{{vars.item._source.parent_image_path}}",
+                    "scheduledTask": "",
+                    "bitstransferid": "",
+                    "parentProcessID": "{{vars.item._source.event_data.ParentProcessId}}",
+                    "bytestransferred": "",
+                    "registryKeyValue": "",
+                    "parentCommandLine": "{{vars.item._source.event_data.ParentCommandLine}}",
+                    "decodedCommandLine": "",
+                    "mitreTechniqueData": "{\n      \"id\": 369,\n      \"@id\": \"\/api\/3\/mitre_sub_techniques\/b7dc639b-24cd-482d-a7f1-8897eda21023\",\n      \"name\": \"SID-History Injection\",\n      \"uuid\": \"b7dc639b-24cd-482d-a7f1-8897eda21023\",\n      \"@type\": \"Subtechnique\",\n      \"capecId\": null,\n      \"created\": 1582050889,\n      \"mitreId\": \"T1134.005\",\n      \"myNotes\": null,\n      \"version\": \"1.0\",\n      \"detection\": \"Examine data in user\u2019s SID-History attributes using the PowerShell <code>Get-ADUser<\/code> cmdlet (Citation: Microsoft Get-ADUser), especially users who have SID-History values from the same domain. (Citation: AdSecurity SID History Sept 2015) Also monitor account management events on Domain Controllers for successful and failed changes to SID-History. (Citation: AdSecurity SID History Sept 2015) (Citation: Microsoft DsAddSidHistory)\\n\\nMonitor for Windows API calls to the <code>DsAddSidHistory<\/code> function. (Citation: Microsoft DsAddSidHistory)\",\n      \"platforms\": \"Windows\",\n      \"recordTags\": [],\n      \"dataSources\": \"Process: OS API Execution, User Account: User Account Metadata, Active Directory: Active Directory Object Modification\",\n      \"description\": \"Adversaries may use SID-History Injection to escalate privileges and bypass access controls. The Windows security identifier (SID) is a unique value that identifies a user or group account. SIDs are used by Windows security in both security descriptors and access tokens. (Citation: Microsoft SID) An account can hold additional SIDs in the SID-History Active Directory attribute (Citation: Microsoft SID-History Attribute), allowing inter-operable account migration between domains (e.g., all values in SID-History are included in access tokens).\\n\\nWith Domain Administrator (or equivalent) rights, harvested or well-known SID values (Citation: Microsoft Well Known SIDs Jun 2017) may be inserted into SID-History to enable impersonation of arbitrary users\/groups such as Enterprise Administrators. This manipulation may result in elevated access to local resources and\/or access to otherwise inaccessible domains via lateral movement techniques such as [Remote Services](https:\/\/attack.mitre.org\/techniques\/T1021), [SMB\/Windows Admin Shares](https:\/\/attack.mitre.org\/techniques\/T1021\/002), or [Windows Remote Management](https:\/\/attack.mitre.org\/techniques\/T1021\/006).\",\n      \"lastModified\": 1612885798,\n      \"parentTechnique\": {\n        \"id\": 274,\n        \"@id\": \"\/api\/3\/mitre_techniques\/dcaa092b-7de9-4a21-977f-7fcb77e89c48\",\n        \"name\": \"Access Token Manipulation\",\n        \"uuid\": \"dcaa092b-7de9-4a21-977f-7fcb77e89c48\",\n        \"@type\": \"Technique\",\n        \"notes\": null,\n        \"capecId\": null,\n        \"created\": 1513269966,\n        \"mitreId\": \"T1134\",\n        \"version\": \"2.0\",\n        \"detection\": \"If an adversary is using a standard command-line shell, analysts can detect token manipulation by auditing command-line activity. Specifically, analysts should look for use of the <code>runas<\/code> command. Detailed command-line logging is not enabled by default in Windows.(Citation: Microsoft Command-line Logging)\\n\\nIf an adversary is using a payload that calls the Windows token APIs directly, analysts can detect token manipulation only through careful analysis of user network activity, examination of running processes, and correlation with other endpoint and network behavior. \\n\\nThere are many Windows API calls a payload can take advantage of to manipulate access tokens (e.g., <code>LogonUser<\/code> (Citation: Microsoft LogonUser), <code>DuplicateTokenEx<\/code>(Citation: Microsoft DuplicateTokenEx), and <code>ImpersonateLoggedOnUser<\/code>(Citation: Microsoft ImpersonateLoggedOnUser)). Please see the referenced Windows API pages for more information.\\n\\nQuery systems for process and thread token information and look for inconsistencies such as user owns processes impersonating the local SYSTEM account.(Citation: BlackHat Atkinson Winchester Token Manipulation)\\n\\nLook for inconsistencies between the various fields that store PPID information, such as the EventHeader ProcessId from data collected via Event Tracing for Windows (ETW), Creator Process ID\/Name from Windows event logs, and the ProcessID and ParentProcessID (which are also produced from ETW and other utilities such as Task Manager and Process Explorer). The ETW provided EventHeader ProcessId identifies the actual parent process.\",\n        \"platforms\": \"Windows\",\n        \"recordTags\": [],\n        \"dataSources\": \"Process: Process Creation, Process: Process Metadata, Process: OS API Execution, User Account: User Account Metadata, Active Directory: Active Directory Object Modification, Command: Command Execution\",\n        \"description\": \"Adversaries may modify access tokens to operate under a different user or system security context to perform actions and bypass access controls. Windows uses access tokens to determine the ownership of a running process. A user can manipulate access tokens to make a running process appear as though it is the child of a different process or belongs to someone other than the user that started the process. When this occurs, the process also takes on the security context associated with the new token.\\n\\nAn adversary can use built-in Windows API functions to copy access tokens from existing processes; this is known as token stealing. These token can then be applied to an existing process (i.e. [Token Impersonation\/Theft](https:\/\/attack.mitre.org\/techniques\/T1134\/001)) or used to spawn a new process (i.e. [Create Process with Token](https:\/\/attack.mitre.org\/techniques\/T1134\/002)). An adversary must already be in a privileged user context (i.e. administrator) to steal a token. However, adversaries commonly use token stealing to elevate their security context from the administrator level to the SYSTEM level. An adversary can then use a token to authenticate to a remote system as the account for that token if the account has appropriate permissions on the remote system.(Citation: Pentestlab Token Manipulation)\\n\\nAny standard user can use the <code>runas<\/code> command, and the Windows API functions, to create impersonation tokens; it does not require access to an administrator account. There are also other mechanisms, such as Active Directory fields, that can be used to modify access tokens.\",\n        \"lastModified\": 1634482309,\n        \"permissionsRequired\": \"User, Administrator\"\n      },\n      \"permissionsRequired\": \"Administrator, SYSTEM\"\n    }"
+                },
+                "apply_async": false,
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/8f61e7f7-955b-4a81-947e-be12568e66b8"
+            },
+            "status": null,
+            "top": "705",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "754c2a2d-c76c-4a3a-a4d4-86eb71f05052",
+            "id": 4307
+        }
+    ],
+    "routes": [
+        {
+            "@type": "WorkflowRoute",
+            "name": "Configuration -> Get Hunt Time Range",
+            "targetStep": "\/api\/3\/workflow_steps\/f6357122-d9e0-4ba1-8c1f-205ef04cb2f2",
+            "sourceStep": "\/api\/3\/workflow_steps\/af45ea39-1578-4de3-af99-abcfb909f824",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "1988a262-a3b2-499c-9942-2408c830bc20"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Get Alert from SIEM -> Copy  of Create and Link Alert",
+            "targetStep": "\/api\/3\/workflow_steps\/754c2a2d-c76c-4a3a-a4d4-86eb71f05052",
+            "sourceStep": "\/api\/3\/workflow_steps\/79b7965b-0e0f-47ae-b416-7d3a12f015b4",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "22c783bf-88ba-4372-83f5-c68c73fbf3cf"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Get Hunt Time Range -> Create Hunt Record",
+            "targetStep": "\/api\/3\/workflow_steps\/bf451807-6719-42af-8b24-c017737c1272",
+            "sourceStep": "\/api\/3\/workflow_steps\/f6357122-d9e0-4ba1-8c1f-205ef04cb2f2",
+            "label": "Submit",
+            "isExecuted": false,
+            "uuid": "929a1120-82a7-42dd-9b8b-a69282c68d73"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Create and Link Alert -> Get Created Alert Data",
+            "targetStep": "\/api\/3\/workflow_steps\/c40df72e-02d2-4df9-9736-224bf2729ab4",
+            "sourceStep": "\/api\/3\/workflow_steps\/754c2a2d-c76c-4a3a-a4d4-86eb71f05052",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "46f7082f-4cb0-4f34-9da7-2cdf0307046b"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Start -> Configuration",
+            "targetStep": "\/api\/3\/workflow_steps\/af45ea39-1578-4de3-af99-abcfb909f824",
+            "sourceStep": "\/api\/3\/workflow_steps\/c293fae8-cec5-474a-83fb-5d5fbb35da29",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "92fe9106-2c52-4fb3-9d41-4f88e79691fd"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Create Hunt Record -> Get Alert from SIEM",
+            "targetStep": "\/api\/3\/workflow_steps\/79b7965b-0e0f-47ae-b416-7d3a12f015b4",
+            "sourceStep": "\/api\/3\/workflow_steps\/bf451807-6719-42af-8b24-c017737c1272",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "57967ece-8eba-4b66-828e-36604ff69a9c"
+        }
+    ],
+    "priority": "\/api\/3\/picklists\/2b563c61-ae2c-41c0-a85a-c9709585e3f2",
+    "uuid": "baa86563-db1d-4101-bfda-334374e12757",
+    "recordTags": [
+        "Referenced"
+    ],
+    "id": 1103,
+    "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "createDate": 1644164607,
+    "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "modifyDate": 1644164607,
+    "owners": [],
+    "isPrivate": false
+}

@@ -1,0 +1,15 @@
+{
+    "@context": "\/api\/3\/contexts\/WorkflowCollection",
+    "@type": "WorkflowCollection",
+    "name": "16 - Scenario - MITRE ATT&CK\u2122 - System Services",
+    "description": "Playbooks designed to hunt System Services  Techniques identified in the MITRE ATT&CK Framework",
+    "visible": true,
+    "image": null,
+    "uuid": "edf2e401-21cf-4a1a-b2c5-f66fdd9e68e6",
+    "id": 98,
+    "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "createDate": 1644164616,
+    "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "modifyDate": 1644164616,
+    "recordTags": []
+}

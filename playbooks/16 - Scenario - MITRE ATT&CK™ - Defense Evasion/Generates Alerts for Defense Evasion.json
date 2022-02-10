@@ -1,0 +1,336 @@
+{
+    "@type": "Workflow",
+    "triggerLimit": null,
+    "name": "Generates Alerts for Defense Evasion",
+    "aliasName": null,
+    "tag": null,
+    "description": "Demonstrates threat hunting scenario for the attacks using MITRE technique Exploitation for Defense Evasion and generates demo Hunt, Alert and Technique\/Sub-Technique records for the same",
+    "isActive": true,
+    "debug": false,
+    "singleRecordExecution": false,
+    "remoteExecutableFlag": false,
+    "parameters": [],
+    "synchronous": false,
+    "lastModifyDate": 1644164607,
+    "collection": "\/api\/3\/workflow_collections\/234e09da-6930-4fd2-ada5-43bfc65f59f5",
+    "versions": [],
+    "triggerStep": "\/api\/3\/workflow_steps\/c20d5928-6621-4489-a03c-e69a78be0599",
+    "steps": [
+        {
+            "@type": "WorkflowStep",
+            "name": "Start",
+            "description": null,
+            "arguments": {
+                "step_variables": {
+                    "input": {
+                        "params": []
+                    }
+                }
+            },
+            "status": null,
+            "top": "30",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/b348f017-9a94-471f-87f8-ce88b6a7ad62",
+            "uuid": "c20d5928-6621-4489-a03c-e69a78be0599",
+            "id": 4411
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Configuration",
+            "description": null,
+            "arguments": {
+                "scenarioTitle": "{{vars.input.records[0].title}}",
+                "useMockOutput": "{{globalVars.Demo_mode}}"
+            },
+            "status": null,
+            "top": "165",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "df1c4b4b-737c-4e56-9aa6-57c6beb6204e",
+            "id": 4412
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Get Alert from SIEM",
+            "description": null,
+            "arguments": {
+                "arguments": {
+                    "huntEnd": "{{arrow.get(vars.steps.Get_Hunt_Time_Range.input.huntEndDate).int_timestamp}}",
+                    "huntStart": "{{arrow.get(vars.steps.Get_Hunt_Time_Range.input.huntStartDate).int_timestamp}}"
+                },
+                "apply_async": false,
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/e8c851d3-a1a2-4f66-b022-24adb86ba717"
+            },
+            "status": null,
+            "top": "570",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "1431861e-4d44-4f04-983a-3f5037001210",
+            "id": 4413
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Get Created Alert Data",
+            "description": null,
+            "arguments": {
+                "@id": "{{((vars.steps.Create_and_Link_Alert | json_query('[].alert_data.\"@id\"')) | union([vars.steps.Create_Hunt_Record['@id']]) | union(vars.steps.Create_and_Link_Alert | json_query('[].technique_data'))) | flatten(levels=1) }}"
+            },
+            "status": null,
+            "top": "840",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "f6d054e7-36dd-480d-b9a5-92d74b53f479",
+            "id": 4414
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Get Hunt Time Range",
+            "description": null,
+            "arguments": {
+                "type": "InputBased",
+                "input": {
+                    "schema": {
+                        "title": "Enter Hunt Time Range",
+                        "description": "Hunt Time Range",
+                        "inputVariables": [
+                            {
+                                "name": "huntStartDate",
+                                "type": "integer",
+                                "label": "Hunt Start Date",
+                                "title": "Date\/Time Field",
+                                "usable": true,
+                                "tooltip": "",
+                                "dataType": "datetime",
+                                "formType": "datetime",
+                                "required": true,
+                                "_expanded": true,
+                                "mmdUpdate": true,
+                                "collection": false,
+                                "searchable": true,
+                                "templateUrl": "app\/components\/form\/fields\/datetime.html",
+                                "defaultValue": {
+                                    "differenceType": "months",
+                                    "differenceValue": -1
+                                },
+                                "_previousName": "untStartDate",
+                                "lengthConstraint": false,
+                                "allowedEncryption": false,
+                                "allowedGridColumn": true,
+                                "useRecordFieldDefault": false
+                            },
+                            {
+                                "name": "huntEndDate",
+                                "type": "integer",
+                                "label": "Hunt End Date",
+                                "title": "Date\/Time Field",
+                                "usable": true,
+                                "tooltip": "",
+                                "dataType": "datetime",
+                                "formType": "datetime",
+                                "required": true,
+                                "_expanded": true,
+                                "mmdUpdate": true,
+                                "collection": false,
+                                "searchable": true,
+                                "templateUrl": "app\/components\/form\/fields\/datetime.html",
+                                "defaultValue": {
+                                    "differenceType": "mins",
+                                    "differenceValue": 1
+                                },
+                                "_previousName": "huntStartDate",
+                                "lengthConstraint": false,
+                                "allowedEncryption": false,
+                                "allowedGridColumn": true,
+                                "useRecordFieldDefault": false
+                            }
+                        ]
+                    }
+                },
+                "record": "{{vars.input.records[0]['@id']}}",
+                "resources": "scenario",
+                "owner_detail": {
+                    "isAssigned": false
+                },
+                "step_variables": [],
+                "response_mapping": {
+                    "options": [
+                        {
+                            "option": "Submit",
+                            "primary": true,
+                            "step_iri": "\/api\/3\/workflow_steps\/2c740b78-eb03-438d-8e38-244e2ff17499"
+                        }
+                    ],
+                    "duplicateOption": false
+                },
+                "email_notification": {
+                    "enabled": false,
+                    "smtpParameters": []
+                }
+            },
+            "status": null,
+            "top": "300",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/fc04082a-d7dc-4299-96fb-6837b1baa0fe",
+            "uuid": "3f7c3325-e7cc-4573-b9cd-d5381a3bb8a0",
+            "id": 4415
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create and Link Alert",
+            "description": null,
+            "arguments": {
+                "for_each": {
+                    "item": "{{vars.steps.Get_Alert_from_SIEM.step_output}}",
+                    "parallel": false,
+                    "condition": ""
+                },
+                "arguments": {
+                    "MD5": "{{ (vars.item._source.event_data.Hashes.split(\"MD5=\")[1].split(',')[0])}}",
+                    "url": "",
+                    "source": "{{vars.item._source.source_name}}",
+                    "comment": "{% if 'certutil' in vars.item._source.image_path %}SIEM query identified a possible attempt to use {{vars.item._source.image_path.split(\"\\\\\")[-1]}} to Deobfuscate\/Decode Files or Information on {{vars.item._source.beat.hostname}} at {{vars.item._source.event_data.UtcTime}}.{% elif 'cmd' in vars.item._source.image_path %}SIEM query identified a potential attempt to use the command \"copy \/b\" to deobfuscate\/decode files or information through {{vars.item._source.image_path.split(\"\\\\\")[-1]}} to Deobfuscate\/Decode Files or Information on {{vars.item._source.beat.hostname}} at {{vars.item._source.event_data.UtcTime}}.{% else %}SIEM query identified Mimikatz module DCShadow execution from {{vars.item._source.image_path.split(\"\\\\\")[-1]}} on {{vars.item._source.beat.hostname}} at {{vars.item._source.event_data.UtcTime}}.{% endif %}",
+                    "huntIRI": "{{vars.steps.Create_Hunt_Record['@id']}}",
+                    "service": "",
+                    "filePath": "{{vars.item._source.image_path}}",
+                    "hostName": "{{vars.item._source.beat.hostname}}",
+                    "sourceIP": "",
+                    "userName": "{{vars.item._source.username}}",
+                    "alertName": "{% if 'certutil' in vars.item._source.image_path %}ATT&CK-Deobfuscate\/Decode-Certutil executed{% elif 'cmd' in vars.item._source.image_path %}ATT&CK-Deobfuscate\/Decode-cmd executed with \"copy \/b\" argument{% else %}ATT&CK-DCShadow-{{vars.item._source.image_path.split(\"\\\\\")[-1]}} executed with DCShadow commandline arguments{% endif %}",
+                    "alertType": "{% if 'certutil' in vars.item._source.image_path %}{{\"AlertType\" | picklist(\"Deobfuscate\/Decode Files or Information\", \"@id\")}}{% elif 'cmd' in vars.item._source.image_path %}{{\"AlertType\" | picklist(\"Deobfuscate\/Decode Files or Information\", \"@id\")}}{% else %}{{\"AlertType\" | picklist(\"Rogue Domain Controller\", \"@id\")}}{% endif %}",
+                    "epochTime": "{{ arrow.get(vars.item._source.event_data.UtcTime).timestamp }}",
+                    "eventName": "",
+                    "eventTime": "{{ vars.item._source.event_data.UtcTime}}",
+                    "processID": "{{vars.item._source.event_data.ProcessId}}",
+                    "technique": "{% if 'certutil' in vars.item._source.image_path %}Deobfuscate\/Decode Files or Information- Certutil{% elif 'cmd' in vars.item._source.image_path %}Deobfuscate\/Decode Files or Information- Copy \/b{% else %}DCShadow{% endif %}",
+                    "sourceData": "{{vars.item}}",
+                    "sourceTool": "{{vars.item._source.source_name}}",
+                    "commandline": "{{vars.item._source.event_data.CommandLine}}",
+                    "description": "{% if 'certutil' in vars.item._source.image_path %}An attempt to utilize Certutil.exe to decode data was observed. An attacker could use Certutil to deobfuscate data and then interact with\/utilize the data elsewhere.{% elif 'cmd' in vars.item._source.image_path %}An attempt to utilize Copy \/b to was observed. An attacker could use the command Copy \/b to read data as binary and then interact with\/utilize the data elsewhere. This attack has been observed being conducted by nation-state actors and other malicious entities to join together binary fragments to assemble and run executables.{% else %}A command line argument was passed containing \"lsadump::dcshadow\". This is indicative of attempted execution of Mimikatz module DCShadow, which is used to cause a host to masquerade as a Domain Controller. This host should be investigated for further signs of compromise.{% endif %}",
+                    "processGUID": "{{vars.item._source.event_data.ProcessGuid}}",
+                    "processName": "{{vars.item._source.image_path.split(\"\\\\\")[-1] }}",
+                    "registryKey": "",
+                    "sourceImage": "{{ vars.item._source.event_data.SourceImage | replace( \"\\\\\", \"\\\\\\\\\" )}}",
+                    "targetImage": "{{ vars.item._source.event_data.TargetImage | replace( \"\\\\\", \"\\\\\\\\\" )}}",
+                    "computerName": "{{vars.item._source.computer_name}}",
+                    "destinationIP": "",
+                    "mitre_tech_id": "{% if 'certutil' in vars.item._source.image_path %}T1140{% elif 'cmd' in vars.item._source.image_path %}T1140{% else %}T1207{% endif %}",
+                    "parentProcess": "{{vars.item._source.parent_image_path}}",
+                    "scheduledTask": "",
+                    "bitstransferid": "",
+                    "parentProcessID": "{{vars.item._source.event_data.ParentProcessId}}",
+                    "bytestransferred": "",
+                    "registryKeyValue": "",
+                    "parentCommandLine": "{{vars.item._source.event_data.ParentCommandLine}}",
+                    "decodedCommandLine": "",
+                    "mitreTechniqueData": "{% if 'certutil' in vars.item._source.image_path %}{\n    \"id\": 130,\n    \"@id\": \"\/api\/3\/mitre_techniques\/3ccef7ae-cb5e-48f6-8302-897105fbf55c\",\n    \"name\": \"Deobfuscate\/Decode Files or Information\",\n    \"uuid\": \"3ccef7ae-cb5e-48f6-8302-897105fbf55c\",\n    \"@type\": \"Technique\",\n    \"notes\": null,\n    \"capecId\": null,\n    \"created\": 1513269966,\n    \"mitreId\": \"T1140\",\n    \"version\": \"1.1\",\n    \"detection\": \"Detecting the action of deobfuscating or decoding files or information may be difficult depending on the implementation. If the functionality is contained within malware and uses the Windows API, then attempting to detect malicious behavior before or after the action may yield better results than attempting to perform analysis on loaded libraries or API calls. If scripts are used, then collecting the scripts for analysis may be necessary. Perform process and command-line monitoring to detect potentially malicious behavior related to scripts and system utilities such as [certutil](https:\/\/attack.mitre.org\/software\/S0160).\\n\\nMonitor the execution file paths and command-line arguments for common archive file applications and extensions, such as those for Zip and RAR archive tools, and correlate with other suspicious behavior to reduce false positives from normal user and administrator behavior.\",\n    \"platforms\": \"Windows, Linux, macOS\",\n    \"recordTags\": [],\n    \"dataSources\": \"Process: Process Creation, File: File Modification, Script: Script Execution\",\n    \"description\": \"Adversaries may use [Obfuscated Files or Information](https:\/\/attack.mitre.org\/techniques\/T1027) to hide artifacts of an intrusion from analysis. They may require separate mechanisms to decode or deobfuscate that information depending on how they intend to use it. Methods for doing that include built-in functionality of malware or by using utilities present on the system.\\n\\nOne such example is use of [certutil](https:\/\/attack.mitre.org\/software\/S0160) to decode a remote access tool portable executable file that has been hidden inside a certificate file. (Citation: Malwarebytes Targeted Attack against Saudi Arabia) Another example is using the Windows <code>copy \/b<\/code> command to reassemble binary fragments into a malicious payload. (Citation: Carbon Black Obfuscation Sept 2016)\\n\\nSometimes a user's action may be required to open it for deobfuscation or decryption as part of [User Execution](https:\/\/attack.mitre.org\/techniques\/T1204). The user may also be required to input a password to open a password protected compressed\/encrypted file that was provided by the adversary. (Citation: Volexity PowerDuke November 2016)\",\n    \"lastModified\": 1619707779,\n    \"permissionsRequired\": \"User\"\n  }{% elif 'cmd' in vars.item._source.image_path %}{\n    \"id\": 130,\n    \"@id\": \"\/api\/3\/mitre_techniques\/3ccef7ae-cb5e-48f6-8302-897105fbf55c\",\n    \"name\": \"Deobfuscate\/Decode Files or Information\",\n    \"uuid\": \"3ccef7ae-cb5e-48f6-8302-897105fbf55c\",\n    \"@type\": \"Technique\",\n    \"notes\": null,\n    \"capecId\": null,\n    \"created\": 1513269966,\n    \"mitreId\": \"T1140\",\n    \"version\": \"1.1\",\n    \"detection\": \"Detecting the action of deobfuscating or decoding files or information may be difficult depending on the implementation. If the functionality is contained within malware and uses the Windows API, then attempting to detect malicious behavior before or after the action may yield better results than attempting to perform analysis on loaded libraries or API calls. If scripts are used, then collecting the scripts for analysis may be necessary. Perform process and command-line monitoring to detect potentially malicious behavior related to scripts and system utilities such as [certutil](https:\/\/attack.mitre.org\/software\/S0160).\\n\\nMonitor the execution file paths and command-line arguments for common archive file applications and extensions, such as those for Zip and RAR archive tools, and correlate with other suspicious behavior to reduce false positives from normal user and administrator behavior.\",\n    \"platforms\": \"Windows, Linux, macOS\",\n    \"recordTags\": [],\n    \"dataSources\": \"Process: Process Creation, File: File Modification, Script: Script Execution\",\n    \"description\": \"Adversaries may use [Obfuscated Files or Information](https:\/\/attack.mitre.org\/techniques\/T1027) to hide artifacts of an intrusion from analysis. They may require separate mechanisms to decode or deobfuscate that information depending on how they intend to use it. Methods for doing that include built-in functionality of malware or by using utilities present on the system.\\n\\nOne such example is use of [certutil](https:\/\/attack.mitre.org\/software\/S0160) to decode a remote access tool portable executable file that has been hidden inside a certificate file. (Citation: Malwarebytes Targeted Attack against Saudi Arabia) Another example is using the Windows <code>copy \/b<\/code> command to reassemble binary fragments into a malicious payload. (Citation: Carbon Black Obfuscation Sept 2016)\\n\\nSometimes a user's action may be required to open it for deobfuscation or decryption as part of [User Execution](https:\/\/attack.mitre.org\/techniques\/T1204). The user may also be required to input a password to open a password protected compressed\/encrypted file that was provided by the adversary. (Citation: Volexity PowerDuke November 2016)\",\n    \"lastModified\": 1619707779,\n    \"permissionsRequired\": \"User\"\n  }{% else %}{\n    \"id\": 159,\n    \"@id\": \"\/api\/3\/mitre_techniques\/564998d8-ab3e-4123-93fb-eccaa6b9714a\",\n    \"name\": \"Rogue Domain Controller\",\n    \"uuid\": \"564998d8-ab3e-4123-93fb-eccaa6b9714a\",\n    \"@type\": \"Technique\",\n    \"notes\": null,\n    \"capecId\": null,\n    \"created\": 1524074364,\n    \"mitreId\": \"T1207\",\n    \"version\": \"2.0\",\n    \"detection\": \"Monitor and analyze network traffic associated with data replication (such as calls to DrsAddEntry, DrsReplicaAdd, and especially GetNCChanges) between DCs as well as to\/from non DC hosts. (Citation: GitHub DCSYNCMonitor) (Citation: DCShadow Blog) DC replication will naturally take place every 15 minutes but can be triggered by an attacker or by legitimate urgent changes (ex: passwords). Also consider monitoring and alerting on the replication of AD objects (Audit Detailed Directory Service Replication Events 4928 and 4929). (Citation: DCShadow Blog)\\n\\nLeverage AD directory synchronization (DirSync) to monitor changes to directory state using AD replication cookies. (Citation: Microsoft DirSync) (Citation: ADDSecurity DCShadow Feb 2018)\\n\\nBaseline and periodically analyze the Configuration partition of the AD schema and alert on creation of nTDSDSA objects. (Citation: DCShadow Blog)\\n\\nInvestigate usage of Kerberos Service Principal Names (SPNs), especially those associated with services (beginning with \u201cGC\/\u201d) by computers not present in the DC organizational unit (OU). The SPN associated with the Directory Replication Service (DRS) Remote Protocol interface (GUID E3514235\u20134B06\u201311D1-AB04\u201300C04FC2DCD2) can be set without logging. (Citation: ADDSecurity DCShadow Feb 2018) A rogue DC must authenticate as a service using these two SPNs for the replication process to successfully complete.\",\n    \"platforms\": \"Windows\",\n    \"recordTags\": [],\n    \"dataSources\": \"Active Directory: Active Directory Object Creation, Active Directory: Active Directory Object Modification, Network Traffic: Network Traffic Content, User Account: User Account Authentication\",\n    \"description\": \"Adversaries may register a rogue Domain Controller to enable manipulation of Active Directory data. DCShadow may be used to create a rogue Domain Controller (DC). DCShadow is a method of manipulating Active Directory (AD) data, including objects and schemas, by registering (or reusing an inactive registration) and simulating the behavior of a DC. (Citation: DCShadow Blog) Once registered, a rogue DC may be able to inject and replicate changes into AD infrastructure for any domain object, including credentials and keys.\\n\\nRegistering a rogue DC involves creating a new server and nTDSDSA objects in the Configuration partition of the AD schema, which requires Administrator privileges (either Domain or local to the DC) or the KRBTGT hash. (Citation: Adsecurity Mimikatz Guide)\\n\\nThis technique may bypass system logging and security monitors such as security information and event management (SIEM) products (since actions taken on a rogue DC may not be reported to these sensors). (Citation: DCShadow Blog) The technique may also be used to alter and delete replication and other associated metadata to obstruct forensic analysis. Adversaries may also utilize this technique to perform [SID-History Injection](https:\/\/attack.mitre.org\/techniques\/T1134\/005) and\/or manipulate AD objects (such as accounts, access control lists, schemas) to establish backdoors for Persistence. (Citation: DCShadow Blog)\",\n    \"lastModified\": 1612883607,\n    \"permissionsRequired\": \"Administrator\"\n  }{% endif %}"
+                },
+                "apply_async": false,
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/8f61e7f7-955b-4a81-947e-be12568e66b8"
+            },
+            "status": null,
+            "top": "705",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "b3ee0af2-a3e2-4796-b2c6-fe654c32795f",
+            "id": 4416
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create Hunt Record",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "name": "Demo Hunt - {{vars.scenarioTitle}}",
+                    "huntEnd": "{{arrow.get(vars.steps.Get_Hunt_Time_Range.input.huntEndDate).int_timestamp}}",
+                    "__replace": "",
+                    "huntStart": "{{arrow.get(vars.steps.Get_Hunt_Time_Range.input.huntStartDate).int_timestamp}}",
+                    "timeCreated": "{{arrow.utcnow().int_timestamp}}"
+                },
+                "_showJson": false,
+                "operation": "Overwrite",
+                "collection": "\/api\/3\/hunt",
+                "__recommend": [],
+                "fieldOperation": {
+                    "recordTags": "Overwrite"
+                },
+                "step_variables": []
+            },
+            "status": null,
+            "top": "435",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/2597053c-e718-44b4-8394-4d40fe26d357",
+            "uuid": "2c740b78-eb03-438d-8e38-244e2ff17499",
+            "id": 4417
+        }
+    ],
+    "routes": [
+        {
+            "@type": "WorkflowRoute",
+            "name": "Create Alerts from Elastic -> Get Created Alert Data",
+            "targetStep": "\/api\/3\/workflow_steps\/f6d054e7-36dd-480d-b9a5-92d74b53f479",
+            "sourceStep": "\/api\/3\/workflow_steps\/b3ee0af2-a3e2-4796-b2c6-fe654c32795f",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "41b47451-bb55-4e26-a11b-8675ba5a19c1"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Get Alert from SIEM -> Create and Link Alert",
+            "targetStep": "\/api\/3\/workflow_steps\/b3ee0af2-a3e2-4796-b2c6-fe654c32795f",
+            "sourceStep": "\/api\/3\/workflow_steps\/1431861e-4d44-4f04-983a-3f5037001210",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "b42ac69e-90a5-41e6-83e9-dd19340ae4c7"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Start -> Configuration",
+            "targetStep": "\/api\/3\/workflow_steps\/df1c4b4b-737c-4e56-9aa6-57c6beb6204e",
+            "sourceStep": "\/api\/3\/workflow_steps\/c20d5928-6621-4489-a03c-e69a78be0599",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "5d2d8c79-3a8f-4d54-9662-670a49cf87c9"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Get Hunt Time Range -> Create Hunt Record",
+            "targetStep": "\/api\/3\/workflow_steps\/2c740b78-eb03-438d-8e38-244e2ff17499",
+            "sourceStep": "\/api\/3\/workflow_steps\/3f7c3325-e7cc-4573-b9cd-d5381a3bb8a0",
+            "label": "Submit",
+            "isExecuted": false,
+            "uuid": "83b9733c-0ed2-4556-8aef-4f89444b88b3"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Configuration -> Get Hunt Time Range",
+            "targetStep": "\/api\/3\/workflow_steps\/3f7c3325-e7cc-4573-b9cd-d5381a3bb8a0",
+            "sourceStep": "\/api\/3\/workflow_steps\/df1c4b4b-737c-4e56-9aa6-57c6beb6204e",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "6c41b1b7-c79b-4158-b80c-66ab462afaca"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Create Hunt Record -> Get Alert from SIEM",
+            "targetStep": "\/api\/3\/workflow_steps\/1431861e-4d44-4f04-983a-3f5037001210",
+            "sourceStep": "\/api\/3\/workflow_steps\/2c740b78-eb03-438d-8e38-244e2ff17499",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "75385ccb-180f-45c7-bdb6-0a2b10be95de"
+        }
+    ],
+    "priority": "\/api\/3\/picklists\/2b563c61-ae2c-41c0-a85a-c9709585e3f2",
+    "uuid": "42fcd125-90b5-492d-a6be-ac7b3e1cec49",
+    "recordTags": [
+        "Referenced"
+    ],
+    "id": 1114,
+    "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "createDate": 1644164610,
+    "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "modifyDate": 1644164610,
+    "owners": [],
+    "isPrivate": false
+}
