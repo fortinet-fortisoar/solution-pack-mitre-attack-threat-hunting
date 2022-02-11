@@ -1,0 +1,706 @@
+{
+    "@type": "Workflow",
+    "triggerLimit": null,
+    "name": "Create and Link Alerts from Hunt (Host-based)",
+    "aliasName": null,
+    "tag": "",
+    "description": "Creates and links an Alert from a host based sensor to a Hunt",
+    "isActive": true,
+    "debug": false,
+    "singleRecordExecution": false,
+    "remoteExecutableFlag": false,
+    "parameters": [
+        "commandline",
+        "userName",
+        "technique",
+        "processName",
+        "MD5",
+        "hostName",
+        "sourceIP",
+        "destinationIP",
+        "sourceTool",
+        "parentProcess",
+        "eventTime",
+        "parentProcessID",
+        "processID",
+        "parentCommandLine",
+        "filePath",
+        "eventName",
+        "description",
+        "huntIRI",
+        "epochTime",
+        "comment",
+        "sourceImage",
+        "targetImage",
+        "source",
+        "processGUID",
+        "scheduledTask",
+        "service",
+        "url",
+        "bytestransferred",
+        "bitstransferid",
+        "sourceData",
+        "registryKey",
+        "registryKeyValue",
+        "computerName",
+        "alertName",
+        "decodedCommandLine",
+        "mitre_tech_id",
+        "alertType"
+    ],
+    "synchronous": false,
+    "lastModifyDate": 1644165542,
+    "collection": "\/api\/3\/workflow_collections\/e1d97fae-bb76-4989-b4d2-a30b6109e91f",
+    "versions": [],
+    "triggerStep": "\/api\/3\/workflow_steps\/81219dd1-8fbf-432c-8de6-62b8bf277e0b",
+    "steps": [
+        {
+            "@type": "WorkflowStep",
+            "name": "Start",
+            "description": null,
+            "arguments": {
+                "step_variables": {
+                    "input": {
+                        "params": {
+                            "MD5": "{{ vars.MD5 }}",
+                            "url": "{{ vars.url }}",
+                            "source": "{{ vars.source }}",
+                            "comment": "{{ vars.comment }}",
+                            "huntIRI": "{{ vars.huntIRI }}",
+                            "service": "{{ vars.service }}",
+                            "filePath": "{{ vars.filePath }}",
+                            "hostName": "{{ vars.hostName }}",
+                            "sourceIP": "{{ vars.sourceIP }}",
+                            "userName": "{{ vars.userName }}",
+                            "alertName": "{{ vars.alertName }}",
+                            "alertType": "{{ vars.alertType }}",
+                            "epochTime": "{{ vars.epochTime }}",
+                            "eventName": "{{ vars.eventName }}",
+                            "eventTime": "{{ vars.eventTime }}",
+                            "processID": "{{ vars.processID }}",
+                            "technique": "{{ vars.technique }}",
+                            "sourceData": "{{ vars.sourceData }}",
+                            "sourceTool": "{{ vars.sourceTool }}",
+                            "commandline": "{{ vars.commandline }}",
+                            "description": "{{ vars.description }}",
+                            "processGUID": "{{ vars.processGUID }}",
+                            "processName": "{{ vars.processName }}",
+                            "registryKey": "{{ vars.registryKey }}",
+                            "sourceImage": "{{ vars.sourceImage }}",
+                            "targetImage": "{{ vars.targetImage }}",
+                            "computerName": "{{ vars.computerName }}",
+                            "destinationIP": "{{ vars.destinationIP }}",
+                            "mitre_tech_id": "{{ vars.mitre_tech_id }}",
+                            "parentProcess": "{{ vars.parentProcess }}",
+                            "scheduledTask": "{{ vars.scheduledTask }}",
+                            "bitstransferid": "{{ vars.bitstransferid }}",
+                            "parentProcessID": "{{ vars.parentProcessID }}",
+                            "bytestransferred": "{{ vars.bytestransferred }}",
+                            "registryKeyValue": "{{ vars.registryKeyValue }}",
+                            "parentCommandLine": "{{ vars.parentCommandLine }}",
+                            "decodedCommandLine": "{{ vars.decodedCommandLine }}"
+                        }
+                    }
+                }
+            },
+            "status": null,
+            "top": "30",
+            "left": "300",
+            "stepType": "\/api\/3\/workflow_step_types\/b348f017-9a94-471f-87f8-ce88b6a7ad62",
+            "uuid": "81219dd1-8fbf-432c-8de6-62b8bf277e0b",
+            "id": 4585
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Retrieve Existing Open Alerts",
+            "description": null,
+            "arguments": {
+                "query": {
+                    "sort": [],
+                    "limit": 30,
+                    "logic": "AND",
+                    "filters": [
+                        {
+                            "type": "primitive",
+                            "field": "epochTime",
+                            "value": "{{vars.input.params.epochTime}}",
+                            "operator": "eq",
+                            "_operator": "eq"
+                        },
+                        {
+                            "type": "primitive",
+                            "field": "mitreTechnique",
+                            "value": "%{{vars.input.params.technique}}%",
+                            "operator": "like",
+                            "_operator": "like"
+                        },
+                        {
+                            "type": "primitive",
+                            "field": "processId",
+                            "value": "{{vars.input.params.processID}}",
+                            "operator": "eq",
+                            "_operator": "eq"
+                        },
+                        {
+                            "type": "primitive",
+                            "field": "computerName",
+                            "value": "{{vars.input.params.computerName}}",
+                            "operator": "eq",
+                            "_operator": "eq"
+                        },
+                        {
+                            "logic": "OR",
+                            "filters": [
+                                {
+                                    "type": "object",
+                                    "field": "status",
+                                    "value": "\/api\/3\/picklists\/7de816ff-7140-4ee5-bd05-93ce22002146",
+                                    "_value": {
+                                        "itemValue": "Open"
+                                    },
+                                    "operator": "eq"
+                                },
+                                {
+                                    "type": "object",
+                                    "field": "status",
+                                    "value": "\/api\/3\/picklists\/891fb9d5-556c-44c6-9f7d-94a27dec732e",
+                                    "_value": {
+                                        "itemValue": "Re-Opened"
+                                    },
+                                    "operator": "eq"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "primitive",
+                            "field": "processGuid",
+                            "value": "%{{vars.input.params.processGUID}}%",
+                            "operator": "like",
+                            "_operator": "like"
+                        },
+                        {
+                            "type": "primitive",
+                            "field": "scheduledTask",
+                            "value": "{{vars.input.params.scheduledTask}}",
+                            "operator": "eq",
+                            "_operator": "eq"
+                        },
+                        {
+                            "type": "primitive",
+                            "field": "services",
+                            "value": "{{vars.input.params.service}}",
+                            "operator": "eq",
+                            "_operator": "eq"
+                        },
+                        {
+                            "type": "primitive",
+                            "field": "url",
+                            "value": "{{vars.input.params.url}}",
+                            "operator": "eq",
+                            "_operator": "eq"
+                        }
+                    ]
+                },
+                "module": "alerts?$limit=30",
+                "step_variables": {
+                    "resultRecordscount2": "{{vars.result | length}}"
+                }
+            },
+            "status": null,
+            "top": "435",
+            "left": "475",
+            "stepType": "\/api\/3\/workflow_step_types\/b593663d-7d13-40ce-a3a3-96dece928770",
+            "uuid": "9e60a091-e5e5-4cff-b1a1-4245827abc34",
+            "id": 4586
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create and Link Comment to Hunt",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "hunts": "{%if vars.input.params.huntIRI %}[\"{{vars.input.params.huntIRI}}\"]{% endif %}",
+                    "scans": null,
+                    "tasks": null,
+                    "users": null,
+                    "alerts": null,
+                    "assets": null,
+                    "emails": null,
+                    "events": null,
+                    "owners": null,
+                    "people": null,
+                    "content": "<p>{{vars.input.params.comment}}<\/p>",
+                    "accounts": null,
+                    "schedule": null,
+                    "approvals": "",
+                    "companies": null,
+                    "customers": null,
+                    "incidents": null,
+                    "indicators": null,
+                    "attachments": null,
+                    "fraudAlerts": null,
+                    "vulnerabilities": null
+                },
+                "_showJson": false,
+                "collection": "\/api\/3\/comments",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "570",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/2597053c-e718-44b4-8394-4d40fe26d357",
+            "uuid": "399374be-e986-442c-b34c-13c805616f99",
+            "id": 4587
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create and Link Alert",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "url": "{{vars.input.params.url or None}}",
+                    "name": "{% if vars.input.params.alertName%}{{vars.input.params.alertName}}{% else %}MITRE-{{vars.input.params.technique}} Execution of {{vars.input.params.processName}}{% endif %}",
+                    "type": "{% if vars.input.params.alertType %}{{vars.input.params.alertType}}{% else %}{{\"AlertType\" | picklist(\"MITRE ATT&CK\", \"@id\")}}{% endif %}",
+                    "hunts": "{%if vars.input.params.huntIRI %}[\"{{vars.input.params.huntIRI}}\"]{% endif %}",
+                    "state": {
+                        "id": 220,
+                        "@id": "\/api\/3\/picklists\/a1bac09b-1441-45aa-ad1b-c88744e48e72",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": null,
+                        "display": "New",
+                        "listName": "\/api\/3\/picklist_names\/2f9ed741-25fe-475a-9f12-64336288eebf",
+                        "itemValue": "New",
+                        "orderIndex": 0
+                    },
+                    "source": "{{vars.input.params.source or None}}",
+                    "status": {
+                        "id": 120,
+                        "@id": "\/api\/3\/picklists\/7de816ff-7140-4ee5-bd05-93ce22002146",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": null,
+                        "display": "Open",
+                        "listName": "\/api\/3\/picklist_names\/33e964a9-d607-49f2-813c-7ce46141815a",
+                        "itemValue": "Open",
+                        "orderIndex": 0
+                    },
+                    "fileHash": "{{vars.input.params.MD5 or None}}",
+                    "filePath": "{{vars.input.params.filePath or None}}",
+                    "services": "{{vars.input.params.service or None}}",
+                    "severity": {
+                        "id": 81,
+                        "@id": "\/api\/3\/picklists\/40187287-89fc-4e9c-b717-e9443d57eedb",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": "#DE7A13",
+                        "display": "High",
+                        "listName": "\/api\/3\/picklist_names\/4e80cba3-032f-48b4-ac03-17e3ec247aac",
+                        "itemValue": "High",
+                        "orderIndex": 3
+                    },
+                    "sourceIp": "{{vars.input.params.sourceIP or None}}",
+                    "userName": "{{vars.input.params.userName or None}}",
+                    "__replace": "true",
+                    "epochTime": "{{vars.input.params.epochTime}}",
+                    "eventTime": "{{vars.input.params.eventTime}}",
+                    "processId": "{{vars.input.params.processID or None}}",
+                    "sourceTool": "{{vars.input.params.sourceTool or None}}",
+                    "sourcedata": "{{vars.input.params.sourceData | toJSON}}",
+                    "commandLine": "{{vars.input.params.commandline or None}}",
+                    "description": "<p>{{vars.input.params.description}}<\/p>",
+                    "processGuid": "{{vars.input.params.processGUID or None}}",
+                    "processName": "{{vars.input.params.processName or None}}",
+                    "registryKey": "{{vars.input.params.registryKey or None}}",
+                    "targetAsset": "{{vars.input.params.hostName or None}}",
+                    "ackSlaStatus": {
+                        "id": 289,
+                        "@id": "\/api\/3\/picklists\/72979f64-e8b9-4888-a965-957e0ec24818",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": "#808080",
+                        "display": "Awaiting Action",
+                        "listName": "\/api\/3\/picklist_names\/fe36a8f2-fcba-4221-b4ab-1081f596b153",
+                        "itemValue": "Awaiting Action",
+                        "orderIndex": 2
+                    },
+                    "computerName": "{{vars.input.params.computerName or None}}",
+                    "closureReason": {
+                        "id": 250,
+                        "@id": "\/api\/3\/picklists\/8590c81e-3307-4645-97f5-c3e1bec4e05a",
+                        "icon": null,
+                        "uuid": "8590c81e-3307-4645-97f5-c3e1bec4e05a",
+                        "@type": "Picklist",
+                        "color": null,
+                        "display": "Tasks Completed",
+                        "@context": "\/api\/3\/contexts\/Picklist",
+                        "listName": "\/api\/3\/picklist_names\/4ebacea1-88cd-4ea8-9dcc-385bea42cc59",
+                        "itemValue": "Tasks Completed",
+                        "orderIndex": 0
+                    },
+                    "destinationIp": "{{vars.input.params.destinationIP or None}}",
+                    "mitreattackid": "{{vars.input.params['mitre_tech_id']}}",
+                    "respSlaStatus": {
+                        "id": 289,
+                        "@id": "\/api\/3\/picklists\/72979f64-e8b9-4888-a965-957e0ec24818",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": "#808080",
+                        "display": "Awaiting Action",
+                        "listName": "\/api\/3\/picklist_names\/fe36a8f2-fcba-4221-b4ab-1081f596b153",
+                        "itemValue": "Awaiting Action",
+                        "orderIndex": 2
+                    },
+                    "scheduledTask": "{{vars.input.params.scheduledTask or None}}",
+                    "sourceProcess": "{{vars.input.params.sourceImage or None}}",
+                    "targetProcess": "{{vars.input.params.targetImage or None}}",
+                    "mitreTechnique": "{{vars.input.params.technique}}",
+                    "priorityWeight": 1,
+                    "bytesTransferred": "{{vars.input.params.bytestransferred or None}}",
+                    "parentProcessPid": "{{vars.input.params.parentProcessID or None}}",
+                    "registryKeyValue": "{{vars.input.params.registryKeyValue or None}}",
+                    "parentProcessName": "{{vars.input.params.parentProcess or None}}",
+                    "decodedCommandLine": "{{vars.input.params.decodedCommandLine or None}}",
+                    "escalatedtoincident": {
+                        "id": 32,
+                        "@id": "\/api\/3\/picklists\/2128a09c-153d-4db3-985d-de6be33deae5",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": "#808080",
+                        "display": "No",
+                        "listName": "\/api\/3\/picklist_names\/e131cc54-9ae4-43c9-b830-af6e331fe024",
+                        "itemValue": "No",
+                        "orderIndex": 1
+                    },
+                    "alertRemainingAckSLA": 0,
+                    "parentProcessCmdLine": "{{vars.input.params.parentCommandLine or None}}"
+                },
+                "_showJson": false,
+                "operation": "Overwrite",
+                "collection": "\/api\/3\/upsert\/alerts",
+                "__recommend": [],
+                "tagsOperation": "OverwriteTags",
+                "fieldOperation": {
+                    "recordTags": "Overwrite"
+                },
+                "step_variables": []
+            },
+            "status": null,
+            "top": "435",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/2597053c-e718-44b4-8394-4d40fe26d357",
+            "uuid": "9ced32d4-5411-42fc-ba94-65908785af6b",
+            "id": 4588
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Link Open Alerts to Hunt",
+            "description": null,
+            "arguments": {
+                "for_each": {
+                    "item": "{{vars.steps.Retrieve_Existing_Open_Alerts}}",
+                    "condition": ""
+                },
+                "resource": {
+                    "__link": {
+                        "hunts": "{%if vars.input.params.huntIRI %}[\"{{vars.input.params.huntIRI}}\"]{% endif %}"
+                    }
+                },
+                "_showJson": false,
+                "operation": "Append",
+                "collection": "{{vars.item['@id']}}",
+                "collectionType": "\/api\/3\/alerts",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "705",
+            "left": "300",
+            "stepType": "\/api\/3\/workflow_step_types\/b593663d-7d13-40ce-a3a3-96dece928722",
+            "uuid": "15fd998b-4304-41b4-ba59-924cfce035e4",
+            "id": 4589
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Are Any Alerts Still Open",
+            "description": null,
+            "arguments": {
+                "conditions": [
+                    {
+                        "option": "Yes",
+                        "step_iri": "\/api\/3\/workflow_steps\/15fd998b-4304-41b4-ba59-924cfce035e4",
+                        "condition": "{{ vars.resultRecordscount2 != 0 }}"
+                    },
+                    {
+                        "option": "No",
+                        "step_iri": "\/api\/3\/workflow_steps\/f1e37c09-c701-450c-8c0b-45a6c6358310",
+                        "condition": "{{ vars.resultRecordscount2 == 0 }}"
+                    }
+                ]
+            },
+            "status": null,
+            "top": "570",
+            "left": "475",
+            "stepType": "\/api\/3\/workflow_step_types\/12254cf5-5db7-4b1a-8cb1-3af081924b28",
+            "uuid": "8083de9c-1166-437d-921e-ab28a080bbde",
+            "id": 4590
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Do Alerts Already Exist",
+            "description": null,
+            "arguments": {
+                "conditions": [
+                    {
+                        "option": "Yes",
+                        "step_iri": "\/api\/3\/workflow_steps\/9e60a091-e5e5-4cff-b1a1-4245827abc34",
+                        "condition": "{{ vars.resultRecordscount != 0 }}"
+                    },
+                    {
+                        "option": "No",
+                        "step_iri": "\/api\/3\/workflow_steps\/9ced32d4-5411-42fc-ba94-65908785af6b",
+                        "condition": "{{ vars.resultRecordscount == 0 }}"
+                    }
+                ]
+            },
+            "status": null,
+            "top": "300",
+            "left": "300",
+            "stepType": "\/api\/3\/workflow_step_types\/12254cf5-5db7-4b1a-8cb1-3af081924b28",
+            "uuid": "4f12dcc0-9507-4db9-b6d5-038404751cf0",
+            "id": 4591
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Retrieve Existing Alerts",
+            "description": null,
+            "arguments": {
+                "query": {
+                    "sort": [],
+                    "limit": 30,
+                    "logic": "AND",
+                    "filters": [
+                        {
+                            "type": "primitive",
+                            "field": "epochTime",
+                            "value": "{{vars.input.params.epochTime}}",
+                            "operator": "eq",
+                            "_operator": "eq"
+                        },
+                        {
+                            "type": "primitive",
+                            "field": "mitreTechnique",
+                            "value": "%{{vars.input.params.technique}}%",
+                            "operator": "like",
+                            "_operator": "like"
+                        },
+                        {
+                            "type": "primitive",
+                            "field": "processId",
+                            "value": "{{vars.input.params.processID}}",
+                            "operator": "eq",
+                            "_operator": "eq"
+                        },
+                        {
+                            "type": "primitive",
+                            "field": "computerName",
+                            "value": "{{vars.input.params.computerName}}",
+                            "operator": "eq",
+                            "_operator": "eq"
+                        },
+                        {
+                            "type": "primitive",
+                            "field": "processGuid",
+                            "value": "%{{vars.input.params.processGUID}}%",
+                            "operator": "like",
+                            "_operator": "like"
+                        },
+                        {
+                            "type": "primitive",
+                            "field": "services",
+                            "value": "{{vars.input.params.service}}",
+                            "operator": "eq",
+                            "_operator": "eq"
+                        },
+                        {
+                            "type": "primitive",
+                            "field": "scheduledTask",
+                            "value": "{{vars.input.params.scheduledTask}}",
+                            "operator": "eq",
+                            "_operator": "eq"
+                        },
+                        {
+                            "type": "primitive",
+                            "field": "url",
+                            "value": "{{vars.input.params.url}}",
+                            "operator": "eq",
+                            "_operator": "eq"
+                        }
+                    ]
+                },
+                "module": "alerts?$limit=30000",
+                "step_variables": {
+                    "resultRecordscount": "{{vars.result | length}}"
+                }
+            },
+            "status": null,
+            "top": "165",
+            "left": "300",
+            "stepType": "\/api\/3\/workflow_step_types\/b593663d-7d13-40ce-a3a3-96dece928770",
+            "uuid": "3b08718a-d77d-44e9-a12d-358aa5f9feb2",
+            "id": 4592
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "No New Alerts Needed",
+            "description": null,
+            "arguments": {
+                "params": [],
+                "version": "2.1.3",
+                "connector": "cyops_utilities",
+                "operation": "no_op",
+                "operationTitle": "Utils: No Operation",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "705",
+            "left": "650",
+            "stepType": "\/api\/3\/workflow_step_types\/0109f35d-090b-4a2b-bd8a-94cbc3508562",
+            "uuid": "f1e37c09-c701-450c-8c0b-45a6c6358310",
+            "id": 4593
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create and Link Comments to Hunt",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "hunts": "{%if vars.input.params.huntIRI %}[\"{{vars.input.params.huntIRI}}\"]{% endif %}",
+                    "scans": null,
+                    "tasks": null,
+                    "users": null,
+                    "alerts": null,
+                    "assets": null,
+                    "emails": null,
+                    "events": null,
+                    "owners": null,
+                    "people": null,
+                    "content": "<p>{{vars.input.params.comment}} Additionally, pre-existing related <a href=\"{{vars.request.baseUri}}{{ vars.steps.Retrieve_Existing_Open_Alerts[0]['@id'] | replace('\/api\/3','\/modules\/view-panel')}}\">Alert-{{vars.steps.Retrieve_Existing_Open_Alerts[0].id}}<\/a>&nbsp;with Status \"Open\" or \"Re-Opened\" was observed within CyOps. This Alert has now been linked to this Hunt.<\/p>\n<p>&nbsp;<\/p>\n<p>&nbsp;<\/p>\n<p>&nbsp;<\/p>",
+                    "accounts": null,
+                    "schedule": null,
+                    "approvals": null,
+                    "companies": null,
+                    "customers": null,
+                    "incidents": null,
+                    "indicators": null,
+                    "attachments": null,
+                    "fraudAlerts": null,
+                    "vulnerabilities": null
+                },
+                "_showJson": false,
+                "collection": "\/api\/3\/comments",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "840",
+            "left": "300",
+            "stepType": "\/api\/3\/workflow_step_types\/2597053c-e718-44b4-8394-4d40fe26d357",
+            "uuid": "bcff600b-187e-4093-b6aa-1cea5dbcf44e",
+            "id": 4594
+        }
+    ],
+    "routes": [
+        {
+            "@type": "WorkflowRoute",
+            "name": "Do Alerts Already Exist -> Retrieve Existing Open Alerts",
+            "targetStep": "\/api\/3\/workflow_steps\/9e60a091-e5e5-4cff-b1a1-4245827abc34",
+            "sourceStep": "\/api\/3\/workflow_steps\/4f12dcc0-9507-4db9-b6d5-038404751cf0",
+            "label": "Yes",
+            "isExecuted": false,
+            "uuid": "bc579818-1c15-4ffe-8e1a-bebf29a17ea3"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Retrieve Existing Open Alerts -> Are Any Alerts Still Open",
+            "targetStep": "\/api\/3\/workflow_steps\/8083de9c-1166-437d-921e-ab28a080bbde",
+            "sourceStep": "\/api\/3\/workflow_steps\/9e60a091-e5e5-4cff-b1a1-4245827abc34",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "6c66fe94-d7fc-4718-a958-2977d13c3d35"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Start -> Retrieve Existing Alerts",
+            "targetStep": "\/api\/3\/workflow_steps\/3b08718a-d77d-44e9-a12d-358aa5f9feb2",
+            "sourceStep": "\/api\/3\/workflow_steps\/81219dd1-8fbf-432c-8de6-62b8bf277e0b",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "45f81f50-32fc-45f2-8ba2-574365252604"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Are Any Alerts Still Open -> No New Alerts Needed",
+            "targetStep": "\/api\/3\/workflow_steps\/f1e37c09-c701-450c-8c0b-45a6c6358310",
+            "sourceStep": "\/api\/3\/workflow_steps\/8083de9c-1166-437d-921e-ab28a080bbde",
+            "label": "No",
+            "isExecuted": false,
+            "uuid": "0dbe41d3-d006-4d2c-a86c-e6fc2e1d9d28"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Link Open Alerts to Hunt -> Create and Link Comments to Hunt",
+            "targetStep": "\/api\/3\/workflow_steps\/bcff600b-187e-4093-b6aa-1cea5dbcf44e",
+            "sourceStep": "\/api\/3\/workflow_steps\/15fd998b-4304-41b4-ba59-924cfce035e4",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "971ec5be-ed36-4a05-af38-67216d397675"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Create and Link Alert -> Create and Link Comment to Hunt",
+            "targetStep": "\/api\/3\/workflow_steps\/399374be-e986-442c-b34c-13c805616f99",
+            "sourceStep": "\/api\/3\/workflow_steps\/9ced32d4-5411-42fc-ba94-65908785af6b",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "70142a25-a460-4548-82d0-2b86666ab115"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Retrieve Existing Alerts -> Do Alerts Already Exist",
+            "targetStep": "\/api\/3\/workflow_steps\/4f12dcc0-9507-4db9-b6d5-038404751cf0",
+            "sourceStep": "\/api\/3\/workflow_steps\/3b08718a-d77d-44e9-a12d-358aa5f9feb2",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "26dfd20e-676c-4a37-aa1c-e500d1867dfc"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Do Alerts Already Exist -> Create and Link Alert",
+            "targetStep": "\/api\/3\/workflow_steps\/9ced32d4-5411-42fc-ba94-65908785af6b",
+            "sourceStep": "\/api\/3\/workflow_steps\/4f12dcc0-9507-4db9-b6d5-038404751cf0",
+            "label": "No",
+            "isExecuted": false,
+            "uuid": "b22d5bd3-f7f5-4852-bad0-57d0327e5e97"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Are Any Alerts Still Open -> Link Open Alerts to Hunt",
+            "targetStep": "\/api\/3\/workflow_steps\/15fd998b-4304-41b4-ba59-924cfce035e4",
+            "sourceStep": "\/api\/3\/workflow_steps\/8083de9c-1166-437d-921e-ab28a080bbde",
+            "label": "Yes",
+            "isExecuted": false,
+            "uuid": "21d5f1d1-5cc2-4bf5-b7ea-b068b6fce9e7"
+        }
+    ],
+    "priority": null,
+    "uuid": "bf7d418b-7ff3-44c1-b473-90d0a03c4641",
+    "recordTags": [
+        "Referenced"
+    ],
+    "id": 1135,
+    "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "createDate": 1644165546,
+    "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "modifyDate": 1644165546,
+    "owners": [],
+    "isPrivate": false
+}

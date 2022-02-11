@@ -1,0 +1,15 @@
+{
+    "@context": "\/api\/3\/contexts\/WorkflowCollection",
+    "@type": "WorkflowCollection",
+    "name": "04 - Use Case - MITRE ATT&CK\u2122 - Credential Access",
+    "description": null,
+    "visible": true,
+    "image": null,
+    "uuid": "2d31bc0f-81b6-482b-91ac-2629def1c7ac",
+    "id": 92,
+    "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "createDate": 1644165543,
+    "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "modifyDate": 1644572462,
+    "recordTags": []
+}

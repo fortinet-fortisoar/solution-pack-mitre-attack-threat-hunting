@@ -1,0 +1,771 @@
+{
+    "@type": "Workflow",
+    "triggerLimit": null,
+    "name": "HUNTS - Deobfuscate\/Decode Files or Information (T1140)",
+    "aliasName": null,
+    "tag": "ATT&CK, Defense_Evasion, Certutil, Copy, Deobfuscate_Decode_Files_or_Information",
+    "description": "Identifies use of Certutil or copy \/b to deobfuscate data\/files",
+    "isActive": true,
+    "debug": false,
+    "singleRecordExecution": false,
+    "remoteExecutableFlag": false,
+    "parameters": [],
+    "synchronous": false,
+    "lastModifyDate": 1644165542,
+    "collection": "\/api\/3\/workflow_collections\/234e09da-6930-4fd2-ada5-43bfc65f59f5",
+    "versions": [],
+    "triggerStep": "\/api\/3\/workflow_steps\/79799870-7486-49db-9ce2-60a355fd787b",
+    "steps": [
+        {
+            "@type": "WorkflowStep",
+            "name": "return certutil query",
+            "description": null,
+            "arguments": {
+                "name": "Splunk",
+                "config": "55bf97af-75c2-45ca-ae75-f4d27220cc52",
+                "params": {
+                    "sid": "{'value': \"{{vars.steps.Query_for_certutil.data.sid}}\"}",
+                    "additional_args": "{\"A\":\"B\"}"
+                },
+                "version": "1.4.0",
+                "do_until": {
+                    "delay": "1",
+                    "retries": "300",
+                    "condition": "{{\"results\" in vars.result.data}}"
+                },
+                "connector": "splunk",
+                "operation": "get_results",
+                "operationTitle": "Get Results for a Search",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "30",
+            "left": "1425",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "95c7f6be-befc-4262-83e0-77809a975e3c",
+            "id": 4428
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create and Link Alert2",
+            "description": null,
+            "arguments": {
+                "for_each": {
+                    "item": "{{vars.steps.Return_copy_b_query.data.results}}",
+                    "condition": ""
+                },
+                "arguments": {
+                    "MD5": "{{vars.item.MD5}}",
+                    "url": "",
+                    "source": "{{vars.item.EventChannel}}",
+                    "comment": "SIEM query identified a potential attempt to use the command \"copy \/b\" to deobfuscate\/decode files or information through {{vars.item.process_exec}} on {{vars.item.host}} at {{vars.item.UtcTime}}.",
+                    "huntIRI": "{{vars.input.records[0]['@id']}}",
+                    "service": "",
+                    "filePath": "{{vars.item.Image}}",
+                    "hostName": "{{vars.item.host}}",
+                    "sourceIP": "null",
+                    "userName": "{{vars.item.User}}",
+                    "alertName": "ATT&CK-Deobfuscate\/Decode-cmd executed with \"copy \/b\" argument",
+                    "epochTime": "{{vars.item.epoch_time}}",
+                    "eventName": "",
+                    "eventTime": "{{vars.item.UtcTime}}",
+                    "processID": "{{vars.item.ProcessId}}",
+                    "technique": "Deobfuscate\/Decode Files or Information- Copy \/b",
+                    "sourceData": "{{vars.item}}",
+                    "sourceTool": "{{vars.item.EventChannel}}",
+                    "commandline": "{{vars.item.CommandLine}}",
+                    "description": "An attempt to utilize Copy \/b to was observed. An attacker could use the command Copy \/b to read data as binary and then interact with\/utilize the data elsewhere. This attack has been observed being conducted by nation-state actors and other malicious entities to join together binary fragments to assemble and run executables.",
+                    "processGUID": "{{vars.item.ProcessGuid}}",
+                    "processName": "{{vars.item.process_exec}}",
+                    "registryKey": "",
+                    "sourceImage": "",
+                    "targetImage": "",
+                    "computerName": "{{vars.item.Computer}}",
+                    "destinationIP": "null",
+                    "mitre_tech_id": "T1140",
+                    "parentProcess": "{{vars.item.ParentImage}}",
+                    "scheduledTask": "",
+                    "bitstransferid": "",
+                    "parentProcessID": "{{vars.item.ParentProcessId}}",
+                    "bytestransferred": "",
+                    "registryKeyValue": "",
+                    "parentCommandLine": "{{vars.item.ParentCommandLine}}",
+                    "decodedCommandLine": ""
+                },
+                "apply_async": false,
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/bf7d418b-7ff3-44c1-b473-90d0a03c4641"
+            },
+            "status": null,
+            "top": "190",
+            "left": "1750",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "770ce515-c5cc-40fa-be25-ca97240ee638",
+            "id": 4429
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Query for certutil",
+            "description": null,
+            "arguments": {
+                "name": "Splunk",
+                "config": "55bf97af-75c2-45ca-ae75-f4d27220cc52",
+                "params": {
+                    "query": "index=sysmon EventCode=1 {{vars.splunkHuntStart}} {{vars.splunkHuntEnd}} Image=\"C:\\\\Windows\\\\System32\\\\certutil.exe\" OR  Image=\"C:\\\\Windows\\\\SysWOW64\\\\certutil.exe\" |  table host Image MD5 ParentImage User CommandLine process_exec EventChannel UtcTime ParentProcessId ProcessId ParentCommandLine ProcessGuid Computer",
+                    "exec_mode": "",
+                    "auto_cancel": "",
+                    "latest_time": "",
+                    "earliest_time": "",
+                    "additional_search_args": "{\"A\":\"B\"}"
+                },
+                "version": "1.5.0",
+                "connector": "splunk",
+                "operation": "invoke_search",
+                "operationTitle": "Invoke Search",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "30",
+            "left": "1100",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "31732be0-d59d-4cd7-8153-ff2adc47e4cc",
+            "id": 4430
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Query for Copy B",
+            "description": null,
+            "arguments": {
+                "name": "Splunk",
+                "config": "55bf97af-75c2-45ca-ae75-f4d27220cc52",
+                "params": {
+                    "query": "index=sysmon EventCode=1 {{vars.splunkHuntStart}} {{vars.splunkHuntEnd}} Image=\"C:\\\\Windows\\\\System32\\\\cmd.exe\" OR  Image=\"C:\\\\Windows\\\\SysWOW64\\\\cmd.exe\" CommandLine=\"*copy \/b*\" | table host Image MD5 ParentImage User CommandLine process_exec EventChannel UtcTime ParentProcessId ProcessId ParentCommandLine ProcessGuid Computer",
+                    "exec_mode": "",
+                    "auto_cancel": "",
+                    "latest_time": "",
+                    "earliest_time": "",
+                    "additional_search_args": "{\"A\":\"B\"}"
+                },
+                "version": "1.5.0",
+                "connector": "splunk",
+                "operation": "invoke_search",
+                "operationTitle": "Invoke Search",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "190",
+            "left": "1100",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "1a516d8b-dee9-4039-8de8-1f99bf670a7f",
+            "id": 4431
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Start",
+            "description": null,
+            "arguments": {
+                "route": "060e8284-feb9-479f-8cba-640cbbbf0771",
+                "title": "T1140 - Hunt for Deobfuscate\/Decode Files or Information",
+                "resources": [
+                    "hunt"
+                ],
+                "inputVariables": [
+                    {
+                        "name": "siem",
+                        "type": "picklists",
+                        "label": "SIEM",
+                        "title": "Picklist",
+                        "usable": true,
+                        "_ignore": false,
+                        "tooltip": "Choose your SIEM",
+                        "dataType": "picklist",
+                        "formType": "picklist",
+                        "required": true,
+                        "_expanded": true,
+                        "collection": false,
+                        "dataSource": {
+                            "model": "picklists",
+                            "query": {
+                                "sort": [
+                                    {
+                                        "field": "orderIndex",
+                                        "direction": "ASC"
+                                    }
+                                ],
+                                "logic": "AND",
+                                "filters": [
+                                    {
+                                        "field": "listName__name",
+                                        "value": "SIEMs",
+                                        "operator": "eq"
+                                    }
+                                ]
+                            },
+                            "displayConditions": {
+                                "876c1483-416b-4d2f-8138-15769ae16d5c": {
+                                    "conditions": null,
+                                    "visibility": "visible"
+                                },
+                                "bcebcab1-3f93-468a-9f3f-91e5c511a0b5": {
+                                    "conditions": null,
+                                    "visibility": "visible"
+                                }
+                            }
+                        },
+                        "searchable": false,
+                        "templateUrl": "app\/components\/form\/fields\/typeahead.html",
+                        "_nameTouched": true,
+                        "defaultValue": {
+                            "id": 280,
+                            "@id": "\/api\/3\/picklists\/876c1483-416b-4d2f-8138-15769ae16d5c",
+                            "icon": null,
+                            "@type": "Picklist",
+                            "color": null,
+                            "display": "Elastic",
+                            "listName": "\/api\/3\/picklist_names\/98830189-afff-40e6-bed1-94012551dc67",
+                            "itemValue": "Elastic",
+                            "orderIndex": 1
+                        },
+                        "useModuleField": false,
+                        "displayTemplate": "{{ itemValue }}",
+                        "allowedEncryption": false,
+                        "allowedGridColumn": true,
+                        "useRecordFieldDefault": false
+                    }
+                ],
+                "step_variables": {
+                    "input": {
+                        "params": {
+                            "siem": "{{vars.request.data[\"siem\"]}}"
+                        },
+                        "records": "{{vars.input.records}}"
+                    },
+                    "useMockOutput": "{{globalVars.Demo_mode}}"
+                },
+                "_promptexpanded": true,
+                "displayConditions": {
+                    "hunt": {
+                        "sort": [],
+                        "limit": 30,
+                        "logic": "AND",
+                        "filters": []
+                    },
+                    "alerts": {
+                        "sort": [],
+                        "limit": 30,
+                        "logic": "AND",
+                        "filters": []
+                    }
+                },
+                "executeButtonText": "Execute",
+                "noRecordExecution": false,
+                "singleRecordExecution": false
+            },
+            "status": null,
+            "top": "270",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/f414d039-bb0d-4e59-9c39-a8f1e880b18a",
+            "uuid": "79799870-7486-49db-9ce2-60a355fd787b",
+            "id": 4432
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Select SIEM",
+            "description": null,
+            "arguments": {
+                "conditions": [
+                    {
+                        "step_iri": "\/api\/3\/workflow_steps\/6b906ede-1de4-4309-84a7-a00ad3e089d1",
+                        "condition": "{{ vars.input.params.siem.itemValue == \"Elastic\" }}"
+                    },
+                    {
+                        "step_iri": "\/api\/3\/workflow_steps\/a9ee60d8-3b61-4181-9fa6-bb148e34add1",
+                        "condition": "{{ vars.input.params.siem.itemValue == \"Splunk\" }}"
+                    }
+                ]
+            },
+            "status": null,
+            "top": "270",
+            "left": "450",
+            "stepType": "\/api\/3\/workflow_step_types\/12254cf5-5db7-4b1a-8cb1-3af081924b28",
+            "uuid": "e2799e95-3ec1-4bd5-8b76-cfca607bf26d",
+            "id": 4433
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Set Elastic hunt times",
+            "description": null,
+            "arguments": {
+                "elasticHuntEnd": "{% if vars.input.records[0].huntEnd %} {{ arrow.get(vars.input.records[0].huntEnd).format('YYYY-MM-DDTHH:mm:ss.SSSSSSSSSZ') }} {% else %} now {% endif %}",
+                "elasticHuntStart": "{{ arrow.get(vars.input.records[0].huntStart).format('YYYY-MM-DDTHH:mm:ss.SSSSSSSSSZ') }}"
+            },
+            "status": null,
+            "top": "430",
+            "left": "1100",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "6b906ede-1de4-4309-84a7-a00ad3e089d1",
+            "id": 4434
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Return copy b query",
+            "description": null,
+            "arguments": {
+                "name": "Splunk",
+                "config": "55bf97af-75c2-45ca-ae75-f4d27220cc52",
+                "params": {
+                    "sid": "{'value': \"{{vars.steps.Query_for_Copy_B.data.sid}}\"}",
+                    "additional_args": "{\"A\":\"B\"}"
+                },
+                "version": "1.4.0",
+                "do_until": {
+                    "delay": "1",
+                    "retries": "300",
+                    "condition": "{{\"results\" in vars.result.data}}"
+                },
+                "connector": "splunk",
+                "operation": "get_results",
+                "operationTitle": "Get Results for a Search",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "190",
+            "left": "1425",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "08d47539-7a75-4f59-b520-241273ade8b6",
+            "id": 4435
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create and Elastic Link Alert",
+            "description": null,
+            "arguments": {
+                "for_each": {
+                    "item": "{{vars.steps.Elastic_query_for_Certutil.data.hits.hits}}",
+                    "parallel": false,
+                    "condition": ""
+                },
+                "arguments": {
+                    "MD5": "{{vars.item._source.event_data.Hashes.split(\"MD5=\")[1].split(',')[0]}}",
+                    "url": "",
+                    "source": "{{vars.item._source.source_name}}",
+                    "comment": "SIEM query identified a possible attempt to use {{vars.item._source.image_path.split(\"\\\\\")[-1]}} to Deobfuscate\/Decode Files or Information on {{vars.item._source.beat.hostname}} at {{vars.item._source.event_data.UtcTime}}.",
+                    "huntIRI": "{{vars.input.records[0]['@id']}}",
+                    "service": "",
+                    "filePath": "{{vars.item._source.image_path}}",
+                    "hostName": "{{vars.item._source.beat.hostname}}",
+                    "sourceIP": "null",
+                    "userName": "{{vars.item._source.username}}",
+                    "alertName": "ATT&CK-Deobfuscate\/Decode-Certutil executed",
+                    "alertType": "{{\"AlertType\" | picklist(\"Deobfuscate\/Decode Files or Information\", \"@id\")}}",
+                    "epochTime": "{{arrow.get(vars.item._source.event_data.UtcTime).timestamp}}",
+                    "eventName": "",
+                    "eventTime": "{{vars.item._source.event_data.UtcTime}}",
+                    "processID": "{{vars.item._source.event_data.ProcessId}}",
+                    "technique": "Deobfuscate\/Decode Files or Information- Certutil",
+                    "sourceData": "{{vars.item}}",
+                    "sourceTool": "{{vars.item._source.source_name}}",
+                    "commandline": "{{vars.item._source.event_data.CommandLine}}",
+                    "description": "An attempt to utilize Certutil.exe to decode data was observed. An attacker could use Certutil to deobfuscate data and then interact with\/utilize the data elsewhere.",
+                    "processGUID": "{{vars.item._source.event_data.ProcessGuid}}",
+                    "processName": "{{vars.item._source.image_path.split(\"\\\\\")[-1]}}",
+                    "registryKey": "",
+                    "sourceImage": "",
+                    "targetImage": "",
+                    "computerName": "{{vars.item._source.computer_name}}",
+                    "destinationIP": "null",
+                    "mitre_tech_id": "T1140",
+                    "parentProcess": "{{vars.item._source.parent_image_path}}",
+                    "scheduledTask": "",
+                    "bitstransferid": "",
+                    "parentProcessID": "{{vars.item._source.event_data.ParentProcessId}}",
+                    "bytestransferred": "",
+                    "registryKeyValue": "",
+                    "parentCommandLine": "{{vars.item._source.event_data.ParentCommandLine}}",
+                    "decodedCommandLine": ""
+                },
+                "apply_async": false,
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/bf7d418b-7ff3-44c1-b473-90d0a03c4641"
+            },
+            "status": null,
+            "top": "510",
+            "left": "1750",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "1b38b201-5b96-48a2-9884-6116f9ff3646",
+            "id": 4436
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create and Elastic Link Alert2",
+            "description": null,
+            "arguments": {
+                "for_each": {
+                    "item": "{{vars.steps.Elastic_query_for_Copy_B.data.hits.hits}}",
+                    "parallel": false,
+                    "condition": ""
+                },
+                "arguments": {
+                    "MD5": "{{vars.item._source.event_data.Hashes.split(\"MD5=\")[1].split(',')[0]}}",
+                    "url": "",
+                    "source": "{{vars.item._source.source_name}}",
+                    "comment": "SIEM query identified a potential attempt to use the command \"copy \/b\" to deobfuscate\/decode files or information through {{vars.item._source.image_path.split(\"\\\\\")[-1]}} to Deobfuscate\/Decode Files or Information on {{vars.item._source.beat.hostname}} at {{vars.item._source.event_data.UtcTime}}.",
+                    "huntIRI": "{{vars.input.records[0]['@id']}}",
+                    "service": "",
+                    "filePath": "{{vars.item._source.image_path}}",
+                    "hostName": "{{vars.item._source.beat.hostname}}",
+                    "sourceIP": "null",
+                    "userName": "{{vars.item._source.username}}",
+                    "alertName": "ATT&CK-Deobfuscate\/Decode-cmd executed with \"copy \/b\" argument",
+                    "alertType": "{{\"AlertType\" | picklist(\"Deobfuscate\/Decode Files or Information\", \"@id\")}}",
+                    "epochTime": "{{arrow.get(vars.item._source.event_data.UtcTime).timestamp}}",
+                    "eventName": "",
+                    "eventTime": "{{vars.item._source.event_data.UtcTime}}",
+                    "processID": "{{vars.item._source.event_data.ProcessId}}",
+                    "technique": "Deobfuscate\/Decode Files or Information- Copy \/b",
+                    "sourceData": "{{vars.item}}",
+                    "sourceTool": "{{vars.item._source.source_name}}",
+                    "commandline": "{{vars.item._source.event_data.CommandLine}}",
+                    "description": "An attempt to utilize Copy \/b to was observed. An attacker could use the command Copy \/b to read data as binary and then interact with\/utilize the data elsewhere. This attack has been observed being conducted by nation-state actors and other malicious entities to join together binary fragments to assemble and run executables.",
+                    "processGUID": "{{vars.item._source.event_data.ProcessGuid}}",
+                    "processName": "{{vars.item._source.image_path.split(\"\\\\\")[-1]}}",
+                    "registryKey": "",
+                    "sourceImage": "",
+                    "targetImage": "",
+                    "computerName": "{{vars.item._source.computer_name}}",
+                    "destinationIP": "null",
+                    "mitre_tech_id": "T1140",
+                    "parentProcess": "{{vars.item._source.parent_image_path}}",
+                    "scheduledTask": "",
+                    "bitstransferid": "",
+                    "parentProcessID": "{{vars.item._source.event_data.ParentProcessId}}",
+                    "bytestransferred": "",
+                    "registryKeyValue": "",
+                    "parentCommandLine": "{{vars.item._source.event_data.ParentCommandLine}}",
+                    "decodedCommandLine": ""
+                },
+                "apply_async": false,
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/bf7d418b-7ff3-44c1-b473-90d0a03c4641"
+            },
+            "status": null,
+            "top": "350",
+            "left": "1750",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "2af438f3-2712-4a4b-a863-e4f225b7d64d",
+            "id": 4437
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create and Link Alert",
+            "description": null,
+            "arguments": {
+                "for_each": {
+                    "item": "{{vars.steps.return_certutil_query.data.results}}",
+                    "parallel": false,
+                    "condition": ""
+                },
+                "arguments": {
+                    "MD5": "{{vars.item.MD5}}",
+                    "url": "",
+                    "source": "{{vars.item.EventChannel}}",
+                    "comment": "SIEM query identified a possible attempt to use {{vars.item.process_exec}} to Deobfuscate\/Decode Files or Information on {{vars.item.host}} at {{vars.item.UtcTime}}.",
+                    "huntIRI": "{{vars.input.records[0]['@id']}}",
+                    "service": "",
+                    "filePath": "{{vars.item.Image}}",
+                    "hostName": "{{vars.item.host}}",
+                    "sourceIP": "null",
+                    "userName": "{{vars.item.User}}",
+                    "alertName": "ATT&CK-Deobfuscate\/Decode-Certutil executed",
+                    "alertType": "{{\"AlertType\" | picklist(\"Deobfuscate\/Decode Files or Information\", \"@id\")}}",
+                    "epochTime": "{{vars.item.epoch_time}}",
+                    "eventName": "",
+                    "eventTime": "{{vars.item.UtcTime}}",
+                    "processID": "{{vars.item.ProcessId}}",
+                    "technique": "Deobfuscate\/Decode Files or Information- Certutil",
+                    "sourceData": "{{vars.item}}",
+                    "sourceTool": "{{vars.item.EventChannel}}",
+                    "commandline": "{{vars.item.CommandLine}}",
+                    "description": "An attempt to utilize Certutil.exe to decode data was observed. An attacker could use Certutil to deobfuscate data and then interact with\/utilize the data elsewhere.",
+                    "processGUID": "{{vars.item.ProcessGuid}}",
+                    "processName": "{{vars.item.process_exec}}",
+                    "registryKey": "",
+                    "sourceImage": "",
+                    "targetImage": "",
+                    "computerName": "{{vars.item.Computer}}",
+                    "destinationIP": "null",
+                    "mitre_tech_id": "T1140",
+                    "parentProcess": "{{vars.item.ParentImage}}",
+                    "scheduledTask": "",
+                    "bitstransferid": "",
+                    "parentProcessID": "{{vars.item.ParentProcessId}}",
+                    "bytestransferred": "",
+                    "registryKeyValue": "",
+                    "parentCommandLine": "{{vars.item.ParentCommandLine}}",
+                    "decodedCommandLine": ""
+                },
+                "apply_async": false,
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/bf7d418b-7ff3-44c1-b473-90d0a03c4641"
+            },
+            "status": null,
+            "top": "30",
+            "left": "1750",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "bac887db-52b0-4047-a864-893ca420ccfa",
+            "id": 4438
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Deduplicate Comments",
+            "description": null,
+            "arguments": {
+                "arguments": {
+                    "hunt_iri": "{{vars.input.records[0]['@id']}}"
+                },
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/3fd311be-a1c6-41c7-99a3-8794b33d8f8a"
+            },
+            "status": null,
+            "top": "270",
+            "left": "2075",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "1b227a2b-bbb5-4bdd-a4f4-0de92cda07e6",
+            "id": 4439
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Elastic query for Certutil",
+            "description": null,
+            "arguments": {
+                "name": "ElasticSearch",
+                "config": "8d03a01d-1cef-40a8-992a-63d8de2b339f",
+                "params": {
+                    "index": "logstash-beats-*",
+                    "query": "event_type:sysmon @timestamp:{ {{vars.elasticHuntStart}} TO {{vars.elasticHuntEnd}} } AND event_id:1 AND (image_path:\"C:\\\\Windows\\\\System32\\\\certutil.exe\" OR image_path:\"C:\\\\Windows\\\\SysWOW64\\\\certutil.exe\") AND event_data.CommandLine:\"*-decode*\"",
+                    "run_as_user": ""
+                },
+                "version": "2.2.1",
+                "connector": "elasticsearch",
+                "operation": "execute_lucene_query",
+                "mock_result": "{\n  \"data\": {\n    \"hits\": {\n      \"hits\": [\n        {\n          \"_id\": \"rwlrUGoBqSmy6R6glsjz\",\n          \"_type\": \"doc\",\n          \"_index\": \"logstash-beats-deobfuscatedecodefiles\",\n          \"_score\": 3.7260926,\n          \"_source\": {\n            \"beat\": {\n              \"name\": \"admin-PC3\",\n              \"version\": \"6.5.3\",\n              \"hostname\": \"admin-PC3\"\n            },\n            \"tags\": [\n              \"beat\",\n              \"beats_input_codec_plain_applied\"\n            ],\n            \"task\": \"Process Create (rule: ProcessCreate)\",\n            \"user\": {\n              \"name\": \"SYSTEM\",\n              \"type\": \"User\",\n              \"domain\": \"NT AUTHORITY\",\n              \"identifier\": \"S-1-5-18\"\n            },\n            \"level\": \"Information\",\n            \"opcode\": \"Info\",\n            \"message\": \"Process Create:\\nRuleName: \\nUtcTime: 2019-04-24 17:36:28.273\\nProcessGuid: {2268A29F-9E9C-5CC0-0000-00103A3CB705}\\nProcessId: 1496\\nImage: C:\\\\Windows\\\\System32\\\\certutil.exe\\nFileVersion: 6.1.7601.18151 (win7sp1_gdr.130512-1533)\\nDescription: CertUtil.exe\\nProduct: Microsoft\u00ae Windows\u00ae Operating System\\nCompany: Microsoft Corporation\\nCommandLine: certutil  -decode \\\".\\\\malware config.txt\\\" \\\".\\\\decoded9.txt\\\"\\nCurrentDirectory: C:\\\\Users\\\\superman\\\\Desktop\\\\\\nUser: batman\\\\superman\\nLogonGuid: {2268A29F-F86A-5CB9-0000-0020CB330600}\\nLogonId: 0x633cb\\nTerminalSessionId: 1\\nIntegrityLevel: High\\nHashes: MD5=4586B77B18FA9A8518AF76CA8FD247D9,SHA256=453EDE55C520FAF0EC802D27DB9CE496646400160B638D6E5CC546060B524A65\\nParentProcessGuid: {2268A29F-C628-5CC0-0000-0010A14EB605}\\nParentProcessId: 3936\\nParentImage: C:\\\\Program Files\\\\SplunkUniversalForwarder\\\\bin\\\\splunk-powershell.exe\\nParentCommandLine: \\\"C:\\\\Program Files\\\\SplunkUniversalForwarder\\\\bin\\\\splunk-powershell.exe\\\"\",\n            \"version\": 5,\n            \"@version\": \"1\",\n            \"event_id\": 1,\n            \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n            \"username\": \"batman\\\\superman\",\n            \"beat_host\": {\n              \"id\": \"2268a29f-2078-4d13-a846-d03220089285\",\n              \"os\": {\n                \"build\": \"7601.24334\",\n                \"family\": \"windows\",\n                \"version\": \"6.1\",\n                \"platform\": \"windows\"\n              },\n              \"name\": \"admin-PC3\",\n              \"architecture\": \"x86_64\"\n            },\n            \"thread_id\": 1152,\n            \"@timestamp\": \"2019-04-24T17:36:28.352Z\",\n            \"event_data\": {\n              \"Hashes\": \"MD5=4586B77B18FA9A8518AF76CA8FD247D9,SHA256=453EDE55C520FAF0EC802D27DB9CE496646400160B638D6E5CC546060B524A65\",\n              \"Company\": \"Microsoft Corporation\",\n              \"LogonId\": \"0x633cb\",\n              \"Product\": \"Microsoft\u00ae Windows\u00ae Operating System\",\n              \"UtcTime\": \"2019-04-24 17:36:28.273\",\n              \"LogonGuid\": \"{2268A29F-F86A-5CB9-0000-0020CB330600}\",\n              \"ProcessId\": \"1496\",\n              \"CommandLine\": \"certutil  -decode \\\".\\\\malware config.txt\\\" \\\".\\\\decoded9.txt\\\"\",\n              \"Description\": \"CertUtil.exe\",\n              \"FileVersion\": \"6.1.7601.18151 (win7sp1_gdr.130512-1533)\",\n              \"ProcessGuid\": \"{2268A29F-9E9C-5CC0-0000-00103A3CB705}\",\n              \"IntegrityLevel\": \"High\",\n              \"ParentProcessId\": \"3936\",\n              \"CurrentDirectory\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\\",\n              \"ParentCommandLine\": \"\\\"C:\\\\Program Files\\\\SplunkUniversalForwarder\\\\bin\\\\splunk-powershell.exe\\\"\",\n              \"ParentProcessGuid\": \"{2268A29F-C628-5CC0-0000-0010A14EB605}\",\n              \"TerminalSessionId\": \"1\"\n            },\n            \"event_type\": \"sysmon\",\n            \"image_path\": \"C:\\\\Windows\\\\System32\\\\certutil.exe\",\n            \"process_id\": 1544,\n            \"source_name\": \"Microsoft-Windows-Sysmon\",\n            \"computer_name\": \"admin-PC3.batman.local\",\n            \"logstash_time\": 0.0011510848999023438,\n            \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n            \"record_number\": \"42579\",\n            \"parent_image_path\": \"C:\\\\Program Files\\\\SplunkUniversalForwarder\\\\bin\\\\splunk-powershell.exe\"\n          }\n        },\n        {\n          \"_id\": \"IglmUGoBqSmy6R6gusIp\",\n          \"_type\": \"doc\",\n          \"_index\": \"logstash-beats-deobfuscatedecodefiles\",\n          \"_score\": 3.7260926,\n          \"_source\": {\n            \"beat\": {\n              \"name\": \"admin-PC3\",\n              \"version\": \"6.5.3\",\n              \"hostname\": \"admin-PC3\"\n            },\n            \"tags\": [\n              \"beat\",\n              \"beats_input_codec_plain_applied\"\n            ],\n            \"task\": \"Process Create (rule: ProcessCreate)\",\n            \"user\": {\n              \"name\": \"SYSTEM\",\n              \"type\": \"User\",\n              \"domain\": \"NT AUTHORITY\",\n              \"identifier\": \"S-1-5-18\"\n            },\n            \"level\": \"Information\",\n            \"opcode\": \"Info\",\n            \"message\": \"Process Create:\\nRuleName: \\nUtcTime: 2019-04-24 20:25:17.659\\nProcessGuid: {2268A29F-C62D-5CC0-0000-0010F868B605}\\nProcessId: 3088\\nImage: C:\\\\Windows\\\\System32\\\\certutil.exe\\nFileVersion: 6.1.7601.18151 (win7sp1_gdr.130512-1533)\\nDescription: CertUtil.exe\\nProduct: Microsoft\u00ae Windows\u00ae Operating System\\nCompany: Microsoft Corporation\\nCommandLine: \\\"C:\\\\Windows\\\\system32\\\\certutil.exe\\\"  -decode \\\".\\\\malware config.txt\\\" .\\\\decoded5.txt\\nCurrentDirectory: C:\\\\Users\\\\superman\\\\Desktop\\\\\\nUser: batman\\\\superman\\nLogonGuid: {2268A29F-F86A-5CB9-0000-0020CB330600}\\nLogonId: 0x633cb\\nTerminalSessionId: 1\\nIntegrityLevel: High\\nHashes: MD5=4586B77B18FA9A8518AF76CA8FD247D9,SHA256=453EDE55C520FAF0EC802D27DB9CE496646400160B638D6E5CC546060B524A65\\nParentProcessGuid: {2268A29F-2275-5CBA-0000-001007400900}\\nParentProcessId: 1052\\nParentImage: C:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\\nParentCommandLine: \\\"C:\\\\WINDOWS\\\\system32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\\\" \",\n            \"version\": 5,\n            \"@version\": \"1\",\n            \"event_id\": 1,\n            \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n            \"username\": \"batman\\\\superman\",\n            \"beat_host\": {\n              \"id\": \"2268a29f-2078-4d13-a846-d03220089285\",\n              \"os\": {\n                \"build\": \"7601.24334\",\n                \"family\": \"windows\",\n                \"version\": \"6.1\",\n                \"platform\": \"windows\"\n              },\n              \"name\": \"admin-PC3\",\n              \"architecture\": \"x86_64\"\n            },\n            \"thread_id\": 1152,\n            \"@timestamp\": \"2019-04-24T20:25:17.743Z\",\n            \"event_data\": {\n              \"Hashes\": \"MD5=4586B77B18FA9A8518AF76CA8FD247D9,SHA256=453EDE55C520FAF0EC802D27DB9CE496646400160B638D6E5CC546060B524A65\",\n              \"Company\": \"Microsoft Corporation\",\n              \"LogonId\": \"0x633cb\",\n              \"Product\": \"Microsoft\u00ae Windows\u00ae Operating System\",\n              \"UtcTime\": \"2019-04-24 20:25:17.659\",\n              \"LogonGuid\": \"{2268A29F-F86A-5CB9-0000-0020CB330600}\",\n              \"ProcessId\": \"3088\",\n              \"CommandLine\": \"\\\"C:\\\\Windows\\\\system32\\\\certutil.exe\\\"  -decode \\\".\\\\malware config.txt\\\" .\\\\decoded5.txt\",\n              \"Description\": \"CertUtil.exe\",\n              \"FileVersion\": \"6.1.7601.18151 (win7sp1_gdr.130512-1533)\",\n              \"ProcessGuid\": \"{2268A29F-C62D-5CC0-0000-0010F868B605}\",\n              \"IntegrityLevel\": \"High\",\n              \"ParentProcessId\": \"1052\",\n              \"CurrentDirectory\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\\",\n              \"ParentCommandLine\": \"\\\"C:\\\\WINDOWS\\\\system32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\\\" \",\n              \"ParentProcessGuid\": \"{2268A29F-2275-5CBA-0000-001007400900}\",\n              \"TerminalSessionId\": \"1\"\n            },\n            \"event_type\": \"sysmon\",\n            \"image_path\": \"C:\\\\Windows\\\\System32\\\\certutil.exe\",\n            \"process_id\": 1544,\n            \"source_name\": \"Microsoft-Windows-Sysmon\",\n            \"computer_name\": \"admin-PC3.batman.local\",\n            \"logstash_time\": 0.0027799606323242188,\n            \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n            \"record_number\": \"42573\",\n            \"parent_image_path\": \"C:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\"\n          }\n        }\n      ],\n      \"total\": {\n        \"value\": 2,\n        \"relation\": \"eq\"\n      },\n      \"max_score\": 3.7260926\n    },\n    \"took\": 281,\n    \"_shards\": {\n      \"total\": 95,\n      \"failed\": 0,\n      \"skipped\": 0,\n      \"successful\": 95\n    },\n    \"timed_out\": false\n  },\n  \"status\": \"Success\",\n  \"message\": \"\",\n  \"operation\": null\n}",
+                "operationTitle": "Execute Lucene Query",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "510",
+            "left": "1425",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "11253db7-4491-4064-99d2-e1e9263238b5",
+            "id": 4440
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Set Splunk hunt times",
+            "description": null,
+            "arguments": {
+                "splunkHuntEnd": "{% if vars.input.records[0].huntEnd %}latest={{vars.input.records[0].huntEnd}}{% endif %}",
+                "splunkHuntStart": "earliest={{vars.input.records[0].huntStart}}"
+            },
+            "status": null,
+            "top": "110",
+            "left": "775",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "a9ee60d8-3b61-4181-9fa6-bb148e34add1",
+            "id": 4441
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Elastic query for Copy B",
+            "description": null,
+            "arguments": {
+                "name": "ElasticSearch",
+                "config": "8d03a01d-1cef-40a8-992a-63d8de2b339f",
+                "params": {
+                    "index": "logstash-beats-*",
+                    "query": "event_type:sysmon AND @timestamp:{ {{vars.elasticHuntStart}} TO {{vars.elasticHuntEnd}} } AND event_id:1 AND (image_path:\"C:\\\\Windows\\\\System32\\\\cmd.exe\" OR  image_path:\"C:\\\\Windows\\\\SysWOW64\\\\cmd.exe\") AND event_data.CommandLine:\"*copy\\ \\\/b*\"",
+                    "run_as_user": ""
+                },
+                "version": "2.2.1",
+                "connector": "elasticsearch",
+                "operation": "execute_lucene_query",
+                "mock_result": "{\n  \"data\": {\n    \"hits\": {\n      \"hits\": [\n        {\n          \"_id\": \"RAlzUGoBqSmy6R6gX9El\",\n          \"_type\": \"doc\",\n          \"_index\": \"logstash-beats-deobfuscatedecodefiles\",\n          \"_score\": 4.0137744,\n          \"_source\": {\n            \"beat\": {\n              \"name\": \"admin-PC3\",\n              \"version\": \"6.5.3\",\n              \"hostname\": \"admin-PC3\"\n            },\n            \"tags\": [\n              \"beat\",\n              \"beats_input_codec_plain_applied\"\n            ],\n            \"task\": \"Process Create (rule: ProcessCreate)\",\n            \"user\": {\n              \"name\": \"SYSTEM\",\n              \"type\": \"User\",\n              \"domain\": \"NT AUTHORITY\",\n              \"identifier\": \"S-1-5-18\"\n            },\n            \"level\": \"Information\",\n            \"opcode\": \"Info\",\n            \"message\": \"Process Create:\\nRuleName: \\nUtcTime: 2019-04-24 17:44:59.152\\nProcessGuid: {2268A29F-A09B-5CC0-0000-0010FC22B805}\\nProcessId: 3832\\nImage: C:\\\\Windows\\\\System32\\\\cmd.exe\\nFileVersion: 6.1.7601.17514 (win7sp1_rtm.101119-1850)\\nDescription: Windows Command Processor\\nProduct: Microsoft\u00ae Windows\u00ae Operating System\\nCompany: Microsoft Corporation\\nCommandLine: cmd  \/k copy \/b \\\".\\\\decoded9.txt\\\"+\\\".\\\\decoded5.txt\\\" \\\"notgoodatall.bin\\\"\\nCurrentDirectory: C:\\\\Users\\\\superman\\\\Desktop\\\\\\nUser: batman\\\\superman\\nLogonGuid: {2268A29F-F86A-5CB9-0000-0020CB330600}\\nLogonId: 0x633cb\\nTerminalSessionId: 1\\nIntegrityLevel: High\\nHashes: MD5=5746BD7E255DD6A8AFA06F7C42C1BA41,SHA256=DB06C3534964E3FC79D2763144BA53742D7FA250CA336F4A0FE724B75AAFF386\\nParentProcessGuid: {2268A29F-A085-5CC0-0000-0010041AB805}\\nParentProcessId: 3644\\nParentImage: C:\\\\Windows\\\\System32\\\\cmd.exe\\nParentCommandLine: cmd  \/k copy\",\n            \"version\": 5,\n            \"@version\": \"1\",\n            \"event_id\": 1,\n            \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n            \"username\": \"batman\\\\superman\",\n            \"beat_host\": {\n              \"id\": \"2268a29f-2078-4d13-a846-d03220089285\",\n              \"os\": {\n                \"build\": \"7601.24334\",\n                \"family\": \"windows\",\n                \"version\": \"6.1\",\n                \"platform\": \"windows\"\n              },\n              \"name\": \"admin-PC3\",\n              \"architecture\": \"x86_64\"\n            },\n            \"thread_id\": 1152,\n            \"@timestamp\": \"2019-04-24T17:44:59.198Z\",\n            \"event_data\": {\n              \"Hashes\": \"MD5=5746BD7E255DD6A8AFA06F7C42C1BA41,SHA256=DB06C3534964E3FC79D2763144BA53742D7FA250CA336F4A0FE724B75AAFF386\",\n              \"Company\": \"Microsoft Corporation\",\n              \"LogonId\": \"0x633cb\",\n              \"Product\": \"Microsoft\u00ae Windows\u00ae Operating System\",\n              \"UtcTime\": \"2019-04-24 17:44:59.152\",\n              \"LogonGuid\": \"{2268A29F-F86A-5CB9-0000-0020CB330600}\",\n              \"ProcessId\": \"3832\",\n              \"CommandLine\": \"cmd  \/k copy \/b \\\".\\\\decoded9.txt\\\"+\\\".\\\\decoded5.txt\\\" \\\"notgoodatall.bin\\\"\",\n              \"Description\": \"Windows Command Processor\",\n              \"FileVersion\": \"6.1.7601.17514 (win7sp1_rtm.101119-1850)\",\n              \"ProcessGuid\": \"{2268A29F-A09B-5CC0-0000-0010FC22B805}\",\n              \"IntegrityLevel\": \"High\",\n              \"ParentProcessId\": \"3644\",\n              \"CurrentDirectory\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\\",\n              \"ParentCommandLine\": \"cmd  \/k copy\",\n              \"ParentProcessGuid\": \"{2268A29F-A085-5CC0-0000-0010041AB805}\",\n              \"TerminalSessionId\": \"1\"\n            },\n            \"event_type\": \"sysmon\",\n            \"image_path\": \"C:\\\\Windows\\\\System32\\\\cmd.exe\",\n            \"process_id\": 1544,\n            \"source_name\": \"Microsoft-Windows-Sysmon\",\n            \"computer_name\": \"admin-PC3.batman.local\",\n            \"logstash_time\": 0.0009198188781738281,\n            \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n            \"record_number\": \"42586\",\n            \"parent_image_path\": \"C:\\\\Windows\\\\System32\\\\cmd.exe\"\n          }\n        }\n      ],\n      \"total\": {\n        \"value\": 1,\n        \"relation\": \"eq\"\n      },\n      \"max_score\": 4.0137744\n    },\n    \"took\": 141,\n    \"_shards\": {\n      \"total\": 95,\n      \"failed\": 0,\n      \"skipped\": 0,\n      \"successful\": 95\n    },\n    \"timed_out\": false\n  },\n  \"status\": \"Success\",\n  \"message\": \"\",\n  \"operation\": null\n}",
+                "operationTitle": "Execute Lucene Query",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "350",
+            "left": "1425",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "3a2b0e36-4296-463b-8a29-158f99f4af8a",
+            "id": 4442
+        }
+    ],
+    "routes": [
+        {
+            "@type": "WorkflowRoute",
+            "name": "Query for Copy B -> Copy  of return certutil query",
+            "targetStep": "\/api\/3\/workflow_steps\/08d47539-7a75-4f59-b520-241273ade8b6",
+            "sourceStep": "\/api\/3\/workflow_steps\/1a516d8b-dee9-4039-8de8-1f99bf670a7f",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "0a42d784-0600-41df-928d-1286e0641a38"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Set Elastic hunt times -> Copy  of Elastic query for Certutil",
+            "targetStep": "\/api\/3\/workflow_steps\/3a2b0e36-4296-463b-8a29-158f99f4af8a",
+            "sourceStep": "\/api\/3\/workflow_steps\/6b906ede-1de4-4309-84a7-a00ad3e089d1",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "f0892802-64eb-4d7e-b85b-cbdfa26c2339"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Create and Elastic Link Alert -> Deduplicate Comments",
+            "targetStep": "\/api\/3\/workflow_steps\/1b227a2b-bbb5-4bdd-a4f4-0de92cda07e6",
+            "sourceStep": "\/api\/3\/workflow_steps\/1b38b201-5b96-48a2-9884-6116f9ff3646",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "a039bdb5-152c-414a-acfb-16eeddd66b5e"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Select SIEM -> Set Splunk hunt times",
+            "targetStep": "\/api\/3\/workflow_steps\/a9ee60d8-3b61-4181-9fa6-bb148e34add1",
+            "sourceStep": "\/api\/3\/workflow_steps\/e2799e95-3ec1-4bd5-8b76-cfca607bf26d",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "384607c6-3dd5-4915-ba53-d5e2aff4fb42"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Set Elastic hunt times -> Elastic query for Certutil",
+            "targetStep": "\/api\/3\/workflow_steps\/11253db7-4491-4064-99d2-e1e9263238b5",
+            "sourceStep": "\/api\/3\/workflow_steps\/6b906ede-1de4-4309-84a7-a00ad3e089d1",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "7d373047-4ce0-4da4-9786-c9d64f0ee0ff"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Copy  of Create Splunk Alert -> Deduplicate Comments",
+            "targetStep": "\/api\/3\/workflow_steps\/1b227a2b-bbb5-4bdd-a4f4-0de92cda07e6",
+            "sourceStep": "\/api\/3\/workflow_steps\/770ce515-c5cc-40fa-be25-ca97240ee638",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "4fd2584b-b666-42c3-94d8-f8903c635832"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Create Splunk Alert -> Deduplicate Comments",
+            "targetStep": "\/api\/3\/workflow_steps\/1b227a2b-bbb5-4bdd-a4f4-0de92cda07e6",
+            "sourceStep": "\/api\/3\/workflow_steps\/bac887db-52b0-4047-a864-893ca420ccfa",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "2259f26e-6404-48a8-a60c-d2fb0ddbc00d"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Elastic query for Certutil -> Copy  of Create and Link Alert",
+            "targetStep": "\/api\/3\/workflow_steps\/1b38b201-5b96-48a2-9884-6116f9ff3646",
+            "sourceStep": "\/api\/3\/workflow_steps\/11253db7-4491-4064-99d2-e1e9263238b5",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "407a888d-3a92-42ef-bb58-0e9f2d9efc54"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "return certutil query -> Create Splunk Alert",
+            "targetStep": "\/api\/3\/workflow_steps\/bac887db-52b0-4047-a864-893ca420ccfa",
+            "sourceStep": "\/api\/3\/workflow_steps\/95c7f6be-befc-4262-83e0-77809a975e3c",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "cbdb3622-7422-41d7-a4a9-6cf33f694892"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Copy  of Elastic query for Certutil -> Create and Elastic Link Alert2",
+            "targetStep": "\/api\/3\/workflow_steps\/2af438f3-2712-4a4b-a863-e4f225b7d64d",
+            "sourceStep": "\/api\/3\/workflow_steps\/3a2b0e36-4296-463b-8a29-158f99f4af8a",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "18ca9d2c-c65c-4c26-ba2a-1fb65ef8b3b6"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Set Splunk hunt times -> Query for certutil",
+            "targetStep": "\/api\/3\/workflow_steps\/31732be0-d59d-4cd7-8153-ff2adc47e4cc",
+            "sourceStep": "\/api\/3\/workflow_steps\/a9ee60d8-3b61-4181-9fa6-bb148e34add1",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "d14b3410-39e4-4c9c-837c-0af1bc5399f3"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Copy  of Create and Elastic Link Alert -> Deduplicate Comments",
+            "targetStep": "\/api\/3\/workflow_steps\/1b227a2b-bbb5-4bdd-a4f4-0de92cda07e6",
+            "sourceStep": "\/api\/3\/workflow_steps\/2af438f3-2712-4a4b-a863-e4f225b7d64d",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "f33b1273-008a-473b-b1c3-99188bcb1280"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Return copy b query -> Copy  of Create Splunk Alert",
+            "targetStep": "\/api\/3\/workflow_steps\/770ce515-c5cc-40fa-be25-ca97240ee638",
+            "sourceStep": "\/api\/3\/workflow_steps\/08d47539-7a75-4f59-b520-241273ade8b6",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "bf7c4f3b-d5af-4d21-908f-b2f6942bd746"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Start -> Select SIEM",
+            "targetStep": "\/api\/3\/workflow_steps\/e2799e95-3ec1-4bd5-8b76-cfca607bf26d",
+            "sourceStep": "\/api\/3\/workflow_steps\/79799870-7486-49db-9ce2-60a355fd787b",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "d86924ef-e4cd-4a4c-9cb6-df386cb13139"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Set Splunk hunt times -> Query for Copy B",
+            "targetStep": "\/api\/3\/workflow_steps\/1a516d8b-dee9-4039-8de8-1f99bf670a7f",
+            "sourceStep": "\/api\/3\/workflow_steps\/a9ee60d8-3b61-4181-9fa6-bb148e34add1",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "b440a1fd-df20-4725-8ac4-5cc84229020b"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Query for certutil -> return certutil query",
+            "targetStep": "\/api\/3\/workflow_steps\/95c7f6be-befc-4262-83e0-77809a975e3c",
+            "sourceStep": "\/api\/3\/workflow_steps\/31732be0-d59d-4cd7-8153-ff2adc47e4cc",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "5eec3b3c-7d89-478d-a29d-3d0178e7c867"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Select SIEM -> Convert time for elastic",
+            "targetStep": "\/api\/3\/workflow_steps\/6b906ede-1de4-4309-84a7-a00ad3e089d1",
+            "sourceStep": "\/api\/3\/workflow_steps\/e2799e95-3ec1-4bd5-8b76-cfca607bf26d",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "9338432d-d193-49bd-aedc-b68aeb0f2a30"
+        }
+    ],
+    "priority": null,
+    "uuid": "0a596dd7-d068-423a-ad43-163be40138f3",
+    "recordTags": [
+        "ManualTrigger"
+    ],
+    "id": 1119,
+    "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "createDate": 1644165544,
+    "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "modifyDate": 1644165544,
+    "owners": [],
+    "isPrivate": false
+}

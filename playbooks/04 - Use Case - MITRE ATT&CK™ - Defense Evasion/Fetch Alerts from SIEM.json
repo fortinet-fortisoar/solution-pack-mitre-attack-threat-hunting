@@ -1,0 +1,208 @@
+{
+    "@type": "Workflow",
+    "triggerLimit": null,
+    "name": "Fetch Alerts from SIEM",
+    "aliasName": null,
+    "tag": null,
+    "description": "Fetches alerts by querying to SIEM",
+    "isActive": true,
+    "debug": false,
+    "singleRecordExecution": false,
+    "remoteExecutableFlag": false,
+    "parameters": [
+        "huntStart",
+        "huntEnd"
+    ],
+    "synchronous": false,
+    "lastModifyDate": 1644165542,
+    "collection": "\/api\/3\/workflow_collections\/234e09da-6930-4fd2-ada5-43bfc65f59f5",
+    "versions": [],
+    "triggerStep": "\/api\/3\/workflow_steps\/f047995b-614c-40c6-a6db-827d37e36432",
+    "steps": [
+        {
+            "@type": "WorkflowStep",
+            "name": "Start",
+            "description": null,
+            "arguments": {
+                "step_variables": {
+                    "input": {
+                        "params": []
+                    }
+                }
+            },
+            "status": null,
+            "top": "30",
+            "left": "126",
+            "stepType": "\/api\/3\/workflow_step_types\/b348f017-9a94-471f-87f8-ce88b6a7ad62",
+            "uuid": "f047995b-614c-40c6-a6db-827d37e36432",
+            "id": 4415
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Configuration",
+            "description": null,
+            "arguments": {
+                "useMockOutput": "{{globalVars.Demo_mode}}",
+                "huntEndDateTime": "{{ arrow.get(vars.input.params.huntEnd).format('YYYY-MM-DDTHH:mm:ss.SSSSSSSSSZ') }}",
+                "huntStartDateTime": "{{ arrow.get(vars.input.params.huntStart).format('YYYY-MM-DDTHH:mm:ss.SSSSSSSSSZ') }}"
+            },
+            "status": null,
+            "top": "165",
+            "left": "126",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "463f3833-d2a4-49ac-bbf8-cb3a92badf15",
+            "id": 4416
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Step Output",
+            "description": null,
+            "arguments": {
+                "step_output": "{{vars.steps.Query_for_Certutil.data.hits.hits | union(vars.steps.Query_for_Copy_B.data.hits.hits) | union(vars.steps.Query_for_Sysmon_logs.data.hits.hits) }}"
+            },
+            "status": null,
+            "top": "705",
+            "left": "126",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "4330ae0e-c64b-46c3-80a7-72075f774966",
+            "id": 4417
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Query for Certutil",
+            "description": null,
+            "arguments": {
+                "name": "ElasticSearch",
+                "config": "8d03a01d-1cef-40a8-992a-63d8de2b339f",
+                "params": {
+                    "index": "logstash-beats-*",
+                    "query": "event_type:sysmon @timestamp:{ {{vars.huntStartDateTime}} TO {{vars.huntEndDateTime}} } AND event_id:1 AND (image_path:\"C:\\\\Windows\\\\System32\\\\certutil.exe\" OR image_path:\"C:\\\\Windows\\\\SysWOW64\\\\certutil.exe\") AND event_data.CommandLine:\"*-decode*\"",
+                    "run_as_user": ""
+                },
+                "version": "2.2.1",
+                "connector": "elasticsearch",
+                "operation": "execute_lucene_query",
+                "mock_result": "{\n    \"data\": {\n      \"hits\": {\n        \"hits\": [\n          {\n            \"_id\": \"rwlrUGoBqSmy6R6glsjz\",\n            \"_type\": \"doc\",\n            \"_index\": \"logstash-beats-deobfuscatedecodefiles\",\n            \"_score\": 3.7260926,\n            \"_source\": {\n              \"beat\": {\n                \"name\": \"admin-PC3\",\n                \"version\": \"6.5.3\",\n                \"hostname\": \"admin-PC3\"\n              },\n              \"tags\": [\n                \"beat\",\n                \"beats_input_codec_plain_applied\"\n              ],\n              \"task\": \"Process Create (rule: ProcessCreate)\",\n              \"user\": {\n                \"name\": \"SYSTEM\",\n                \"type\": \"User\",\n                \"domain\": \"NT AUTHORITY\",\n                \"identifier\": \"S-1-5-18\"\n              },\n              \"level\": \"Information\",\n              \"opcode\": \"Info\",\n              \"message\": \"Process Create:\\nRuleName: \\nUtcTime: 2019-04-24 17:36:28.273\\nProcessGuid: {2268A29F-9E9C-5CC0-0000-00103A3CB705}\\nProcessId: 1496\\nImage: C:\\\\Windows\\\\System32\\\\certutil.exe\\nFileVersion: 6.1.7601.18151 (win7sp1_gdr.130512-1533)\\nDescription: CertUtil.exe\\nProduct: Microsoft\u00ae Windows\u00ae Operating System\\nCompany: Microsoft Corporation\\nCommandLine: certutil  -decode \\\".\\\\malware config.txt\\\" \\\".\\\\decoded9.txt\\\"\\nCurrentDirectory: C:\\\\Users\\\\superman\\\\Desktop\\\\\\nUser: batman\\\\superman\\nLogonGuid: {2268A29F-F86A-5CB9-0000-0020CB330600}\\nLogonId: 0x633cb\\nTerminalSessionId: 1\\nIntegrityLevel: High\\nHashes: MD5=4586B77B18FA9A8518AF76CA8FD247D9,SHA256=453EDE55C520FAF0EC802D27DB9CE496646400160B638D6E5CC546060B524A65\\nParentProcessGuid: {2268A29F-C628-5CC0-0000-0010A14EB605}\\nParentProcessId: 3936\\nParentImage: C:\\\\Program Files\\\\SplunkUniversalForwarder\\\\bin\\\\splunk-powershell.exe\\nParentCommandLine: \\\"C:\\\\Program Files\\\\SplunkUniversalForwarder\\\\bin\\\\splunk-powershell.exe\\\"\",\n              \"version\": 5,\n              \"@version\": \"1\",\n              \"event_id\": 1,\n              \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n              \"username\": \"batman\\\\superman\",\n              \"beat_host\": {\n                \"id\": \"2268a29f-2078-4d13-a846-d03220089285\",\n                \"os\": {\n                  \"build\": \"7601.24334\",\n                  \"family\": \"windows\",\n                  \"version\": \"6.1\",\n                  \"platform\": \"windows\"\n                },\n                \"name\": \"admin-PC3\",\n                \"architecture\": \"x86_64\"\n              },\n              \"thread_id\": 1152,\n              \"@timestamp\": \"2019-04-24T17:36:28.352Z\",\n              \"event_data\": {\n                \"Hashes\": \"MD5=4586B77B18FA9A8518AF76CA8FD247D9,SHA256=453EDE55C520FAF0EC802D27DB9CE496646400160B638D6E5CC546060B524A65\",\n                \"Company\": \"Microsoft Corporation\",\n                \"LogonId\": \"0x633cb\",\n                \"Product\": \"Microsoft\u00ae Windows\u00ae Operating System\",\n                \"UtcTime\": \"2019-04-24 17:36:28.273\",\n                \"LogonGuid\": \"{2268A29F-F86A-5CB9-0000-0020CB330600}\",\n                \"ProcessId\": \"1496\",\n                \"CommandLine\": \"certutil  -decode \\\".\\\\malware config.txt\\\" \\\".\\\\decoded9.txt\\\"\",\n                \"Description\": \"CertUtil.exe\",\n                \"FileVersion\": \"6.1.7601.18151 (win7sp1_gdr.130512-1533)\",\n                \"ProcessGuid\": \"{2268A29F-9E9C-5CC0-0000-00103A3CB705}\",\n                \"IntegrityLevel\": \"High\",\n                \"ParentProcessId\": \"3936\",\n                \"CurrentDirectory\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\\",\n                \"ParentCommandLine\": \"\\\"C:\\\\Program Files\\\\SplunkUniversalForwarder\\\\bin\\\\splunk-powershell.exe\\\"\",\n                \"ParentProcessGuid\": \"{2268A29F-C628-5CC0-0000-0010A14EB605}\",\n                \"TerminalSessionId\": \"1\"\n              },\n              \"event_type\": \"sysmon\",\n              \"image_path\": \"C:\\\\Windows\\\\System32\\\\certutil.exe\",\n              \"process_id\": 1544,\n              \"source_name\": \"Microsoft-Windows-Sysmon\",\n              \"computer_name\": \"admin-PC3.batman.local\",\n              \"logstash_time\": 0.0011510848999023438,\n              \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n              \"record_number\": \"42579\",\n              \"parent_image_path\": \"C:\\\\Program Files\\\\SplunkUniversalForwarder\\\\bin\\\\splunk-powershell.exe\"\n            }\n          },\n          {\n            \"_id\": \"IglmUGoBqSmy6R6gusIp\",\n            \"_type\": \"doc\",\n            \"_index\": \"logstash-beats-deobfuscatedecodefiles\",\n            \"_score\": 3.7260926,\n            \"_source\": {\n              \"beat\": {\n                \"name\": \"admin-PC3\",\n                \"version\": \"6.5.3\",\n                \"hostname\": \"admin-PC3\"\n              },\n              \"tags\": [\n                \"beat\",\n                \"beats_input_codec_plain_applied\"\n              ],\n              \"task\": \"Process Create (rule: ProcessCreate)\",\n              \"user\": {\n                \"name\": \"SYSTEM\",\n                \"type\": \"User\",\n                \"domain\": \"NT AUTHORITY\",\n                \"identifier\": \"S-1-5-18\"\n              },\n              \"level\": \"Information\",\n              \"opcode\": \"Info\",\n              \"message\": \"Process Create:\\nRuleName: \\nUtcTime: 2019-04-24 20:25:17.659\\nProcessGuid: {2268A29F-C62D-5CC0-0000-0010F868B605}\\nProcessId: 3088\\nImage: C:\\\\Windows\\\\System32\\\\certutil.exe\\nFileVersion: 6.1.7601.18151 (win7sp1_gdr.130512-1533)\\nDescription: CertUtil.exe\\nProduct: Microsoft\u00ae Windows\u00ae Operating System\\nCompany: Microsoft Corporation\\nCommandLine: \\\"C:\\\\Windows\\\\system32\\\\certutil.exe\\\"  -decode \\\".\\\\malware config.txt\\\" .\\\\decoded5.txt\\nCurrentDirectory: C:\\\\Users\\\\superman\\\\Desktop\\\\\\nUser: batman\\\\superman\\nLogonGuid: {2268A29F-F86A-5CB9-0000-0020CB330600}\\nLogonId: 0x633cb\\nTerminalSessionId: 1\\nIntegrityLevel: High\\nHashes: MD5=4586B77B18FA9A8518AF76CA8FD247D9,SHA256=453EDE55C520FAF0EC802D27DB9CE496646400160B638D6E5CC546060B524A65\\nParentProcessGuid: {2268A29F-2275-5CBA-0000-001007400900}\\nParentProcessId: 1052\\nParentImage: C:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\\nParentCommandLine: \\\"C:\\\\WINDOWS\\\\system32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\\\" \",\n              \"version\": 5,\n              \"@version\": \"1\",\n              \"event_id\": 1,\n              \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n              \"username\": \"batman\\\\superman\",\n              \"beat_host\": {\n                \"id\": \"2268a29f-2078-4d13-a846-d03220089285\",\n                \"os\": {\n                  \"build\": \"7601.24334\",\n                  \"family\": \"windows\",\n                  \"version\": \"6.1\",\n                  \"platform\": \"windows\"\n                },\n                \"name\": \"admin-PC3\",\n                \"architecture\": \"x86_64\"\n              },\n              \"thread_id\": 1152,\n              \"@timestamp\": \"2019-04-24T20:25:17.743Z\",\n              \"event_data\": {\n                \"Hashes\": \"MD5=4586B77B18FA9A8518AF76CA8FD247D9,SHA256=453EDE55C520FAF0EC802D27DB9CE496646400160B638D6E5CC546060B524A65\",\n                \"Company\": \"Microsoft Corporation\",\n                \"LogonId\": \"0x633cb\",\n                \"Product\": \"Microsoft\u00ae Windows\u00ae Operating System\",\n                \"UtcTime\": \"2019-04-24 20:25:17.659\",\n                \"LogonGuid\": \"{2268A29F-F86A-5CB9-0000-0020CB330600}\",\n                \"ProcessId\": \"3088\",\n                \"CommandLine\": \"\\\"C:\\\\Windows\\\\system32\\\\certutil.exe\\\"  -decode \\\".\\\\malware config.txt\\\" .\\\\decoded5.txt\",\n                \"Description\": \"CertUtil.exe\",\n                \"FileVersion\": \"6.1.7601.18151 (win7sp1_gdr.130512-1533)\",\n                \"ProcessGuid\": \"{2268A29F-C62D-5CC0-0000-0010F868B605}\",\n                \"IntegrityLevel\": \"High\",\n                \"ParentProcessId\": \"1052\",\n                \"CurrentDirectory\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\\",\n                \"ParentCommandLine\": \"\\\"C:\\\\WINDOWS\\\\system32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\\\" \",\n                \"ParentProcessGuid\": \"{2268A29F-2275-5CBA-0000-001007400900}\",\n                \"TerminalSessionId\": \"1\"\n              },\n              \"event_type\": \"sysmon\",\n              \"image_path\": \"C:\\\\Windows\\\\System32\\\\certutil.exe\",\n              \"process_id\": 1544,\n              \"source_name\": \"Microsoft-Windows-Sysmon\",\n              \"computer_name\": \"admin-PC3.batman.local\",\n              \"logstash_time\": 0.0027799606323242188,\n              \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n              \"record_number\": \"42573\",\n              \"parent_image_path\": \"C:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\"\n            }\n          }\n        ],\n        \"total\": {\n          \"value\": 2,\n          \"relation\": \"eq\"\n        },\n        \"max_score\": 3.7260926\n      },\n      \"took\": 621,\n      \"_shards\": {\n        \"total\": 95,\n        \"failed\": 0,\n        \"skipped\": 0,\n        \"successful\": 95\n      },\n      \"timed_out\": false\n    },\n    \"status\": \"Success\",\n    \"message\": \"\",\n    \"operation\": null\n  }",
+                "operationTitle": "Execute Lucene Query",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "300",
+            "left": "126",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "80634114-c13f-485b-8760-13adb3bffc5c",
+            "id": 4418
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Query for Copy B",
+            "description": null,
+            "arguments": {
+                "name": "ElasticSearch",
+                "config": "8d03a01d-1cef-40a8-992a-63d8de2b339f",
+                "params": {
+                    "index": "logstash-beats-*",
+                    "query": "event_type:sysmon AND @timestamp:{ {{vars.huntStartDateTime}} TO {{vars.huntEndDateTime}} } AND event_id:1 AND (image_path:\"C:\\\\Windows\\\\System32\\\\cmd.exe\" OR  image_path:\"C:\\\\Windows\\\\SysWOW64\\\\cmd.exe\") AND event_data.CommandLine:\"*copy\\ \\\/b*\"",
+                    "run_as_user": ""
+                },
+                "version": "2.2.1",
+                "connector": "elasticsearch",
+                "operation": "execute_lucene_query",
+                "mock_result": "{\n    \"data\": {\n      \"hits\": {\n        \"hits\": [\n          {\n            \"_id\": \"RAlzUGoBqSmy6R6gX9El\",\n            \"_type\": \"doc\",\n            \"_index\": \"logstash-beats-deobfuscatedecodefiles\",\n            \"_score\": 4.0137744,\n            \"_source\": {\n              \"beat\": {\n                \"name\": \"admin-PC3\",\n                \"version\": \"6.5.3\",\n                \"hostname\": \"admin-PC3\"\n              },\n              \"tags\": [\n                \"beat\",\n                \"beats_input_codec_plain_applied\"\n              ],\n              \"task\": \"Process Create (rule: ProcessCreate)\",\n              \"user\": {\n                \"name\": \"SYSTEM\",\n                \"type\": \"User\",\n                \"domain\": \"NT AUTHORITY\",\n                \"identifier\": \"S-1-5-18\"\n              },\n              \"level\": \"Information\",\n              \"opcode\": \"Info\",\n              \"message\": \"Process Create:\\nRuleName: \\nUtcTime: 2019-04-24 17:44:59.152\\nProcessGuid: {2268A29F-A09B-5CC0-0000-0010FC22B805}\\nProcessId: 3832\\nImage: C:\\\\Windows\\\\System32\\\\cmd.exe\\nFileVersion: 6.1.7601.17514 (win7sp1_rtm.101119-1850)\\nDescription: Windows Command Processor\\nProduct: Microsoft\u00ae Windows\u00ae Operating System\\nCompany: Microsoft Corporation\\nCommandLine: cmd  \/k copy \/b \\\".\\\\decoded9.txt\\\"+\\\".\\\\decoded5.txt\\\" \\\"notgoodatall.bin\\\"\\nCurrentDirectory: C:\\\\Users\\\\superman\\\\Desktop\\\\\\nUser: batman\\\\superman\\nLogonGuid: {2268A29F-F86A-5CB9-0000-0020CB330600}\\nLogonId: 0x633cb\\nTerminalSessionId: 1\\nIntegrityLevel: High\\nHashes: MD5=5746BD7E255DD6A8AFA06F7C42C1BA41,SHA256=DB06C3534964E3FC79D2763144BA53742D7FA250CA336F4A0FE724B75AAFF386\\nParentProcessGuid: {2268A29F-A085-5CC0-0000-0010041AB805}\\nParentProcessId: 3644\\nParentImage: C:\\\\Windows\\\\System32\\\\cmd.exe\\nParentCommandLine: cmd  \/k copy\",\n              \"version\": 5,\n              \"@version\": \"1\",\n              \"event_id\": 1,\n              \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n              \"username\": \"batman\\\\superman\",\n              \"beat_host\": {\n                \"id\": \"2268a29f-2078-4d13-a846-d03220089285\",\n                \"os\": {\n                  \"build\": \"7601.24334\",\n                  \"family\": \"windows\",\n                  \"version\": \"6.1\",\n                  \"platform\": \"windows\"\n                },\n                \"name\": \"admin-PC3\",\n                \"architecture\": \"x86_64\"\n              },\n              \"thread_id\": 1152,\n              \"@timestamp\": \"2019-04-24T17:44:59.198Z\",\n              \"event_data\": {\n                \"Hashes\": \"MD5=5746BD7E255DD6A8AFA06F7C42C1BA41,SHA256=DB06C3534964E3FC79D2763144BA53742D7FA250CA336F4A0FE724B75AAFF386\",\n                \"Company\": \"Microsoft Corporation\",\n                \"LogonId\": \"0x633cb\",\n                \"Product\": \"Microsoft\u00ae Windows\u00ae Operating System\",\n                \"UtcTime\": \"2019-04-24 17:44:59.152\",\n                \"LogonGuid\": \"{2268A29F-F86A-5CB9-0000-0020CB330600}\",\n                \"ProcessId\": \"3832\",\n                \"CommandLine\": \"cmd  \/k copy \/b \\\".\\\\decoded9.txt\\\"+\\\".\\\\decoded5.txt\\\" \\\"notgoodatall.bin\\\"\",\n                \"Description\": \"Windows Command Processor\",\n                \"FileVersion\": \"6.1.7601.17514 (win7sp1_rtm.101119-1850)\",\n                \"ProcessGuid\": \"{2268A29F-A09B-5CC0-0000-0010FC22B805}\",\n                \"IntegrityLevel\": \"High\",\n                \"ParentProcessId\": \"3644\",\n                \"CurrentDirectory\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\\",\n                \"ParentCommandLine\": \"cmd  \/k copy\",\n                \"ParentProcessGuid\": \"{2268A29F-A085-5CC0-0000-0010041AB805}\",\n                \"TerminalSessionId\": \"1\"\n              },\n              \"event_type\": \"sysmon\",\n              \"image_path\": \"C:\\\\Windows\\\\System32\\\\cmd.exe\",\n              \"process_id\": 1544,\n              \"source_name\": \"Microsoft-Windows-Sysmon\",\n              \"computer_name\": \"admin-PC3.batman.local\",\n              \"logstash_time\": 0.0009198188781738281,\n              \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n              \"record_number\": \"42586\",\n              \"parent_image_path\": \"C:\\\\Windows\\\\System32\\\\cmd.exe\"\n            }\n          }\n        ],\n        \"total\": {\n          \"value\": 1,\n          \"relation\": \"eq\"\n        },\n        \"max_score\": 4.0137744\n      },\n      \"took\": 694,\n      \"_shards\": {\n        \"total\": 95,\n        \"failed\": 0,\n        \"skipped\": 0,\n        \"successful\": 95\n      },\n      \"timed_out\": false\n    },\n    \"status\": \"Success\",\n    \"message\": \"\",\n    \"operation\": null\n  }",
+                "operationTitle": "Execute Lucene Query",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "435",
+            "left": "126",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "c1d100f1-f529-403d-887c-a5a6ba4b1649",
+            "id": 4419
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Query for Sysmon logs",
+            "description": null,
+            "arguments": {
+                "name": "ElasticSearch",
+                "config": "8d03a01d-1cef-40a8-992a-63d8de2b339f",
+                "params": {
+                    "index": "logstash-beats-*",
+                    "query": "event_id:1 AND event_type:sysmon AND @timestamp:{ {{vars.huntStartDateTime}} TO {{vars.huntEndDateTime}} } AND event_data.CommandLine:\"*lsadump\\:\\:dcshadow*\"",
+                    "run_as_user": ""
+                },
+                "version": "2.2.1",
+                "connector": "elasticsearch",
+                "operation": "execute_lucene_query",
+                "mock_result": "{\n    \"data\": {\n      \"hits\": {\n        \"hits\": [\n          {\n            \"_id\": \"_QkrUGoBqSmy6R6gq3xG\",\n            \"_type\": \"doc\",\n            \"_index\": \"logstash-beats-dcshadow\",\n            \"_score\": 2.8630462,\n            \"_source\": {\n              \"beat\": {\n                \"name\": \"admin-PC3\",\n                \"version\": \"6.5.3\",\n                \"hostname\": \"admin-PC3\"\n              },\n              \"tags\": [\n                \"beat\",\n                \"beats_input_codec_plain_applied\"\n              ],\n              \"task\": \"Process Create (rule: ProcessCreate)\",\n              \"user\": {\n                \"name\": \"SYSTEM\",\n                \"type\": \"User\",\n                \"domain\": \"NT AUTHORITY\",\n                \"identifier\": \"S-1-5-18\"\n              },\n              \"level\": \"Information\",\n              \"opcode\": \"Info\",\n              \"message\": \"Process Create:\\nRuleName: \\nUtcTime: 2019-04-24 16:26:37.411\\nProcessGuid: {2268A29F-8E3D-5CC0-0000-0010A2D6AB05}\\nProcessId: 2800\\nImage: C:\\\\Users\\\\superman\\\\Desktop\\\\x64\\\\mimikatz.exe\\nFileVersion: 2.1.1.0\\nDescription: mimikatz for Windows\\nProduct: mimikatz\\nCompany: gentilkiwi (Benjamin DELPY)\\nCommandLine: \\\"C:\\\\Users\\\\superman\\\\Desktop\\\\x64\\\\mimikatz.exe\\\"  \\\"lsadump::dcshadow \/push\\\"\\nCurrentDirectory: C:\\\\Users\\\\superman\\\\Desktop\\\\x64\\\\\\nUser: batman\\\\superman\\nLogonGuid: {2268A29F-F86A-5CB9-0000-0020CB330600}\\nLogonId: 0x633cb\\nTerminalSessionId: 1\\nIntegrityLevel: High\\nHashes: MD5=332A5371389A8953A96BF09B69EDCB6E,SHA256=E46BA4BDD4168A399EE5BC2161A8C918095FA30EB20AC88CAC6AB1D6DBEA2B4A\\nParentProcessGuid: {2268A29F-2275-5CBA-0000-001007400900}\\nParentProcessId: 1052\\nParentImage: C:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\\nParentCommandLine: \\\"C:\\\\WINDOWS\\\\system32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\\\" \",\n              \"version\": 5,\n              \"@version\": \"1\",\n              \"event_id\": 1,\n              \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n              \"username\": \"batman\\\\superman\",\n              \"beat_host\": {\n                \"id\": \"2268a29f-2078-4d13-a846-d03220089285\",\n                \"os\": {\n                  \"build\": \"7601.24334\",\n                  \"family\": \"windows\",\n                  \"version\": \"6.1\",\n                  \"platform\": \"windows\"\n                },\n                \"name\": \"admin-PC3\",\n                \"architecture\": \"x86_64\"\n              },\n              \"thread_id\": 1152,\n              \"@timestamp\": \"2019-04-24T16:26:37.474Z\",\n              \"event_data\": {\n                \"Hashes\": \"MD5=332A5371389A8953A96BF09B69EDCB6E,SHA256=E46BA4BDD4168A399EE5BC2161A8C918095FA30EB20AC88CAC6AB1D6DBEA2B4A\",\n                \"Company\": \"gentilkiwi (Benjamin DELPY)\",\n                \"LogonId\": \"0x633cb\",\n                \"Product\": \"mimikatz\",\n                \"UtcTime\": \"2019-04-24 16:26:37.411\",\n                \"LogonGuid\": \"{2268A29F-F86A-5CB9-0000-0020CB330600}\",\n                \"ProcessId\": \"2800\",\n                \"CommandLine\": \"\\\"C:\\\\Users\\\\superman\\\\Desktop\\\\x64\\\\mimikatz.exe\\\"  \\\"lsadump::dcshadow \/push\\\"\",\n                \"Description\": \"mimikatz for Windows\",\n                \"FileVersion\": \"2.1.1.0\",\n                \"ProcessGuid\": \"{2268A29F-8E3D-5CC0-0000-0010A2D6AB05}\",\n                \"IntegrityLevel\": \"High\",\n                \"ParentProcessId\": \"1052\",\n                \"CurrentDirectory\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\x64\\\\\",\n                \"ParentCommandLine\": \"\\\"C:\\\\WINDOWS\\\\system32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\\\" \",\n                \"ParentProcessGuid\": \"{2268A29F-2275-5CBA-0000-001007400900}\",\n                \"TerminalSessionId\": \"1\"\n              },\n              \"event_type\": \"sysmon\",\n              \"image_path\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\x64\\\\mimikatz.exe\",\n              \"process_id\": 1544,\n              \"source_name\": \"Microsoft-Windows-Sysmon\",\n              \"computer_name\": \"admin-PC3.batman.local\",\n              \"logstash_time\": 0.0013659000396728516,\n              \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n              \"record_number\": \"42526\",\n              \"parent_image_path\": \"C:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\"\n            }\n          },\n          {\n            \"_id\": \"wAkpUGoBqSmy6R6goHpy\",\n            \"_type\": \"doc\",\n            \"_index\": \"logstash-beats-dcshadow\",\n            \"_score\": 2.8630462,\n            \"_source\": {\n              \"beat\": {\n                \"name\": \"admin-PC3\",\n                \"version\": \"6.5.3\",\n                \"hostname\": \"admin-PC3\"\n              },\n              \"tags\": [\n                \"beat\",\n                \"beats_input_codec_plain_applied\"\n              ],\n              \"task\": \"Process Create (rule: ProcessCreate)\",\n              \"user\": {\n                \"name\": \"SYSTEM\",\n                \"type\": \"User\",\n                \"domain\": \"NT AUTHORITY\",\n                \"identifier\": \"S-1-5-18\"\n              },\n              \"level\": \"Information\",\n              \"opcode\": \"Info\",\n              \"message\": \"Process Create:\\nRuleName: \\nUtcTime: 2019-04-24 19:16:40.214\\nProcessGuid: {2268A29F-B618-5CC0-0000-0010174CAB05}\\nProcessId: 3540\\nImage: C:\\\\Users\\\\superman\\\\Desktop\\\\x64\\\\mimikatz.exe\\nFileVersion: 2.1.1.0\\nDescription: mimikatz for Windows\\nProduct: mimikatz\\nCompany: gentilkiwi (Benjamin DELPY)\\nCommandLine: \\\"C:\\\\Users\\\\superman\\\\Desktop\\\\x64\\\\mimikatz.exe\\\"  lsadump::dcshadow \/push\\nCurrentDirectory: C:\\\\Users\\\\superman\\\\Desktop\\\\x64\\\\\\nUser: batman\\\\superman\\nLogonGuid: {2268A29F-F86A-5CB9-0000-0020CB330600}\\nLogonId: 0x633cb\\nTerminalSessionId: 1\\nIntegrityLevel: High\\nHashes: MD5=332A5371389A8953A96BF09B69EDCB6E,SHA256=E46BA4BDD4168A399EE5BC2161A8C918095FA30EB20AC88CAC6AB1D6DBEA2B4A\\nParentProcessGuid: {2268A29F-2275-5CBA-0000-001007400900}\\nParentProcessId: 1052\\nParentImage: C:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\\nParentCommandLine: \\\"C:\\\\WINDOWS\\\\system32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\\\" \",\n              \"version\": 5,\n              \"@version\": \"1\",\n              \"event_id\": 1,\n              \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n              \"username\": \"batman\\\\superman\",\n              \"beat_host\": {\n                \"id\": \"2268a29f-2078-4d13-a846-d03220089285\",\n                \"os\": {\n                  \"build\": \"7601.24334\",\n                  \"family\": \"windows\",\n                  \"version\": \"6.1\",\n                  \"platform\": \"windows\"\n                },\n                \"name\": \"admin-PC3\",\n                \"architecture\": \"x86_64\"\n              },\n              \"thread_id\": 1152,\n              \"@timestamp\": \"2019-04-24T19:16:40.270Z\",\n              \"event_data\": {\n                \"Hashes\": \"MD5=332A5371389A8953A96BF09B69EDCB6E,SHA256=E46BA4BDD4168A399EE5BC2161A8C918095FA30EB20AC88CAC6AB1D6DBEA2B4A\",\n                \"Company\": \"gentilkiwi (Benjamin DELPY)\",\n                \"LogonId\": \"0x633cb\",\n                \"Product\": \"mimikatz\",\n                \"UtcTime\": \"2019-04-24 19:16:40.214\",\n                \"LogonGuid\": \"{2268A29F-F86A-5CB9-0000-0020CB330600}\",\n                \"ProcessId\": \"3540\",\n                \"CommandLine\": \"\\\"C:\\\\Users\\\\superman\\\\Desktop\\\\x64\\\\mimikatz.exe\\\"  lsadump::dcshadow \/push\",\n                \"Description\": \"mimikatz for Windows\",\n                \"FileVersion\": \"2.1.1.0\",\n                \"ProcessGuid\": \"{2268A29F-B618-5CC0-0000-0010174CAB05}\",\n                \"IntegrityLevel\": \"High\",\n                \"ParentProcessId\": \"1052\",\n                \"CurrentDirectory\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\x64\\\\\",\n                \"ParentCommandLine\": \"\\\"C:\\\\WINDOWS\\\\system32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\\\" \",\n                \"ParentProcessGuid\": \"{2268A29F-2275-5CBA-0000-001007400900}\",\n                \"TerminalSessionId\": \"1\"\n              },\n              \"event_type\": \"sysmon\",\n              \"image_path\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\x64\\\\mimikatz.exe\",\n              \"process_id\": 1544,\n              \"source_name\": \"Microsoft-Windows-Sysmon\",\n              \"computer_name\": \"admin-PC3.batman.local\",\n              \"logstash_time\": 0.0007929801940917969,\n              \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n              \"record_number\": \"42512\",\n              \"parent_image_path\": \"C:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\"\n            }\n          },\n          {\n            \"_id\": \"wAkqUGoBqSmy6R6gn3tc\",\n            \"_type\": \"doc\",\n            \"_index\": \"logstash-beats-dcshadow\",\n            \"_score\": 2.8630462,\n            \"_source\": {\n              \"beat\": {\n                \"name\": \"admin-PC3\",\n                \"version\": \"6.5.3\",\n                \"hostname\": \"admin-PC3\"\n              },\n              \"tags\": [\n                \"beat\",\n                \"beats_input_codec_plain_applied\"\n              ],\n              \"task\": \"Process Create (rule: ProcessCreate)\",\n              \"user\": {\n                \"name\": \"SYSTEM\",\n                \"type\": \"User\",\n                \"domain\": \"NT AUTHORITY\",\n                \"identifier\": \"S-1-5-18\"\n              },\n              \"level\": \"Information\",\n              \"opcode\": \"Info\",\n              \"message\": \"Process Create:\\nRuleName: \\nUtcTime: 2019-04-24 19:17:41.797\\nProcessGuid: {2268A29F-B655-5CC0-0000-0010FD83AB05}\\nProcessId: 1096\\nImage: C:\\\\Users\\\\superman\\\\Desktop\\\\x64\\\\mimikatz.exe\\nFileVersion: 2.1.1.0\\nDescription: mimikatz for Windows\\nProduct: mimikatz\\nCompany: gentilkiwi (Benjamin DELPY)\\nCommandLine: \\\"C:\\\\Users\\\\superman\\\\Desktop\\\\x64\\\\mimikatz.exe\\\"  \\\"lsadump::dcshadow \/push\\\"\\nCurrentDirectory: C:\\\\Users\\\\superman\\\\Desktop\\\\x64\\\\\\nUser: batman\\\\superman\\nLogonGuid: {2268A29F-F86A-5CB9-0000-0020CB330600}\\nLogonId: 0x633cb\\nTerminalSessionId: 1\\nIntegrityLevel: High\\nHashes: MD5=332A5371389A8953A96BF09B69EDCB6E,SHA256=E46BA4BDD4168A399EE5BC2161A8C918095FA30EB20AC88CAC6AB1D6DBEA2B4A\\nParentProcessGuid: {2268A29F-2275-5CBA-0000-001007400900}\\nParentProcessId: 1052\\nParentImage: C:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\\nParentCommandLine: \\\"C:\\\\WINDOWS\\\\system32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\\\" \",\n              \"version\": 5,\n              \"@version\": \"1\",\n              \"event_id\": 1,\n              \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n              \"username\": \"batman\\\\superman\",\n              \"beat_host\": {\n                \"id\": \"2268a29f-2078-4d13-a846-d03220089285\",\n                \"os\": {\n                  \"build\": \"7601.24334\",\n                  \"family\": \"windows\",\n                  \"version\": \"6.1\",\n                  \"platform\": \"windows\"\n                },\n                \"name\": \"admin-PC3\",\n                \"architecture\": \"x86_64\"\n              },\n              \"thread_id\": 1152,\n              \"@timestamp\": \"2019-04-24T19:17:41.860Z\",\n              \"event_data\": {\n                \"Hashes\": \"MD5=332A5371389A8953A96BF09B69EDCB6E,SHA256=E46BA4BDD4168A399EE5BC2161A8C918095FA30EB20AC88CAC6AB1D6DBEA2B4A\",\n                \"Company\": \"gentilkiwi (Benjamin DELPY)\",\n                \"LogonId\": \"0x633cb\",\n                \"Product\": \"mimikatz\",\n                \"UtcTime\": \"2019-04-24 19:17:41.797\",\n                \"LogonGuid\": \"{2268A29F-F86A-5CB9-0000-0020CB330600}\",\n                \"ProcessId\": \"1096\",\n                \"CommandLine\": \"\\\"C:\\\\Users\\\\superman\\\\Desktop\\\\x64\\\\mimikatz.exe\\\"  \\\"lsadump::dcshadow \/push\\\"\",\n                \"Description\": \"mimikatz for Windows\",\n                \"FileVersion\": \"2.1.1.0\",\n                \"ProcessGuid\": \"{2268A29F-B655-5CC0-0000-0010FD83AB05}\",\n                \"IntegrityLevel\": \"High\",\n                \"ParentProcessId\": \"1052\",\n                \"CurrentDirectory\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\x64\\\\\",\n                \"ParentCommandLine\": \"\\\"C:\\\\WINDOWS\\\\system32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\\\" \",\n                \"ParentProcessGuid\": \"{2268A29F-2275-5CBA-0000-001007400900}\",\n                \"TerminalSessionId\": \"1\"\n              },\n              \"event_type\": \"sysmon\",\n              \"image_path\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\x64\\\\mimikatz.exe\",\n              \"process_id\": 1544,\n              \"source_name\": \"Microsoft-Windows-Sysmon\",\n              \"computer_name\": \"admin-PC3.batman.local\",\n              \"logstash_time\": 0.001338958740234375,\n              \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n              \"record_number\": \"42515\",\n              \"parent_image_path\": \"C:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\"\n            }\n          }\n        ],\n        \"total\": {\n          \"value\": 3,\n          \"relation\": \"eq\"\n        },\n        \"max_score\": 2.8630462\n      },\n      \"took\": 54,\n      \"_shards\": {\n        \"total\": 95,\n        \"failed\": 0,\n        \"skipped\": 0,\n        \"successful\": 95\n      },\n      \"timed_out\": false\n    },\n    \"status\": \"Success\",\n    \"message\": \"\",\n    \"operation\": null\n  }",
+                "operationTitle": "Execute Lucene Query",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "570",
+            "left": "126",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "3d0d76c3-9b32-453a-bc50-b80861adb3e6",
+            "id": 4420
+        }
+    ],
+    "routes": [
+        {
+            "@type": "WorkflowRoute",
+            "name": "Elastic query for Copy B -> Query Elastic for Sysmon logs",
+            "targetStep": "\/api\/3\/workflow_steps\/3d0d76c3-9b32-453a-bc50-b80861adb3e6",
+            "sourceStep": "\/api\/3\/workflow_steps\/c1d100f1-f529-403d-887c-a5a6ba4b1649",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "798b5ba5-0956-4e71-8095-5a7693027f03"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Configuration -> Query for Certutil",
+            "targetStep": "\/api\/3\/workflow_steps\/80634114-c13f-485b-8760-13adb3bffc5c",
+            "sourceStep": "\/api\/3\/workflow_steps\/463f3833-d2a4-49ac-bbf8-cb3a92badf15",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "39ab45c2-416f-448a-a238-1b4157f0389e"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Elastic query for Certutil -> Elastic query for Copy B",
+            "targetStep": "\/api\/3\/workflow_steps\/c1d100f1-f529-403d-887c-a5a6ba4b1649",
+            "sourceStep": "\/api\/3\/workflow_steps\/80634114-c13f-485b-8760-13adb3bffc5c",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "8dcc8295-743e-48d6-95f7-abee8d9974d7"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Start -> Configuration",
+            "targetStep": "\/api\/3\/workflow_steps\/463f3833-d2a4-49ac-bbf8-cb3a92badf15",
+            "sourceStep": "\/api\/3\/workflow_steps\/f047995b-614c-40c6-a6db-827d37e36432",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "bd0879ac-6285-499b-8d9f-e8d7c5f1ca8e"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Query for Sysmon logs -> Step Output",
+            "targetStep": "\/api\/3\/workflow_steps\/4330ae0e-c64b-46c3-80a7-72075f774966",
+            "sourceStep": "\/api\/3\/workflow_steps\/3d0d76c3-9b32-453a-bc50-b80861adb3e6",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "64b4908e-6099-4699-9d8e-f22116e6301d"
+        }
+    ],
+    "priority": "\/api\/3\/picklists\/2b563c61-ae2c-41c0-a85a-c9709585e3f2",
+    "uuid": "e8c851d3-a1a2-4f66-b022-24adb86ba717",
+    "recordTags": [
+        "Referenced"
+    ],
+    "id": 1117,
+    "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "createDate": 1644165544,
+    "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "modifyDate": 1644165544,
+    "owners": [],
+    "isPrivate": false
+}

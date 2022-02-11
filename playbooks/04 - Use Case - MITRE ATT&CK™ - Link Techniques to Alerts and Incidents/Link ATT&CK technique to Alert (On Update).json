@@ -1,0 +1,262 @@
+{
+    "@type": "Workflow",
+    "triggerLimit": null,
+    "name": "Link ATT&CK technique to Alert (On Update)",
+    "aliasName": null,
+    "tag": null,
+    "description": "Links MITRE technique or sub-technique to an alert, based on MITRE Attack ID",
+    "isActive": true,
+    "debug": false,
+    "singleRecordExecution": false,
+    "remoteExecutableFlag": false,
+    "parameters": [],
+    "synchronous": false,
+    "lastModifyDate": 1644165542,
+    "collection": "\/api\/3\/workflow_collections\/c862c8b5-f841-44a5-983f-551625ca7d6d",
+    "versions": [],
+    "triggerStep": "\/api\/3\/workflow_steps\/269c5f53-c33d-44e1-904b-2a5daa3caa9c",
+    "steps": [
+        {
+            "@type": "WorkflowStep",
+            "name": "Is it a subtechnique",
+            "description": null,
+            "arguments": {
+                "conditions": [
+                    {
+                        "step_iri": "\/api\/3\/workflow_steps\/0919c83d-1832-48fe-914d-1843fa86cbfb",
+                        "condition": "{{ \".\" in vars.input.records[0].mitreattackid }}",
+                        "step_name": "Find subtechnique"
+                    },
+                    {
+                        "default": true,
+                        "step_iri": "\/api\/3\/workflow_steps\/25c4b590-222f-4fa3-a163-d3d437f66b84",
+                        "step_name": "Find technique"
+                    }
+                ]
+            },
+            "status": null,
+            "top": "165",
+            "left": "300",
+            "stepType": "\/api\/3\/workflow_step_types\/12254cf5-5db7-4b1a-8cb1-3af081924b28",
+            "uuid": "71643679-3b7f-4142-9beb-e04e2e381b6f",
+            "id": 4537
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Find subtechnique",
+            "description": null,
+            "arguments": {
+                "query": {
+                    "sort": [],
+                    "limit": 30,
+                    "logic": "AND",
+                    "filters": [
+                        {
+                            "type": "primitive",
+                            "field": "mitreId",
+                            "value": "{{vars.input.records[0].mitreattackid}}",
+                            "operator": "eq",
+                            "_operator": "eq"
+                        }
+                    ]
+                },
+                "module": "mitre_sub_techniques?$limit=30",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "300",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/b593663d-7d13-40ce-a3a3-96dece928770",
+            "uuid": "0919c83d-1832-48fe-914d-1843fa86cbfb",
+            "id": 4538
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Link subtechnique to alert",
+            "description": null,
+            "arguments": {
+                "when": "{{vars.steps.Find_subtechnique | length > 0}}",
+                "resource": {
+                    "mitreTechnique": "{{vars.steps.Find_subtechnique[0].name}}",
+                    "mitresubtechniques": "{{vars.steps.Find_subtechnique[0]['@id']}}"
+                },
+                "_showJson": false,
+                "operation": "Overwrite",
+                "collection": "{{vars.input.records[0]['@id']}}",
+                "__recommend": [],
+                "collectionType": "\/api\/3\/alerts",
+                "fieldOperation": {
+                    "recordTags": "Overwrite"
+                },
+                "step_variables": []
+            },
+            "status": null,
+            "top": "440",
+            "left": "120",
+            "stepType": "\/api\/3\/workflow_step_types\/b593663d-7d13-40ce-a3a3-96dece928722",
+            "uuid": "d6826549-d878-4e41-978c-bc33e180d884",
+            "id": 4539
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Find technique",
+            "description": null,
+            "arguments": {
+                "query": {
+                    "sort": [],
+                    "limit": 30,
+                    "logic": "AND",
+                    "filters": [
+                        {
+                            "type": "primitive",
+                            "field": "mitreId",
+                            "value": "{{vars.input.records[0].mitreattackid}}",
+                            "operator": "eq",
+                            "_operator": "eq"
+                        }
+                    ]
+                },
+                "module": "mitre_techniques?$limit=30",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "300",
+            "left": "476",
+            "stepType": "\/api\/3\/workflow_step_types\/b593663d-7d13-40ce-a3a3-96dece928770",
+            "uuid": "25c4b590-222f-4fa3-a163-d3d437f66b84",
+            "id": 4540
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Link technique to alert",
+            "description": null,
+            "arguments": {
+                "when": "{{vars.steps.Find_technique | length > 0}}",
+                "resource": {
+                    "mitreTechnique": "{{vars.steps.Find_technique[0].name}}",
+                    "mitretechniques": "{{vars.steps.Find_technique[0]['@id']}}"
+                },
+                "_showJson": false,
+                "operation": "Overwrite",
+                "collection": "{{vars.input.records[0]['@id']}}",
+                "__recommend": [],
+                "collectionType": "\/api\/3\/alerts",
+                "fieldOperation": {
+                    "recordTags": "Append"
+                },
+                "step_variables": []
+            },
+            "status": null,
+            "top": "440",
+            "left": "480",
+            "stepType": "\/api\/3\/workflow_step_types\/b593663d-7d13-40ce-a3a3-96dece928722",
+            "uuid": "68bd5371-e910-4fa2-8218-6d8647963ef2",
+            "id": 4541
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Start",
+            "description": null,
+            "arguments": {
+                "resource": "alerts",
+                "resources": [
+                    "alerts"
+                ],
+                "step_variables": {
+                    "input": {
+                        "params": [],
+                        "records": [
+                            "{{vars.input.records[0]}}"
+                        ]
+                    }
+                },
+                "fieldbasedtrigger": {
+                    "sort": [],
+                    "limit": 30,
+                    "logic": "AND",
+                    "filters": [
+                        {
+                            "type": "primitive",
+                            "field": "mitreattackid",
+                            "value": "",
+                            "operator": "changed",
+                            "_operator": "changed"
+                        },
+                        {
+                            "type": "primitive",
+                            "field": "mitreattackid",
+                            "value": "false",
+                            "operator": "isnull",
+                            "_operator": "isnull"
+                        }
+                    ]
+                }
+            },
+            "status": null,
+            "top": "30",
+            "left": "300",
+            "stepType": "\/api\/3\/workflow_step_types\/9300bf69-5063-486d-b3a6-47eb9da24872",
+            "uuid": "269c5f53-c33d-44e1-904b-2a5daa3caa9c",
+            "id": 4542
+        }
+    ],
+    "routes": [
+        {
+            "@type": "WorkflowRoute",
+            "name": "Find subtechnique -> Link subtechnique to alert",
+            "targetStep": "\/api\/3\/workflow_steps\/d6826549-d878-4e41-978c-bc33e180d884",
+            "sourceStep": "\/api\/3\/workflow_steps\/0919c83d-1832-48fe-914d-1843fa86cbfb",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "1af6664c-3b00-4a43-9559-43ed58831317"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Start -> Is it a subtechnique",
+            "targetStep": "\/api\/3\/workflow_steps\/71643679-3b7f-4142-9beb-e04e2e381b6f",
+            "sourceStep": "\/api\/3\/workflow_steps\/269c5f53-c33d-44e1-904b-2a5daa3caa9c",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "496f3ae8-858c-4d4d-82c1-a518e101d26e"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Find technique -> Link technique to Alert2",
+            "targetStep": "\/api\/3\/workflow_steps\/68bd5371-e910-4fa2-8218-6d8647963ef2",
+            "sourceStep": "\/api\/3\/workflow_steps\/25c4b590-222f-4fa3-a163-d3d437f66b84",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "1d6f04f6-76ab-4887-adfe-33509f181018"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Is it a subtechnique -> Find technique",
+            "targetStep": "\/api\/3\/workflow_steps\/25c4b590-222f-4fa3-a163-d3d437f66b84",
+            "sourceStep": "\/api\/3\/workflow_steps\/71643679-3b7f-4142-9beb-e04e2e381b6f",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "2cfae6a3-bc26-4519-8891-e2b92ae75e86"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Is it a subtechnique -> Find subtechnique",
+            "targetStep": "\/api\/3\/workflow_steps\/0919c83d-1832-48fe-914d-1843fa86cbfb",
+            "sourceStep": "\/api\/3\/workflow_steps\/71643679-3b7f-4142-9beb-e04e2e381b6f",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "15641152-2150-446b-960c-c2399cd54dfa"
+        }
+    ],
+    "priority": null,
+    "uuid": "d81c9f18-da8b-44f0-bf8d-b6579d5bcb69",
+    "recordTags": [
+        "PostUpdate"
+    ],
+    "id": 1128,
+    "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "createDate": 1644165545,
+    "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "modifyDate": 1644165545,
+    "owners": [],
+    "isPrivate": false
+}

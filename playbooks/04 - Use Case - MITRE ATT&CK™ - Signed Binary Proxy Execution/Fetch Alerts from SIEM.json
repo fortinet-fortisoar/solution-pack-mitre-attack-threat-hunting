@@ -1,0 +1,453 @@
+{
+    "@type": "Workflow",
+    "triggerLimit": null,
+    "name": "Fetch Alerts from SIEM",
+    "aliasName": null,
+    "tag": null,
+    "description": "Fetches alerts by querying to SIEM",
+    "isActive": true,
+    "debug": false,
+    "singleRecordExecution": false,
+    "remoteExecutableFlag": false,
+    "parameters": [
+        "huntStart",
+        "huntEnd"
+    ],
+    "synchronous": false,
+    "lastModifyDate": 1644165542,
+    "collection": "\/api\/3\/workflow_collections\/c926f317-8aba-41c5-8f71-2f0f23d992fb",
+    "versions": [],
+    "triggerStep": "\/api\/3\/workflow_steps\/110889bd-0b67-462c-af2e-d3c035ae6957",
+    "steps": [
+        {
+            "@type": "WorkflowStep",
+            "name": "Start",
+            "description": null,
+            "arguments": {
+                "step_variables": {
+                    "input": {
+                        "params": []
+                    }
+                }
+            },
+            "status": null,
+            "top": "30",
+            "left": "126",
+            "stepType": "\/api\/3\/workflow_step_types\/b348f017-9a94-471f-87f8-ce88b6a7ad62",
+            "uuid": "110889bd-0b67-462c-af2e-d3c035ae6957",
+            "id": 4726
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Configuration",
+            "description": null,
+            "arguments": {
+                "useMockOutput": "{{globalVars.Demo_mode}}",
+                "huntEndDateTime": "{{ arrow.get(vars.input.params.huntEnd).format('YYYY-MM-DDTHH:mm:ss.SSSSSSSSSZ') }}",
+                "huntStartDateTime": "{{ arrow.get(vars.input.params.huntStart).format('YYYY-MM-DDTHH:mm:ss.SSSSSSSSSZ') }}"
+            },
+            "status": null,
+            "top": "165",
+            "left": "126",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "66b13d9f-b337-401e-be7e-9807b672da11",
+            "id": 4727
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Step Output",
+            "description": null,
+            "arguments": {
+                "step_output": "{{vars.steps.Query_for_Sysmon_CMSTP.data.hits.hits | union(vars.steps.Query_for_Sysmon_Compiled_HTML.data.hits.hits) | union(vars.steps.Query_for_Control_Panel_Item_Execution.data.hits.hits) | union(vars.steps.Query_for_InstallUtil_Via_Command_Line.data.hits.hits) | union(vars.steps.Query_for_Sysmon_InstallUtil_Child.data.hits.hits) | union(vars.steps.Query_for_Sysmon_MSHTA.data.hits.hits) | union(vars.steps.Query_for_MSHTA_Child.data.hits.hits) | union(vars.steps.Query_for_processes_spawned_by_Regsvcs_and_Regasm.data.hits.hits) | union(vars.steps.Query_for_Regsvcs_and_Regasm_command_line.data.hits.hits) | union(vars.steps.Query_for_Sysmon_Rundll32.data.hits.hits) }}"
+            },
+            "status": null,
+            "top": "1650",
+            "left": "126",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "303ec6d8-74de-4800-9f56-58b904ea1909",
+            "id": 4728
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Query for Sysmon CMSTP",
+            "description": null,
+            "arguments": {
+                "name": "ElasticSearch",
+                "config": "8d03a01d-1cef-40a8-992a-63d8de2b339f",
+                "params": {
+                    "index": "logstash-beats-*",
+                    "query": "event_type:sysmon AND event_id:\"1\" AND @timestamp:{ {{vars.huntStartDateTime}} TO {{vars.huntEndDateTime}} } AND (parent_image_path:\"C:\\\\Windows\\\\System32\\\\cmstp.exe\" OR parent_image_path:\"C:\\\\Windows\\\\SysWOW64\\\\cmstp.exe\")",
+                    "run_as_user": ""
+                },
+                "version": "2.2.1",
+                "connector": "elasticsearch",
+                "operation": "execute_lucene_query",
+                "mock_result": "{\n    \"data\": {\n      \"hits\": {\n        \"hits\": [\n          {\n            \"_id\": \"YAkbUGoBqSmy6R6gcmuM\",\n            \"_type\": \"doc\",\n            \"_index\": \"logstash-beats-cmstp\",\n            \"_score\": 3.4384105,\n            \"_source\": {\n              \"beat\": {\n                \"name\": \"win7-host1-PC\",\n                \"version\": \"6.5.3\",\n                \"hostname\": \"win7-host1-PC\"\n              },\n              \"tags\": [\n                \"beat\",\n                \"beats_input_codec_plain_applied\"\n              ],\n              \"task\": \"Process Create (rule: ProcessCreate)\",\n              \"user\": {\n                \"name\": \"SYSTEM\",\n                \"type\": \"User\",\n                \"domain\": \"NT AUTHORITY\",\n                \"identifier\": \"S-1-5-18\"\n              },\n              \"level\": \"Information\",\n              \"opcode\": \"Info\",\n              \"message\": \"Process Create:\\nRuleName: \\nUtcTime: 2019-04-24 19:01:14.208\\nProcessGuid: {DA929735-B27A-5CC0-0000-0010D0089008}\\nProcessId: 2096\\nImage: C:\\\\Windows\\\\System32\\\\calc.exe\\nFileVersion: 6.1.7600.16385 (win7_rtm.090713-1255)\\nDescription: Windows Calculator\\nProduct: Microsoft\u00ae Windows\u00ae Operating System\\nCompany: Microsoft Corporation\\nCommandLine: C:\\\\Windows\\\\System32\\\\calc.exe \/RegServer\\nCurrentDirectory: C:\\\\Users\\\\superman\\\\\\nUser: batman\\\\superman\\nLogonGuid: {DA929735-FDE0-5CB9-0000-002076590200}\\nLogonId: 0x25976\\nTerminalSessionId: 1\\nIntegrityLevel: High\\nHashes: MD5=10E4A1D2132CCB5C6759F038CDB6F3C9,SHA256=C6A91CBA00BF87CDB064C49ADAAC82255CBEC6FDD48FD21F9B3B96ABF019916B\\nParentProcessGuid: {DA929735-B279-5CC0-0000-0010BBFB8F08}\\nParentProcessId: 632\\nParentImage: C:\\\\Windows\\\\System32\\\\cmstp.exe\\nParentCommandLine: \\\"C:\\\\Windows\\\\system32\\\\cmstp.exe\\\" \/s C:\\\\Users\\\\superman\\\\Desktop\\\\badstuff4.inf\",\n              \"version\": 5,\n              \"@version\": \"1\",\n              \"event_id\": 1,\n              \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n              \"username\": \"batman\\\\superman\",\n              \"beat_host\": {\n                \"id\": \"da929735-a8f9-4b38-8348-7664a570a0a2\",\n                \"os\": {\n                  \"build\": \"7601.24356\",\n                  \"family\": \"windows\",\n                  \"version\": \"6.1\",\n                  \"platform\": \"windows\"\n                },\n                \"name\": \"win7-host1-PC\",\n                \"architecture\": \"x86_64\"\n              },\n              \"thread_id\": 2328,\n              \"@timestamp\": \"2019-04-24T19:01:14.349Z\",\n              \"event_data\": {\n                \"Hashes\": \"MD5=10E4A1D2132CCB5C6759F038CDB6F3C9,SHA256=C6A91CBA00BF87CDB064C49ADAAC82255CBEC6FDD48FD21F9B3B96ABF019916B\",\n                \"Company\": \"Microsoft Corporation\",\n                \"LogonId\": \"0x25976\",\n                \"Product\": \"Microsoft\u00ae Windows\u00ae Operating System\",\n                \"UtcTime\": \"2019-04-24 19:01:14.208\",\n                \"LogonGuid\": \"{DA929735-FDE0-5CB9-0000-002076590200}\",\n                \"ProcessId\": \"2096\",\n                \"CommandLine\": \"C:\\\\Windows\\\\System32\\\\calc.exe \/RegServer\",\n                \"Description\": \"Windows Calculator\",\n                \"FileVersion\": \"6.1.7600.16385 (win7_rtm.090713-1255)\",\n                \"ProcessGuid\": \"{DA929735-B27A-5CC0-0000-0010D0089008}\",\n                \"IntegrityLevel\": \"High\",\n                \"ParentProcessId\": \"632\",\n                \"CurrentDirectory\": \"C:\\\\Users\\\\superman\\\\\",\n                \"ParentCommandLine\": \"\\\"C:\\\\Windows\\\\system32\\\\cmstp.exe\\\" \/s C:\\\\Users\\\\superman\\\\Desktop\\\\badstuff4.inf\",\n                \"ParentProcessGuid\": \"{DA929735-B279-5CC0-0000-0010BBFB8F08}\",\n                \"TerminalSessionId\": \"1\"\n              },\n              \"event_type\": \"sysmon\",\n              \"image_path\": \"C:\\\\Windows\\\\System32\\\\calc.exe\",\n              \"process_id\": 1504,\n              \"source_name\": \"Microsoft-Windows-Sysmon\",\n              \"computer_name\": \"win7-host1-PC.batman.local\",\n              \"logstash_time\": 0.0005412101745605469,\n              \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n              \"record_number\": \"865007\",\n              \"parent_image_path\": \"C:\\\\Windows\\\\System32\\\\cmstp.exe\"\n            }\n          },\n          {\n            \"_id\": \"AgkbUGoBqSmy6R6g7GxT\",\n            \"_type\": \"doc\",\n            \"_index\": \"logstash-beats-cmstp\",\n            \"_score\": 3.4384105,\n            \"_source\": {\n              \"beat\": {\n                \"name\": \"win7-host1-PC\",\n                \"version\": \"6.5.3\",\n                \"hostname\": \"win7-host1-PC\"\n              },\n              \"tags\": [\n                \"beat\",\n                \"beats_input_codec_plain_applied\"\n              ],\n              \"task\": \"Process Create (rule: ProcessCreate)\",\n              \"user\": {\n                \"name\": \"SYSTEM\",\n                \"type\": \"User\",\n                \"domain\": \"NT AUTHORITY\",\n                \"identifier\": \"S-1-5-18\"\n              },\n              \"level\": \"Information\",\n              \"opcode\": \"Info\",\n              \"message\": \"Process Create:\\nRuleName: \\nUtcTime: 2019-04-24 16:08:33.004\\nProcessGuid: {DA929735-8A01-5CC0-0000-001033F79008}\\nProcessId: 860\\nImage: C:\\\\Windows\\\\System32\\\\calc.exe\\nFileVersion: 6.1.7600.16385 (win7_rtm.090713-1255)\\nDescription: Windows Calculator\\nProduct: Microsoft\u00ae Windows\u00ae Operating System\\nCompany: Microsoft Corporation\\nCommandLine: C:\\\\Windows\\\\System32\\\\calc.exe \/RegServer\\nCurrentDirectory: C:\\\\Users\\\\superman\\\\\\nUser: batman\\\\superman\\nLogonGuid: {DA929735-FDE0-5CB9-0000-002076590200}\\nLogonId: 0x25976\\nTerminalSessionId: 1\\nIntegrityLevel: High\\nHashes: MD5=10E4A1D2132CCB5C6759F038CDB6F3C9,SHA256=C6A91CBA00BF87CDB064C49ADAAC82255CBEC6FDD48FD21F9B3B96ABF019916B\\nParentProcessGuid: {DA929735-8A00-5CC0-0000-0010C8EE9008}\\nParentProcessId: 3012\\nParentImage: C:\\\\Windows\\\\System32\\\\cmstp.exe\\nParentCommandLine: \\\"C:\\\\Windows\\\\system32\\\\cmstp.exe\\\" \/s C:\\\\Users\\\\superman\\\\Desktop\\\\badstuff4.inf\",\n              \"version\": 5,\n              \"@version\": \"1\",\n              \"event_id\": 1,\n              \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n              \"username\": \"batman\\\\superman\",\n              \"beat_host\": {\n                \"id\": \"da929735-a8f9-4b38-8348-7664a570a0a2\",\n                \"os\": {\n                  \"build\": \"7601.24356\",\n                  \"family\": \"windows\",\n                  \"version\": \"6.1\",\n                  \"platform\": \"windows\"\n                },\n                \"name\": \"win7-host1-PC\",\n                \"architecture\": \"x86_64\"\n              },\n              \"thread_id\": 2328,\n              \"@timestamp\": \"2019-04-24T16:08:33.128Z\",\n              \"event_data\": {\n                \"Hashes\": \"MD5=10E4A1D2132CCB5C6759F038CDB6F3C9,SHA256=C6A91CBA00BF87CDB064C49ADAAC82255CBEC6FDD48FD21F9B3B96ABF019916B\",\n                \"Company\": \"Microsoft Corporation\",\n                \"LogonId\": \"0x25976\",\n                \"Product\": \"Microsoft\u00ae Windows\u00ae Operating System\",\n                \"UtcTime\": \"2019-04-24 16:08:33.004\",\n                \"LogonGuid\": \"{DA929735-FDE0-5CB9-0000-002076590200}\",\n                \"ProcessId\": \"860\",\n                \"CommandLine\": \"C:\\\\Windows\\\\System32\\\\calc.exe \/RegServer\",\n                \"Description\": \"Windows Calculator\",\n                \"FileVersion\": \"6.1.7600.16385 (win7_rtm.090713-1255)\",\n                \"ProcessGuid\": \"{DA929735-8A01-5CC0-0000-001033F79008}\",\n                \"IntegrityLevel\": \"High\",\n                \"ParentProcessId\": \"3012\",\n                \"CurrentDirectory\": \"C:\\\\Users\\\\superman\\\\\",\n                \"ParentCommandLine\": \"\\\"C:\\\\Windows\\\\system32\\\\cmstp.exe\\\" \/s C:\\\\Users\\\\superman\\\\Desktop\\\\badstuff4.inf\",\n                \"ParentProcessGuid\": \"{DA929735-8A00-5CC0-0000-0010C8EE9008}\",\n                \"TerminalSessionId\": \"1\"\n              },\n              \"event_type\": \"sysmon\",\n              \"image_path\": \"C:\\\\Windows\\\\System32\\\\calc.exe\",\n              \"process_id\": 1504,\n              \"source_name\": \"Microsoft-Windows-Sysmon\",\n              \"computer_name\": \"win7-host1-PC.batman.local\",\n              \"logstash_time\": 0.0008289813995361328,\n              \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n              \"record_number\": \"865011\",\n              \"parent_image_path\": \"C:\\\\Windows\\\\System32\\\\cmstp.exe\"\n            }\n          }\n        ],\n        \"total\": {\n          \"value\": 2,\n          \"relation\": \"eq\"\n        },\n        \"max_score\": 3.4384105\n      },\n      \"took\": 169,\n      \"_shards\": {\n        \"total\": 95,\n        \"failed\": 0,\n        \"skipped\": 0,\n        \"successful\": 95\n      },\n      \"timed_out\": false\n    },\n    \"status\": \"Success\",\n    \"message\": \"\",\n    \"operation\": null\n  }",
+                "operationTitle": "Execute Lucene Query",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "300",
+            "left": "126",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "357707c4-f022-413e-ace9-4b1b1543304f",
+            "id": 4729
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Query for Sysmon Compiled HTML",
+            "description": null,
+            "arguments": {
+                "name": "ElasticSearch",
+                "config": "8d03a01d-1cef-40a8-992a-63d8de2b339f",
+                "params": {
+                    "index": "logstash-beats-*",
+                    "query": "event_type:sysmon AND event_id:\"1\" AND @timestamp:{ {{vars.huntStartDateTime}} TO {{vars.huntEndDateTime}} } AND parent_image_path:\"C:\\\\windows\\\\hh.exe\"",
+                    "run_as_user": ""
+                },
+                "version": "2.2.1",
+                "connector": "elasticsearch",
+                "operation": "execute_lucene_query",
+                "mock_result": "{\n    \"data\": {\n      \"hits\": {\n        \"hits\": [\n          {\n            \"_id\": \"HgnpT2oBqSmy6R6grirH\",\n            \"_type\": \"doc\",\n            \"_index\": \"logstash-beats-compiledhtml\",\n            \"_score\": 2.7292862,\n            \"_source\": {\n              \"beat\": {\n                \"name\": \"admin-PC4\",\n                \"version\": \"6.5.3\",\n                \"hostname\": \"admin-PC4\"\n              },\n              \"tags\": [\n                \"beat\",\n                \"beats_input_codec_plain_applied\"\n              ],\n              \"task\": \"Process Create (rule: ProcessCreate)\",\n              \"user\": {\n                \"name\": \"SYSTEM\",\n                \"type\": \"User\",\n                \"domain\": \"NT AUTHORITY\",\n                \"identifier\": \"S-1-5-18\"\n              },\n              \"level\": \"Information\",\n              \"opcode\": \"Info\",\n              \"message\": \"Process Create:\\nRuleName: \\nUtcTime: 2019-04-24 15:11:22.359\\nProcessGuid: {D1BE7B41-7C9A-5CC0-0000-00100883E809}\\nProcessId: 1160\\nImage: C:\\\\Users\\\\superman\\\\Desktop\\\\x64\\\\mimikatz.exe\\nFileVersion: 2.1.1.0\\nDescription: mimikatz for Windows\\nProduct: mimikatz\\nCompany: gentilkiwi (Benjamin DELPY)\\nCommandLine: \\\"C:\\\\Users\\\\superman\\\\Desktop\\\\x64\\\\mimikatz.exe\\\" \\nCurrentDirectory: C:\\\\Users\\\\superman\\\\Desktop\\\\threat emulation\\\\\\nUser: batman\\\\superman\\nLogonGuid: {D1BE7B41-F352-5CB9-0000-00208C590300}\\nLogonId: 0x3598c\\nTerminalSessionId: 1\\nIntegrityLevel: High\\nHashes: MD5=332A5371389A8953A96BF09B69EDCB6E,SHA256=E46BA4BDD4168A399EE5BC2161A8C918095FA30EB20AC88CAC6AB1D6DBEA2B4A\\nParentProcessGuid: {D1BE7B41-7C9A-5CC0-0000-00106D6DE809}\\nParentProcessId: 2168\\nParentImage: C:\\\\Windows\\\\hh.exe\\nParentCommandLine: \\\"C:\\\\Windows\\\\hh.exe\\\" C:\\\\Users\\\\superman\\\\Desktop\\\\threat emulation\\\\test.chm\",\n              \"version\": 5,\n              \"@version\": \"1\",\n              \"event_id\": 1,\n              \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n              \"username\": \"batman\\\\superman\",\n              \"beat_host\": {\n                \"id\": \"d1be7b41-2fc5-49e3-9ff1-ec91443d27c3\",\n                \"os\": {\n                  \"build\": \"7601.0\",\n                  \"family\": \"windows\",\n                  \"version\": \"6.1\",\n                  \"platform\": \"windows\"\n                },\n                \"name\": \"admin-PC4\",\n                \"architecture\": \"x86_64\"\n              },\n              \"thread_id\": 1920,\n              \"@timestamp\": \"2019-04-24T15:11:22.453Z\",\n              \"event_data\": {\n                \"Hashes\": \"MD5=332A5371389A8953A96BF09B69EDCB6E,SHA256=E46BA4BDD4168A399EE5BC2161A8C918095FA30EB20AC88CAC6AB1D6DBEA2B4A\",\n                \"Company\": \"gentilkiwi (Benjamin DELPY)\",\n                \"LogonId\": \"0x3598c\",\n                \"Product\": \"mimikatz\",\n                \"UtcTime\": \"2019-04-24 15:11:22.359\",\n                \"LogonGuid\": \"{D1BE7B41-F352-5CB9-0000-00208C590300}\",\n                \"ProcessId\": \"1160\",\n                \"CommandLine\": \"\\\"C:\\\\Users\\\\superman\\\\Desktop\\\\x64\\\\mimikatz.exe\\\" \",\n                \"Description\": \"mimikatz for Windows\",\n                \"FileVersion\": \"2.1.1.0\",\n                \"ProcessGuid\": \"{D1BE7B41-7C9A-5CC0-0000-00100883E809}\",\n                \"IntegrityLevel\": \"High\",\n                \"ParentProcessId\": \"2168\",\n                \"CurrentDirectory\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\threat emulation\\\\\",\n                \"ParentCommandLine\": \"\\\"C:\\\\Windows\\\\hh.exe\\\" C:\\\\Users\\\\superman\\\\Desktop\\\\threat emulation\\\\test.chm\",\n                \"ParentProcessGuid\": \"{D1BE7B41-7C9A-5CC0-0000-00106D6DE809}\",\n                \"TerminalSessionId\": \"1\"\n              },\n              \"event_type\": \"sysmon\",\n              \"image_path\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\x64\\\\mimikatz.exe\",\n              \"process_id\": 1420,\n              \"source_name\": \"Microsoft-Windows-Sysmon\",\n              \"computer_name\": \"admin-PC4.batman.local\",\n              \"logstash_time\": 0.0008568763732910156,\n              \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n              \"record_number\": \"335366\",\n              \"parent_image_path\": \"C:\\\\Windows\\\\hh.exe\"\n            }\n          },\n          {\n            \"_id\": \"GgnnT2oBqSmy6R6gvydG\",\n            \"_type\": \"doc\",\n            \"_index\": \"logstash-beats-compiledhtml\",\n            \"_score\": 2.7292862,\n            \"_source\": {\n              \"beat\": {\n                \"name\": \"admin-PC4\",\n                \"version\": \"6.5.3\",\n                \"hostname\": \"admin-PC4\"\n              },\n              \"tags\": [\n                \"beat\",\n                \"beats_input_codec_plain_applied\"\n              ],\n              \"task\": \"Process Create (rule: ProcessCreate)\",\n              \"user\": {\n                \"name\": \"SYSTEM\",\n                \"type\": \"User\",\n                \"domain\": \"NT AUTHORITY\",\n                \"identifier\": \"S-1-5-18\"\n              },\n              \"level\": \"Information\",\n              \"opcode\": \"Info\",\n              \"message\": \"Process Create:\\nRuleName: \\nUtcTime: 2019-04-24 18:09:23.753\\nProcessGuid: {D1BE7B41-A653-5CC0-0000-00107D78E709}\\nProcessId: 2892\\nImage: C:\\\\Users\\\\superman\\\\Desktop\\\\x64\\\\mimikatz.exe\\nFileVersion: 2.1.1.0\\nDescription: mimikatz for Windows\\nProduct: mimikatz\\nCompany: gentilkiwi (Benjamin DELPY)\\nCommandLine: \\\"C:\\\\Users\\\\superman\\\\Desktop\\\\x64\\\\mimikatz.exe\\\" \\nCurrentDirectory: C:\\\\Users\\\\superman\\\\Desktop\\\\threat emulation\\\\\\nUser: batman\\\\superman\\nLogonGuid: {D1BE7B41-F352-5CB9-0000-00208C590300}\\nLogonId: 0x3598c\\nTerminalSessionId: 1\\nIntegrityLevel: High\\nHashes: MD5=332A5371389A8953A96BF09B69EDCB6E,SHA256=E46BA4BDD4168A399EE5BC2161A8C918095FA30EB20AC88CAC6AB1D6DBEA2B4A\\nParentProcessGuid: {D1BE7B41-A653-5CC0-0000-00106D5DE709}\\nParentProcessId: 2876\\nParentImage: C:\\\\Windows\\\\hh.exe\\nParentCommandLine: \\\"C:\\\\Windows\\\\hh.exe\\\" C:\\\\Users\\\\superman\\\\Desktop\\\\threat emulation\\\\test.chm\",\n              \"version\": 5,\n              \"@version\": \"1\",\n              \"event_id\": 1,\n              \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n              \"username\": \"batman\\\\superman\",\n              \"beat_host\": {\n                \"id\": \"d1be7b41-2fc5-49e3-9ff1-ec91443d27c3\",\n                \"os\": {\n                  \"build\": \"7601.0\",\n                  \"family\": \"windows\",\n                  \"version\": \"6.1\",\n                  \"platform\": \"windows\"\n                },\n                \"name\": \"admin-PC4\",\n                \"architecture\": \"x86_64\"\n              },\n              \"thread_id\": 1920,\n              \"@timestamp\": \"2019-04-24T18:09:23.878Z\",\n              \"event_data\": {\n                \"Hashes\": \"MD5=332A5371389A8953A96BF09B69EDCB6E,SHA256=E46BA4BDD4168A399EE5BC2161A8C918095FA30EB20AC88CAC6AB1D6DBEA2B4A\",\n                \"Company\": \"gentilkiwi (Benjamin DELPY)\",\n                \"LogonId\": \"0x3598c\",\n                \"Product\": \"mimikatz\",\n                \"UtcTime\": \"2019-04-24 18:09:23.753\",\n                \"LogonGuid\": \"{D1BE7B41-F352-5CB9-0000-00208C590300}\",\n                \"ProcessId\": \"2892\",\n                \"CommandLine\": \"\\\"C:\\\\Users\\\\superman\\\\Desktop\\\\x64\\\\mimikatz.exe\\\" \",\n                \"Description\": \"mimikatz for Windows\",\n                \"FileVersion\": \"2.1.1.0\",\n                \"ProcessGuid\": \"{D1BE7B41-A653-5CC0-0000-00107D78E709}\",\n                \"IntegrityLevel\": \"High\",\n                \"ParentProcessId\": \"2876\",\n                \"CurrentDirectory\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\threat emulation\\\\\",\n                \"ParentCommandLine\": \"\\\"C:\\\\Windows\\\\hh.exe\\\" C:\\\\Users\\\\superman\\\\Desktop\\\\threat emulation\\\\test.chm\",\n                \"ParentProcessGuid\": \"{D1BE7B41-A653-5CC0-0000-00106D5DE709}\",\n                \"TerminalSessionId\": \"1\"\n              },\n              \"event_type\": \"sysmon\",\n              \"image_path\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\x64\\\\mimikatz.exe\",\n              \"process_id\": 1420,\n              \"source_name\": \"Microsoft-Windows-Sysmon\",\n              \"computer_name\": \"admin-PC4.batman.local\",\n              \"logstash_time\": 0.0005850791931152344,\n              \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n              \"record_number\": \"335357\",\n              \"parent_image_path\": \"C:\\\\Windows\\\\hh.exe\"\n            }\n          }\n        ],\n        \"total\": {\n          \"value\": 2,\n          \"relation\": \"eq\"\n        },\n        \"max_score\": 2.7292862\n      },\n      \"took\": 656,\n      \"_shards\": {\n        \"total\": 95,\n        \"failed\": 0,\n        \"skipped\": 0,\n        \"successful\": 95\n      },\n      \"timed_out\": false\n    },\n    \"status\": \"Success\",\n    \"message\": \"\",\n    \"operation\": null\n  }",
+                "operationTitle": "Execute Lucene Query",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "435",
+            "left": "126",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "516704f3-0e10-4c3b-a54b-d2d3b21dc989",
+            "id": 4730
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Query for Control Panel Item Execution",
+            "description": null,
+            "arguments": {
+                "name": "ElasticSearch",
+                "config": "8d03a01d-1cef-40a8-992a-63d8de2b339f",
+                "params": {
+                    "index": "logstash-beats-*",
+                    "query": "event_type:sysmon AND event_id:\"1\" AND @timestamp:{ {{vars.huntStartDateTime}} TO {{vars.huntEndDateTime}} } AND (parent_image_path:\"C:\\\\Windows\\\\System32\\\\control.exe\" OR parent_image_path:\"C:\\\\Windows\\\\syswow64\\\\control.exe\") NOT event_data.ParentCommandLine:\\\"C\\:\\\\Windows\\\\System32\\\\control.exe\\\"\\ \\\"C\\:\\\\Windows\\\\system32\\\\*.cpl\\\"* NOT event_data.ParentCommandLine:\\\"C\\:\\\\Windows\\\\syswow64\\\\control.exe\\\"\\ \\\"C\\:\\\\Windows\\\\syswow6432\\\\*.cpl\\\"*",
+                    "run_as_user": ""
+                },
+                "version": "2.2.1",
+                "connector": "elasticsearch",
+                "operation": "execute_lucene_query",
+                "mock_result": "{\n    \"data\": {\n      \"hits\": {\n        \"hits\": [\n          {\n            \"_id\": \"TgnyT2oBqSmy6R6g9Db9\",\n            \"_type\": \"doc\",\n            \"_index\": \"logstash-beats-controlpanelitems\",\n            \"_score\": 2.9116077,\n            \"_source\": {\n              \"beat\": {\n                \"name\": \"admin-PC4\",\n                \"version\": \"6.5.3\",\n                \"hostname\": \"admin-PC4\"\n              },\n              \"tags\": [\n                \"beat\",\n                \"beats_input_codec_plain_applied\"\n              ],\n              \"task\": \"Process Create (rule: ProcessCreate)\",\n              \"user\": {\n                \"name\": \"SYSTEM\",\n                \"type\": \"User\",\n                \"domain\": \"NT AUTHORITY\",\n                \"identifier\": \"S-1-5-18\"\n              },\n              \"level\": \"Information\",\n              \"opcode\": \"Info\",\n              \"message\": \"Process Create:\\nRuleName: \\nUtcTime: 2019-04-24 15:21:30.787\\nProcessGuid: {D1BE7B41-7EFA-5CC0-0000-00103648EA09}\\nProcessId: 552\\nImage: C:\\\\Windows\\\\System32\\\\rundll32.exe\\nFileVersion: 6.1.7600.16385 (win7_rtm.090713-1255)\\nDescription: Windows host process (Rundll32)\\nProduct: Microsoft\u00ae Windows\u00ae Operating System\\nCompany: Microsoft Corporation\\nCommandLine: \\\"C:\\\\Windows\\\\system32\\\\rundll32.exe\\\" Shell32.dll,Control_RunDLL \\\"C:\\\\Users\\\\superman\\\\Desktop\\\\notethan.cpl\\\",\\nCurrentDirectory: C:\\\\Users\\\\superman\\\\Desktop\\\\\\nUser: batman\\\\superman\\nLogonGuid: {D1BE7B41-F352-5CB9-0000-00208C590300}\\nLogonId: 0x3598c\\nTerminalSessionId: 1\\nIntegrityLevel: High\\nHashes: MD5=DD81D91FF3B0763C392422865C9AC12E,SHA256=F5691B8F200E3196E6808E932630E862F8F26F31CD949981373F23C9D87DB8B9\\nParentProcessGuid: {D1BE7B41-7EFA-5CC0-0000-0010A640EA09}\\nParentProcessId: 3872\\nParentImage: C:\\\\Windows\\\\System32\\\\control.exe\\nParentCommandLine: \\\"C:\\\\Windows\\\\System32\\\\control.exe\\\" \\\"C:\\\\Users\\\\superman\\\\Desktop\\\\notethan.cpl\\\",\",\n              \"version\": 5,\n              \"@version\": \"1\",\n              \"event_id\": 1,\n              \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n              \"username\": \"batman\\\\superman\",\n              \"beat_host\": {\n                \"id\": \"d1be7b41-2fc5-49e3-9ff1-ec91443d27c3\",\n                \"os\": {\n                  \"build\": \"7601.0\",\n                  \"family\": \"windows\",\n                  \"version\": \"6.1\",\n                  \"platform\": \"windows\"\n                },\n                \"name\": \"admin-PC4\",\n                \"architecture\": \"x86_64\"\n              },\n              \"thread_id\": 1920,\n              \"@timestamp\": \"2019-04-24T15:21:30.834Z\",\n              \"event_data\": {\n                \"Hashes\": \"MD5=DD81D91FF3B0763C392422865C9AC12E,SHA256=F5691B8F200E3196E6808E932630E862F8F26F31CD949981373F23C9D87DB8B9\",\n                \"Company\": \"Microsoft Corporation\",\n                \"LogonId\": \"0x3598c\",\n                \"Product\": \"Microsoft\u00ae Windows\u00ae Operating System\",\n                \"UtcTime\": \"2019-04-24 15:21:30.787\",\n                \"LogonGuid\": \"{D1BE7B41-F352-5CB9-0000-00208C590300}\",\n                \"ProcessId\": \"552\",\n                \"CommandLine\": \"\\\"C:\\\\Windows\\\\system32\\\\rundll32.exe\\\" Shell32.dll,Control_RunDLL \\\"C:\\\\Users\\\\superman\\\\Desktop\\\\notethan.cpl\\\",\",\n                \"Description\": \"Windows host process (Rundll32)\",\n                \"FileVersion\": \"6.1.7600.16385 (win7_rtm.090713-1255)\",\n                \"ProcessGuid\": \"{D1BE7B41-7EFA-5CC0-0000-00103648EA09}\",\n                \"IntegrityLevel\": \"High\",\n                \"ParentProcessId\": \"3872\",\n                \"CurrentDirectory\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\\",\n                \"ParentCommandLine\": \"\\\"C:\\\\Windows\\\\System32\\\\control.exe\\\" \\\"C:\\\\Users\\\\superman\\\\Desktop\\\\notethan.cpl\\\",\",\n                \"ParentProcessGuid\": \"{D1BE7B41-7EFA-5CC0-0000-0010A640EA09}\",\n                \"TerminalSessionId\": \"1\"\n              },\n              \"event_type\": \"sysmon\",\n              \"image_path\": \"C:\\\\Windows\\\\System32\\\\rundll32.exe\",\n              \"process_id\": 1420,\n              \"source_name\": \"Microsoft-Windows-Sysmon\",\n              \"computer_name\": \"admin-PC4.batman.local\",\n              \"logstash_time\": 0.0019500255584716797,\n              \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n              \"record_number\": \"335426\",\n              \"parent_image_path\": \"C:\\\\Windows\\\\System32\\\\control.exe\"\n            }\n          },\n          {\n            \"_id\": \"LAnyT2oBqSmy6R6g3TYw\",\n            \"_type\": \"doc\",\n            \"_index\": \"logstash-beats-controlpanelitems\",\n            \"_score\": 2.9116077,\n            \"_source\": {\n              \"beat\": {\n                \"name\": \"admin-PC4\",\n                \"version\": \"6.5.3\",\n                \"hostname\": \"admin-PC4\"\n              },\n              \"tags\": [\n                \"beat\",\n                \"beats_input_codec_plain_applied\"\n              ],\n              \"task\": \"Process Create (rule: ProcessCreate)\",\n              \"user\": {\n                \"name\": \"SYSTEM\",\n                \"type\": \"User\",\n                \"domain\": \"NT AUTHORITY\",\n                \"identifier\": \"S-1-5-18\"\n              },\n              \"level\": \"Information\",\n              \"opcode\": \"Info\",\n              \"message\": \"Process Create:\\nRuleName: \\nUtcTime: 2019-04-24 15:21:24.650\\nProcessGuid: {D1BE7B41-7EF4-5CC0-0000-0010E72AEA09}\\nProcessId: 3592\\nImage: C:\\\\Windows\\\\System32\\\\rundll32.exe\\nFileVersion: 6.1.7600.16385 (win7_rtm.090713-1255)\\nDescription: Windows host process (Rundll32)\\nProduct: Microsoft\u00ae Windows\u00ae Operating System\\nCompany: Microsoft Corporation\\nCommandLine: \\\"C:\\\\Windows\\\\system32\\\\rundll32.exe\\\" Shell32.dll,Control_RunDLL \\\"C:\\\\Users\\\\superman\\\\Desktop\\\\notethan.cpl\\\",\\nCurrentDirectory: C:\\\\Users\\\\superman\\\\Desktop\\\\\\nUser: batman\\\\superman\\nLogonGuid: {D1BE7B41-F352-5CB9-0000-00208C590300}\\nLogonId: 0x3598c\\nTerminalSessionId: 1\\nIntegrityLevel: High\\nHashes: MD5=DD81D91FF3B0763C392422865C9AC12E,SHA256=F5691B8F200E3196E6808E932630E862F8F26F31CD949981373F23C9D87DB8B9\\nParentProcessGuid: {D1BE7B41-7EF4-5CC0-0000-00106523EA09}\\nParentProcessId: 1740\\nParentImage: C:\\\\Windows\\\\System32\\\\control.exe\\nParentCommandLine: \\\"C:\\\\Windows\\\\System32\\\\control.exe\\\" \\\"C:\\\\Users\\\\superman\\\\Desktop\\\\notethan.cpl\\\",\",\n              \"version\": 5,\n              \"@version\": \"1\",\n              \"event_id\": 1,\n              \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n              \"username\": \"batman\\\\superman\",\n              \"beat_host\": {\n                \"id\": \"d1be7b41-2fc5-49e3-9ff1-ec91443d27c3\",\n                \"os\": {\n                  \"build\": \"7601.0\",\n                  \"family\": \"windows\",\n                  \"version\": \"6.1\",\n                  \"platform\": \"windows\"\n                },\n                \"name\": \"admin-PC4\",\n                \"architecture\": \"x86_64\"\n              },\n              \"thread_id\": 1920,\n              \"@timestamp\": \"2019-04-24T15:21:24.666Z\",\n              \"event_data\": {\n                \"Hashes\": \"MD5=DD81D91FF3B0763C392422865C9AC12E,SHA256=F5691B8F200E3196E6808E932630E862F8F26F31CD949981373F23C9D87DB8B9\",\n                \"Company\": \"Microsoft Corporation\",\n                \"LogonId\": \"0x3598c\",\n                \"Product\": \"Microsoft\u00ae Windows\u00ae Operating System\",\n                \"UtcTime\": \"2019-04-24 15:21:24.650\",\n                \"LogonGuid\": \"{D1BE7B41-F352-5CB9-0000-00208C590300}\",\n                \"ProcessId\": \"3592\",\n                \"CommandLine\": \"\\\"C:\\\\Windows\\\\system32\\\\rundll32.exe\\\" Shell32.dll,Control_RunDLL \\\"C:\\\\Users\\\\superman\\\\Desktop\\\\notethan.cpl\\\",\",\n                \"Description\": \"Windows host process (Rundll32)\",\n                \"FileVersion\": \"6.1.7600.16385 (win7_rtm.090713-1255)\",\n                \"ProcessGuid\": \"{D1BE7B41-7EF4-5CC0-0000-0010E72AEA09}\",\n                \"IntegrityLevel\": \"High\",\n                \"ParentProcessId\": \"1740\",\n                \"CurrentDirectory\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\\",\n                \"ParentCommandLine\": \"\\\"C:\\\\Windows\\\\System32\\\\control.exe\\\" \\\"C:\\\\Users\\\\superman\\\\Desktop\\\\notethan.cpl\\\",\",\n                \"ParentProcessGuid\": \"{D1BE7B41-7EF4-5CC0-0000-00106523EA09}\",\n                \"TerminalSessionId\": \"1\"\n              },\n              \"event_type\": \"sysmon\",\n              \"image_path\": \"C:\\\\Windows\\\\System32\\\\rundll32.exe\",\n              \"process_id\": 1420,\n              \"source_name\": \"Microsoft-Windows-Sysmon\",\n              \"computer_name\": \"admin-PC4.batman.local\",\n              \"logstash_time\": 0.002641916275024414,\n              \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n              \"record_number\": \"335418\",\n              \"parent_image_path\": \"C:\\\\Windows\\\\System32\\\\control.exe\"\n            }\n          }\n        ],\n        \"total\": {\n          \"value\": 2,\n          \"relation\": \"eq\"\n        },\n        \"max_score\": 2.9116077\n      },\n      \"took\": 1353,\n      \"_shards\": {\n        \"total\": 95,\n        \"failed\": 0,\n        \"skipped\": 0,\n        \"successful\": 95\n      },\n      \"timed_out\": false\n    },\n    \"status\": \"Success\",\n    \"message\": \"\",\n    \"operation\": null\n  }",
+                "operationTitle": "Execute Lucene Query",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "570",
+            "left": "126",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "409fca22-d67f-474e-a930-83929964c44c",
+            "id": 4731
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Query for InstallUtil Via Command Line",
+            "description": null,
+            "arguments": {
+                "name": "ElasticSearch",
+                "config": "8d03a01d-1cef-40a8-992a-63d8de2b339f",
+                "params": {
+                    "index": "logstash-beats-*",
+                    "query": "event_type:sysmon AND event_id:\"1\" AND @timestamp:{ {{vars.huntStartDateTime}} TO {{vars.huntEndDateTime}} } AND (parent_image_path:C\\:\\\\Windows\\\\System32\\\\wmic.exe OR parent_image_path:C\\:\\\\Windows\\\\System32\\\\cmd.exe OR parent_image_path:C\\:\\\\Windows\\\\SysWOW64\\\\wmic.exe OR parent_image_path:C\\:\\\\Windows\\\\SysWOW64\\\\cmd.exe OR parent_image_path:C\\:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe OR parent_image_path:C\\:\\\\Windows\\\\SysWOW64\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe) AND event_data.CommandLine:*InstallUtil*",
+                    "run_as_user": ""
+                },
+                "version": "2.2.1",
+                "connector": "elasticsearch",
+                "operation": "execute_lucene_query",
+                "mock_result": "{\n    \"data\": {\n      \"hits\": {\n        \"hits\": [\n          {\n            \"_id\": \"ZA3RVGoBqSmy6R6gdn4D\",\n            \"_type\": \"doc\",\n            \"_index\": \"logstash-beats-installutil\",\n            \"_score\": 8.178278,\n            \"_source\": {\n              \"beat\": {\n                \"name\": \"admin-PC4\",\n                \"version\": \"6.5.3\",\n                \"hostname\": \"admin-PC4\"\n              },\n              \"tags\": [\n                \"beat\",\n                \"beats_input_codec_plain_applied\"\n              ],\n              \"task\": \"Process Create (rule: ProcessCreate)\",\n              \"user\": {\n                \"name\": \"SYSTEM\",\n                \"type\": \"User\",\n                \"domain\": \"NT AUTHORITY\",\n                \"identifier\": \"S-1-5-18\"\n              },\n              \"level\": \"Information\",\n              \"opcode\": \"Info\",\n              \"message\": \"Process Create:\\nRuleName: \\nUtcTime: 2019-04-25 14:05:55.748\\nProcessGuid: {D1BE7B41-BEC3-5CC1-0000-0010664F7D01}\\nProcessId: 3760\\nImage: C:\\\\Windows\\\\Microsoft.NET\\\\Framework64\\\\v4.0.30319\\\\InstallUtil.exe\\nFileVersion: 4.6.81.0 built by: NETFXREL2\\nDescription: .NET Framework installation utility\\nProduct: Microsoft\u00ae .NET Framework\\nCompany: Microsoft Corporation\\nCommandLine: C:\\\\Windows\\\\Microsoft.NET\\\\Framework64\\\\v4.0.30319\\\\InstallUtil.exe  \/logfile= \/LogtoConsole=false \/U AllTheThings.dll\\nCurrentDirectory: C:\\\\Users\\\\superman\\\\Desktop\\\\ath\\\\x64\\\\Release\\\\\\nUser: batman\\\\superman\\nLogonGuid: {D1BE7B41-AF27-5CC0-0000-0020AB7A0400}\\nLogonId: 0x47aab\\nTerminalSessionId: 1\\nIntegrityLevel: High\\nHashes: MD5=2F0E46C89AAC4C34EDD5920C69F06441,SHA256=386188380586A54E2CFB737C0632BD6F1BF1F84CB557691631D82B2DFFE94621\\nParentProcessGuid: {D1BE7B41-E538-5CC1-0000-0010EE037901}\\nParentProcessId: 3880\\nParentImage: C:\\\\Windows\\\\System32\\\\cmd.exe\\nParentCommandLine: \\\"C:\\\\Windows\\\\system32\\\\cmd.exe\\\" \",\n              \"version\": 5,\n              \"@version\": \"1\",\n              \"event_id\": 1,\n              \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n              \"username\": \"batman\\\\superman\",\n              \"beat_host\": {\n                \"id\": \"d1be7b41-2fc5-49e3-9ff1-ec91443d27c3\",\n                \"os\": {\n                  \"build\": \"7601.0\",\n                  \"family\": \"windows\",\n                  \"version\": \"6.1\",\n                  \"platform\": \"windows\"\n                },\n                \"name\": \"admin-PC4\",\n                \"architecture\": \"x86_64\"\n              },\n              \"thread_id\": 1492,\n              \"@timestamp\": \"2019-04-25T14:05:56.398Z\",\n              \"event_data\": {\n                \"Hashes\": \"MD5=2F0E46C89AAC4C34EDD5920C69F06441,SHA256=386188380586A54E2CFB737C0632BD6F1BF1F84CB557691631D82B2DFFE94621\",\n                \"Company\": \"Microsoft Corporation\",\n                \"LogonId\": \"0x47aab\",\n                \"Product\": \"Microsoft\u00ae .NET Framework\",\n                \"UtcTime\": \"2019-04-25 14:05:55.748\",\n                \"LogonGuid\": \"{D1BE7B41-AF27-5CC0-0000-0020AB7A0400}\",\n                \"ProcessId\": \"3760\",\n                \"CommandLine\": \"C:\\\\Windows\\\\Microsoft.NET\\\\Framework64\\\\v4.0.30319\\\\InstallUtil.exe  \/logfile= \/LogtoConsole=false \/U AllTheThings.dll\",\n                \"Description\": \".NET Framework installation utility\",\n                \"FileVersion\": \"4.6.81.0 built by: NETFXREL2\",\n                \"ProcessGuid\": \"{D1BE7B41-BEC3-5CC1-0000-0010664F7D01}\",\n                \"IntegrityLevel\": \"High\",\n                \"ParentProcessId\": \"3880\",\n                \"CurrentDirectory\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\ath\\\\x64\\\\Release\\\\\",\n                \"ParentCommandLine\": \"\\\"C:\\\\Windows\\\\system32\\\\cmd.exe\\\" \",\n                \"ParentProcessGuid\": \"{D1BE7B41-E538-5CC1-0000-0010EE037901}\",\n                \"TerminalSessionId\": \"1\"\n              },\n              \"event_type\": \"sysmon\",\n              \"image_path\": \"C:\\\\Windows\\\\Microsoft.NET\\\\Framework64\\\\v4.0.30319\\\\InstallUtil.exe\",\n              \"process_id\": 1428,\n              \"source_name\": \"Microsoft-Windows-Sysmon\",\n              \"computer_name\": \"admin-PC4.batman.local\",\n              \"logstash_time\": 0.0011229515075683594,\n              \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n              \"record_number\": \"338680\",\n              \"parent_image_path\": \"C:\\\\Windows\\\\System32\\\\cmd.exe\"\n            }\n          }\n        ],\n        \"total\": {\n          \"value\": 1,\n          \"relation\": \"eq\"\n        },\n        \"max_score\": 8.178278\n      },\n      \"took\": 1194,\n      \"_shards\": {\n        \"total\": 95,\n        \"failed\": 0,\n        \"skipped\": 0,\n        \"successful\": 95\n      },\n      \"timed_out\": false\n    },\n    \"status\": \"Success\",\n    \"message\": \"\",\n    \"operation\": null\n  }",
+                "operationTitle": "Execute Lucene Query",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "705",
+            "left": "126",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "c223da07-0998-4bb9-81c7-6b51777515f3",
+            "id": 4732
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Query for Sysmon InstallUtil Child",
+            "description": null,
+            "arguments": {
+                "name": "ElasticSearch",
+                "config": "8d03a01d-1cef-40a8-992a-63d8de2b339f",
+                "params": {
+                    "index": "logstash-beats-*",
+                    "query": "event_type:sysmon AND event_id:\"1\" AND @timestamp:{ {{vars.huntStartDateTime}} TO {{vars.huntEndDateTime}} } AND (parent_image_path.keyword:C\\:\\\\Windows\\\\Microsoft.NET\\\\Framework\\\\v*\\\\InstallUtil.exe OR parent_image_path.keyword:C\\:\\\\Windows\\\\Microsoft.NET\\\\Framework64\\\\v*\\\\InstallUtil.exe)",
+                    "run_as_user": ""
+                },
+                "version": "2.2.1",
+                "connector": "elasticsearch",
+                "operation": "execute_lucene_query",
+                "mock_result": "{\n  \"data\": {\n    \"hits\": {\n      \"hits\": [],\n      \"total\": {\n        \"value\": 0,\n        \"relation\": \"eq\"\n      },\n      \"max_score\": null\n    },\n    \"took\": 2331,\n    \"_shards\": {\n      \"total\": 95,\n      \"failed\": 0,\n      \"skipped\": 0,\n      \"successful\": 95\n    },\n    \"timed_out\": false\n  },\n  \"status\": \"Success\",\n  \"message\": \"\",\n  \"operation\": null\n}",
+                "operationTitle": "Execute Lucene Query",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "840",
+            "left": "126",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "036b5ea0-ed22-4cf1-a6b4-12f0e5979f12",
+            "id": 4733
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Query for Sysmon MSHTA",
+            "description": null,
+            "arguments": {
+                "name": "ElasticSearch",
+                "config": "8d03a01d-1cef-40a8-992a-63d8de2b339f",
+                "params": {
+                    "index": "logstash-beats-*",
+                    "query": "event_type:sysmon AND event_id:\"1\" AND @timestamp:{ {{vars.huntStartDateTime}} TO {{vars.huntEndDateTime}} } AND (image_path:\"C:\\\\Windows\\\\System32\\\\mshta.exe\" OR image_path:\"C:\\\\Windows\\\\SysWOW64\\\\mshta.exe\")",
+                    "run_as_user": ""
+                },
+                "version": "2.2.1",
+                "connector": "elasticsearch",
+                "operation": "execute_lucene_query",
+                "mock_result": "{\n    \"data\": {\n      \"hits\": {\n        \"hits\": [\n          {\n            \"_id\": \"w12JdWsBlqecEBF3X246\",\n            \"_type\": \"doc\",\n            \"_index\": \"logstash-beats-mshta\",\n            \"_score\": 3.4384105,\n            \"_source\": {\n              \"beat\": {\n                \"name\": \"win7-host1-PC\",\n                \"version\": \"6.5.3\",\n                \"hostname\": \"win7-host1-PC\"\n              },\n              \"tags\": [\n                \"beat\",\n                \"beats_input_codec_plain_applied\"\n              ],\n              \"task\": \"Process Create (rule: ProcessCreate)\",\n              \"user\": {\n                \"name\": \"SYSTEM\",\n                \"type\": \"User\",\n                \"domain\": \"NT AUTHORITY\",\n                \"identifier\": \"S-1-5-18\"\n              },\n              \"level\": \"Information\",\n              \"opcode\": \"Info\",\n              \"message\": \"Process Create:\\nRuleName: \\nUtcTime: 2019-06-20 15:37:42.620\\nProcessGuid: {DA929735-A846-5D0B-0000-0010813C0E00}\\nProcessId: 3148\\nImage: C:\\\\Windows\\\\SysWOW64\\\\mshta.exe\\nFileVersion: 8.00.7601.19104 (win7sp1_gdr.151210-0600)\\nDescription: Microsoft (R) HTML Application host\\nProduct: Windows\u00ae Internet Explorer\\nCompany: Microsoft Corporation\\nOriginalFileName: MSHTA.EXE\\nCommandLine: C:\\\\Windows\\\\SysWOW64\\\\mshta.exe  C:\\\\Users\\\\superman\\\\Desktop\\\\calc.hta\\nCurrentDirectory: C:\\\\Users\\\\superman\\\\Desktop\\\\\\nUser: batman\\\\superman\\nLogonGuid: {DA929735-A7BD-5D0B-0000-002046760300}\\nLogonId: 0x37646\\nTerminalSessionId: 1\\nIntegrityLevel: High\\nHashes: MD5=B53D7530178E4576A65EF3FE353DB6D4,SHA256=A0F90FACBE2173D3F6D9296E6C1A1F305321D69B02C5AC0D812645871C781FA7\\nParentProcessGuid: {DA929735-A7F1-5D0B-0000-0010A89E0A00}\\nParentProcessId: 3708\\nParentImage: C:\\\\Windows\\\\System32\\\\cmd.exe\\nParentCommandLine: \\\"cmd.exe\\\" \/s \/k pushd \\\"C:\\\\Users\\\\superman\\\\Desktop\\\"\",\n              \"version\": 5,\n              \"@version\": \"1\",\n              \"event_id\": 1,\n              \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n              \"username\": \"batman\\\\superman\",\n              \"beat_host\": {\n                \"id\": \"da929735-a8f9-4b38-8348-7664a570a0a2\",\n                \"os\": {\n                  \"build\": \"7601.24356\",\n                  \"family\": \"windows\",\n                  \"version\": \"6.1\",\n                  \"platform\": \"windows\"\n                },\n                \"name\": \"win7-host1-PC\",\n                \"architecture\": \"x86_64\"\n              },\n              \"thread_id\": 1824,\n              \"@timestamp\": \"2019-06-20T15:37:42.651Z\",\n              \"event_data\": {\n                \"Hashes\": \"MD5=B53D7530178E4576A65EF3FE353DB6D4,SHA256=A0F90FACBE2173D3F6D9296E6C1A1F305321D69B02C5AC0D812645871C781FA7\",\n                \"Company\": \"Microsoft Corporation\",\n                \"LogonId\": \"0x37646\",\n                \"Product\": \"Windows\u00ae Internet Explorer\",\n                \"UtcTime\": \"2019-06-20 15:37:42.620\",\n                \"LogonGuid\": \"{DA929735-A7BD-5D0B-0000-002046760300}\",\n                \"ProcessId\": \"3148\",\n                \"CommandLine\": \"C:\\\\Windows\\\\SysWOW64\\\\mshta.exe  C:\\\\Users\\\\superman\\\\Desktop\\\\calc.hta\",\n                \"Description\": \"Microsoft (R) HTML Application host\",\n                \"FileVersion\": \"8.00.7601.19104 (win7sp1_gdr.151210-0600)\",\n                \"ProcessGuid\": \"{DA929735-A846-5D0B-0000-0010813C0E00}\",\n                \"IntegrityLevel\": \"High\",\n                \"ParentProcessId\": \"3708\",\n                \"CurrentDirectory\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\\",\n                \"OriginalFileName\": \"MSHTA.EXE\",\n                \"ParentCommandLine\": \"\\\"cmd.exe\\\" \/s \/k pushd \\\"C:\\\\Users\\\\superman\\\\Desktop\\\"\",\n                \"ParentProcessGuid\": \"{DA929735-A7F1-5D0B-0000-0010A89E0A00}\",\n                \"TerminalSessionId\": \"1\"\n              },\n              \"event_type\": \"sysmon\",\n              \"image_path\": \"C:\\\\Windows\\\\SysWOW64\\\\mshta.exe\",\n              \"process_id\": 1408,\n              \"source_name\": \"Microsoft-Windows-Sysmon\",\n              \"computer_name\": \"win7-host1-PC.batman.local\",\n              \"logstash_time\": 0.0017402172088623047,\n              \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n              \"record_number\": \"933564\",\n              \"parent_image_path\": \"C:\\\\Windows\\\\System32\\\\cmd.exe\"\n            }\n          }\n        ],\n        \"total\": {\n          \"value\": 1,\n          \"relation\": \"eq\"\n        },\n        \"max_score\": 3.4384105\n      },\n      \"took\": 375,\n      \"_shards\": {\n        \"total\": 95,\n        \"failed\": 0,\n        \"skipped\": 0,\n        \"successful\": 95\n      },\n      \"timed_out\": false\n    },\n    \"status\": \"Success\",\n    \"message\": \"\",\n    \"operation\": null\n  }",
+                "operationTitle": "Execute Lucene Query",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "975",
+            "left": "126",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "027808d0-c64f-4234-8284-3bf2716e6128",
+            "id": 4734
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Query for MSHTA Child",
+            "description": null,
+            "arguments": {
+                "name": "ElasticSearch",
+                "config": "8d03a01d-1cef-40a8-992a-63d8de2b339f",
+                "params": {
+                    "index": "logstash-beats-*",
+                    "query": "event_type:sysmon AND event_id:\"1\" AND @timestamp:{ {{vars.huntStartDateTime}} TO {{vars.huntEndDateTime}} } AND (parent_image_path:\"C:\\\\Windows\\\\System32\\\\mshta.exe\" OR parent_image_path:\"C:\\\\Windows\\\\SysWOW64\\\\mshta.exe\")",
+                    "run_as_user": ""
+                },
+                "version": "2.2.1",
+                "connector": "elasticsearch",
+                "operation": "execute_lucene_query",
+                "mock_result": "{\n    \"data\": {\n      \"hits\": {\n        \"hits\": [\n          {\n            \"_id\": \"2F2JdWsBlqecEBF3bG6u\",\n            \"_type\": \"doc\",\n            \"_index\": \"logstash-beats-mshta\",\n            \"_score\": 3.4384105,\n            \"_source\": {\n              \"beat\": {\n                \"name\": \"win7-host1-PC\",\n                \"version\": \"6.5.3\",\n                \"hostname\": \"win7-host1-PC\"\n              },\n              \"tags\": [\n                \"beat\",\n                \"beats_input_codec_plain_applied\"\n              ],\n              \"task\": \"Process Create (rule: ProcessCreate)\",\n              \"user\": {\n                \"name\": \"SYSTEM\",\n                \"type\": \"User\",\n                \"domain\": \"NT AUTHORITY\",\n                \"identifier\": \"S-1-5-18\"\n              },\n              \"level\": \"Information\",\n              \"opcode\": \"Info\",\n              \"message\": \"Process Create:\\nRuleName: \\nUtcTime: 2019-06-20 15:37:43.813\\nProcessGuid: {DA929735-A847-5D0B-0000-00108E740E00}\\nProcessId: 2388\\nImage: C:\\\\Windows\\\\SysWOW64\\\\cmd.exe\\nFileVersion: 6.1.7601.17514 (win7sp1_rtm.101119-1850)\\nDescription: Windows Command Processor\\nProduct: Microsoft\u00ae Windows\u00ae Operating System\\nCompany: Microsoft Corporation\\nOriginalFileName: Cmd.Exe\\nCommandLine: \\\"C:\\\\Windows\\\\System32\\\\cmd.exe\\\" \/c calc.exe\\nCurrentDirectory: C:\\\\Users\\\\superman\\\\Desktop\\\\\\nUser: batman\\\\superman\\nLogonGuid: {DA929735-A7BD-5D0B-0000-002046760300}\\nLogonId: 0x37646\\nTerminalSessionId: 1\\nIntegrityLevel: High\\nHashes: MD5=AD7B9C14083B52BC532FBA5948342B98,SHA256=17F746D82695FA9B35493B41859D39D786D32B23A9D2E00F4011DEC7A02402AE\\nParentProcessGuid: {DA929735-A846-5D0B-0000-0010813C0E00}\\nParentProcessId: 3148\\nParentImage: C:\\\\Windows\\\\SysWOW64\\\\mshta.exe\\nParentCommandLine: C:\\\\Windows\\\\SysWOW64\\\\mshta.exe  C:\\\\Users\\\\superman\\\\Desktop\\\\calc.hta\",\n              \"version\": 5,\n              \"@version\": \"1\",\n              \"event_id\": 1,\n              \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n              \"username\": \"batman\\\\superman\",\n              \"beat_host\": {\n                \"id\": \"da929735-a8f9-4b38-8348-7664a570a0a2\",\n                \"os\": {\n                  \"build\": \"7601.24356\",\n                  \"family\": \"windows\",\n                  \"version\": \"6.1\",\n                  \"platform\": \"windows\"\n                },\n                \"name\": \"win7-host1-PC\",\n                \"architecture\": \"x86_64\"\n              },\n              \"thread_id\": 1824,\n              \"@timestamp\": \"2019-06-20T15:37:44.003Z\",\n              \"event_data\": {\n                \"Hashes\": \"MD5=AD7B9C14083B52BC532FBA5948342B98,SHA256=17F746D82695FA9B35493B41859D39D786D32B23A9D2E00F4011DEC7A02402AE\",\n                \"Company\": \"Microsoft Corporation\",\n                \"LogonId\": \"0x37646\",\n                \"Product\": \"Microsoft\u00ae Windows\u00ae Operating System\",\n                \"UtcTime\": \"2019-06-20 15:37:43.813\",\n                \"LogonGuid\": \"{DA929735-A7BD-5D0B-0000-002046760300}\",\n                \"ProcessId\": \"2388\",\n                \"CommandLine\": \"\\\"C:\\\\Windows\\\\System32\\\\cmd.exe\\\" \/c calc.exe\",\n                \"Description\": \"Windows Command Processor\",\n                \"FileVersion\": \"6.1.7601.17514 (win7sp1_rtm.101119-1850)\",\n                \"ProcessGuid\": \"{DA929735-A847-5D0B-0000-00108E740E00}\",\n                \"IntegrityLevel\": \"High\",\n                \"ParentProcessId\": \"3148\",\n                \"CurrentDirectory\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\\",\n                \"OriginalFileName\": \"Cmd.Exe\",\n                \"ParentCommandLine\": \"C:\\\\Windows\\\\SysWOW64\\\\mshta.exe  C:\\\\Users\\\\superman\\\\Desktop\\\\calc.hta\",\n                \"ParentProcessGuid\": \"{DA929735-A846-5D0B-0000-0010813C0E00}\",\n                \"TerminalSessionId\": \"1\"\n              },\n              \"event_type\": \"sysmon\",\n              \"image_path\": \"C:\\\\Windows\\\\SysWOW64\\\\cmd.exe\",\n              \"process_id\": 1408,\n              \"source_name\": \"Microsoft-Windows-Sysmon\",\n              \"computer_name\": \"win7-host1-PC.batman.local\",\n              \"logstash_time\": 0.0026938915252685547,\n              \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n              \"record_number\": \"933572\",\n              \"parent_image_path\": \"C:\\\\Windows\\\\SysWOW64\\\\mshta.exe\"\n            }\n          }\n        ],\n        \"total\": {\n          \"value\": 1,\n          \"relation\": \"eq\"\n        },\n        \"max_score\": 3.4384105\n      },\n      \"took\": 229,\n      \"_shards\": {\n        \"total\": 95,\n        \"failed\": 0,\n        \"skipped\": 0,\n        \"successful\": 95\n      },\n      \"timed_out\": false\n    },\n    \"status\": \"Success\",\n    \"message\": \"\",\n    \"operation\": null\n  }",
+                "operationTitle": "Execute Lucene Query",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "1110",
+            "left": "126",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "62f05a75-5572-4274-aea6-f9f68697af26",
+            "id": 4735
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Query for processes spawned by Regsvcs and Regasm",
+            "description": null,
+            "arguments": {
+                "name": "ElasticSearch",
+                "config": "8d03a01d-1cef-40a8-992a-63d8de2b339f",
+                "params": {
+                    "index": "logstash-beats-*",
+                    "query": "event_type:sysmon AND event_id:\"1\" AND @timestamp:{ {{vars.huntStartDateTime}} TO {{vars.huntEndDateTime}} } event_type:sysmon AND event_id:1 AND parent_image_path.keyword:C\\:\\\\Windows\\\\Microsoft.NET\\\\Framework*\\\\*\\\\Reg*.exe",
+                    "run_as_user": ""
+                },
+                "version": "2.2.1",
+                "connector": "elasticsearch",
+                "operation": "execute_lucene_query",
+                "mock_result": "{\n    \"data\": {\n      \"hits\": {\n        \"hits\": [\n          {\n            \"_id\": \"1r9wuGsBt8nuALoCthN7\",\n            \"_type\": \"doc\",\n            \"_index\": \"logstash-beats-regsvcregasm\",\n            \"_score\": 4.575364,\n            \"_source\": {\n              \"beat\": {\n                \"name\": \"admin-PC2\",\n                \"version\": \"6.5.3\",\n                \"hostname\": \"admin-PC2\"\n              },\n              \"tags\": [\n                \"beat\",\n                \"beats_input_codec_plain_applied\"\n              ],\n              \"task\": \"Process Create (rule: ProcessCreate)\",\n              \"user\": {\n                \"name\": \"SYSTEM\",\n                \"type\": \"User\",\n                \"domain\": \"NT AUTHORITY\",\n                \"identifier\": \"S-1-5-18\"\n              },\n              \"level\": \"Information\",\n              \"opcode\": \"Info\",\n              \"message\": \"Process Create:\\nRuleName: \\nUtcTime: 2019-07-03 15:25:20.938\\nProcessGuid: {BAECEEB0-C8E0-5D1C-0000-0010A803D004}\\nProcessId: 3808\\nImage: C:\\\\Windows\\\\System32\\\\calc.exe\\nFileVersion: 6.1.7600.16385 (win7_rtm.090713-1255)\\nDescription: Windows Calculator\\nProduct: Microsoft\u00ae Windows\u00ae Operating System\\nCompany: Microsoft Corporation\\nCommandLine: \\\"C:\\\\Windows\\\\System32\\\\calc.exe\\\" \\nCurrentDirectory: C:\\\\Users\\\\superman\\\\Desktop\\\\Release\\\\\\nUser: batman\\\\superman\\nLogonGuid: {BAECEEB0-784A-5D1A-0000-0020BA5C0D00}\\nLogonId: 0xd5cba\\nTerminalSessionId: 1\\nIntegrityLevel: High\\nHashes: MD5=10E4A1D2132CCB5C6759F038CDB6F3C9,SHA256=C6A91CBA00BF87CDB064C49ADAAC82255CBEC6FDD48FD21F9B3B96ABF019916B\\nParentProcessGuid: {BAECEEB0-C8E0-5D1C-0000-0010EDE9CF04}\\nParentProcessId: 3400\\nParentImage: C:\\\\Windows\\\\Microsoft.NET\\\\Framework64\\\\v4.0.30319\\\\RegAsm.exe\\nParentCommandLine: C:\\\\Windows\\\\Microsoft.NET\\\\Framework64\\\\v4.0.30319\\\\RegAsm.exe  C:\\\\Users\\\\superman\\\\Desktop\\\\Release\\\\AllTheThings.dll\",\n              \"version\": 5,\n              \"@version\": \"1\",\n              \"event_id\": 1,\n              \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n              \"username\": \"batman\\\\superman\",\n              \"beat_host\": {\n                \"id\": \"baeceeb0-040c-498f-84c9-610d57bc902d\",\n                \"os\": {\n                  \"build\": \"7601.0\",\n                  \"family\": \"windows\",\n                  \"version\": \"6.1\",\n                  \"platform\": \"windows\"\n                },\n                \"name\": \"admin-PC2\",\n                \"architecture\": \"x86_64\"\n              },\n              \"thread_id\": 1816,\n              \"@timestamp\": \"2019-07-03T15:25:21.192Z\",\n              \"event_data\": {\n                \"Hashes\": \"MD5=10E4A1D2132CCB5C6759F038CDB6F3C9,SHA256=C6A91CBA00BF87CDB064C49ADAAC82255CBEC6FDD48FD21F9B3B96ABF019916B\",\n                \"Company\": \"Microsoft Corporation\",\n                \"LogonId\": \"0xd5cba\",\n                \"Product\": \"Microsoft\u00ae Windows\u00ae Operating System\",\n                \"UtcTime\": \"2019-07-03 15:25:20.938\",\n                \"LogonGuid\": \"{BAECEEB0-784A-5D1A-0000-0020BA5C0D00}\",\n                \"ProcessId\": \"3808\",\n                \"CommandLine\": \"\\\"C:\\\\Windows\\\\System32\\\\calc.exe\\\" \",\n                \"Description\": \"Windows Calculator\",\n                \"FileVersion\": \"6.1.7600.16385 (win7_rtm.090713-1255)\",\n                \"ProcessGuid\": \"{BAECEEB0-C8E0-5D1C-0000-0010A803D004}\",\n                \"IntegrityLevel\": \"High\",\n                \"ParentProcessId\": \"3400\",\n                \"CurrentDirectory\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\Release\\\\\",\n                \"ParentCommandLine\": \"C:\\\\Windows\\\\Microsoft.NET\\\\Framework64\\\\v4.0.30319\\\\RegAsm.exe  C:\\\\Users\\\\superman\\\\Desktop\\\\Release\\\\AllTheThings.dll\",\n                \"ParentProcessGuid\": \"{BAECEEB0-C8E0-5D1C-0000-0010EDE9CF04}\",\n                \"TerminalSessionId\": \"1\"\n              },\n              \"event_type\": \"sysmon\",\n              \"image_path\": \"C:\\\\Windows\\\\System32\\\\calc.exe\",\n              \"process_id\": 1460,\n              \"source_name\": \"Microsoft-Windows-Sysmon\",\n              \"computer_name\": \"admin-PC2.batman.local\",\n              \"logstash_time\": 0.009769916534423828,\n              \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n              \"record_number\": \"189777\",\n              \"parent_image_path\": \"C:\\\\Windows\\\\Microsoft.NET\\\\Framework64\\\\v4.0.30319\\\\RegAsm.exe\"\n            }\n          }\n        ],\n        \"total\": {\n          \"value\": 1,\n          \"relation\": \"eq\"\n        },\n        \"max_score\": 4.575364\n      },\n      \"took\": 1994,\n      \"_shards\": {\n        \"total\": 95,\n        \"failed\": 0,\n        \"skipped\": 0,\n        \"successful\": 95\n      },\n      \"timed_out\": false\n    },\n    \"status\": \"Success\",\n    \"message\": \"\",\n    \"operation\": null\n  }",
+                "operationTitle": "Execute Lucene Query",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "1245",
+            "left": "126",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "fdc984d3-dd8c-4f8b-ac39-68dde49daefd",
+            "id": 4736
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Query for Regsvcs and Regasm command line",
+            "description": null,
+            "arguments": {
+                "name": "ElasticSearch",
+                "config": "8d03a01d-1cef-40a8-992a-63d8de2b339f",
+                "params": {
+                    "index": "logstash-beats-*",
+                    "query": "event_type:sysmon AND event_id:\"1\" AND @timestamp:{ {{vars.huntStartDateTime}} TO {{vars.huntEndDateTime}} } AND  event_data.CommandLine:C\\:\\\\Windows\\\\Microsoft.NET\\\\Framework*\\\\*\\\\Reg*.exe*.dll*",
+                    "run_as_user": ""
+                },
+                "version": "2.2.1",
+                "connector": "elasticsearch",
+                "operation": "execute_lucene_query",
+                "mock_result": "{\n  \"data\": {\n    \"hits\": {\n      \"hits\": [],\n      \"total\": {\n        \"value\": 0,\n        \"relation\": \"eq\"\n      },\n      \"max_score\": null\n    },\n    \"took\": 3355,\n    \"_shards\": {\n      \"total\": 95,\n      \"failed\": 0,\n      \"skipped\": 0,\n      \"successful\": 95\n    },\n    \"timed_out\": false\n  },\n  \"status\": \"Success\",\n  \"message\": \"\",\n  \"operation\": null\n}",
+                "operationTitle": "Execute Lucene Query",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "1380",
+            "left": "126",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "16a60af7-9330-41cc-ae89-b973671a12e9",
+            "id": 4737
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Query for Sysmon Rundll32",
+            "description": null,
+            "arguments": {
+                "name": "ElasticSearch",
+                "config": "8d03a01d-1cef-40a8-992a-63d8de2b339f",
+                "params": {
+                    "index": "logstash-beats-*",
+                    "query": "event_type:sysmon AND event_id:\"1\" AND @timestamp:{ {{vars.huntStartDateTime}} TO {{vars.huntEndDateTime}} } AND (parent_image_path:\"C:\\\\Windows\\\\System32\\\\rundll32.exe\" OR parent_image_path:\"C:\\\\Windows\\\\SysWOW64\\\\rundll32.exe\") NOT (parent_image_path:\"C:\\\\Windows\\\\SysWOW64\\\\*\" OR parent_image_path:\"C:\\\\Program Files \\(x86\\)\\\\*\" OR parent_image_path:\"C:\\\\Program Files\\\\*\")",
+                    "run_as_user": ""
+                },
+                "version": "2.2.1",
+                "connector": "elasticsearch",
+                "operation": "execute_lucene_query",
+                "mock_result": "{\n    \"data\": {\n      \"hits\": {\n        \"hits\": [\n          {\n            \"_id\": \"rr5auGsBt8nuALoCa90l\",\n            \"_type\": \"doc\",\n            \"_index\": \"logstash-beats-rundll32\",\n            \"_score\": 3.7260923,\n            \"_source\": {\n              \"beat\": {\n                \"name\": \"admin-PC4\",\n                \"version\": \"6.5.3\",\n                \"hostname\": \"admin-PC4\"\n              },\n              \"tags\": [\n                \"beat\",\n                \"beats_input_codec_plain_applied\"\n              ],\n              \"task\": \"Process Create (rule: ProcessCreate)\",\n              \"user\": {\n                \"name\": \"SYSTEM\",\n                \"type\": \"User\",\n                \"domain\": \"NT AUTHORITY\",\n                \"identifier\": \"S-1-5-18\"\n              },\n              \"level\": \"Information\",\n              \"opcode\": \"Info\",\n              \"message\": \"Process Create:\\nRuleName: \\nUtcTime: 2019-07-03 15:00:59.949\\nProcessGuid: {D1BE7B41-0000-0000-0000-00102CE8F70F}\\nProcessId: 1328\\nImage: C:\\\\Windows\\\\System32\\\\notepad.exe\\nFileVersion: 6.1.7600.16385 (win7_rtm.090713-1255)\\nDescription: Notepad\\nProduct: Microsoft\u00ae Windows\u00ae Operating System\\nCompany: Microsoft Corporation\\nOriginalFileName: NOTEPAD.EXE\\nCommandLine: \\\"C:\\\\Windows\\\\system32\\\\NOTEPAD.EXE\\\" C:\\\\Users\\\\superman\\\\Desktop\\\\ath\\\\x64\\\\Release\\\\AllTheThings.dll\\nCurrentDirectory: C:\\\\Users\\\\superman\\\\Desktop\\\\ath\\\\x64\\\\Release\\\\\\nUser: batman\\\\superman\\nLogonGuid: {D1BE7B41-0000-0000-0000-0020C9B70500}\\nLogonId: 0x5b7c9\\nTerminalSessionId: 1\\nIntegrityLevel: High\\nHashes: MD5=F2C7BB8ACC97F92E987A2D4087D021B1,SHA256=142E1D688EF0568370C37187FD9F2351D7DDEDA574F8BFA9B0FA4EF42DB85AA2\\nParentProcessGuid: {D1BE7B41-0000-0000-0000-00103EACF70F}\\nParentProcessId: 780\\nParentImage: C:\\\\Windows\\\\System32\\\\rundll32.exe\\nParentCommandLine: \\\"C:\\\\Windows\\\\system32\\\\rundll32.exe\\\" C:\\\\Windows\\\\system32\\\\shell32.dll,OpenAs_RunDLL C:\\\\Users\\\\superman\\\\Desktop\\\\ath\\\\x64\\\\Release\\\\AllTheThings.dll\",\n              \"version\": 5,\n              \"@version\": \"1\",\n              \"event_id\": 1,\n              \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n              \"username\": \"batman\\\\superman\",\n              \"beat_host\": {\n                \"id\": \"d1be7b41-2fc5-49e3-9ff1-ec91443d27c3\",\n                \"os\": {\n                  \"build\": \"7601.0\",\n                  \"family\": \"windows\",\n                  \"version\": \"6.1\",\n                  \"platform\": \"windows\"\n                },\n                \"name\": \"admin-PC4\",\n                \"architecture\": \"x86_64\"\n              },\n              \"thread_id\": 2116,\n              \"@timestamp\": \"2019-07-03T15:01:00.167Z\",\n              \"event_data\": {\n                \"Hashes\": \"MD5=F2C7BB8ACC97F92E987A2D4087D021B1,SHA256=142E1D688EF0568370C37187FD9F2351D7DDEDA574F8BFA9B0FA4EF42DB85AA2\",\n                \"Company\": \"Microsoft Corporation\",\n                \"LogonId\": \"0x5b7c9\",\n                \"Product\": \"Microsoft\u00ae Windows\u00ae Operating System\",\n                \"UtcTime\": \"2019-07-03 15:00:59.949\",\n                \"LogonGuid\": \"{D1BE7B41-0000-0000-0000-0020C9B70500}\",\n                \"ProcessId\": \"1328\",\n                \"CommandLine\": \"\\\"C:\\\\Windows\\\\system32\\\\NOTEPAD.EXE\\\" C:\\\\Users\\\\superman\\\\Desktop\\\\ath\\\\x64\\\\Release\\\\AllTheThings.dll\",\n                \"Description\": \"Notepad\",\n                \"FileVersion\": \"6.1.7600.16385 (win7_rtm.090713-1255)\",\n                \"ProcessGuid\": \"{D1BE7B41-0000-0000-0000-00102CE8F70F}\",\n                \"IntegrityLevel\": \"High\",\n                \"ParentProcessId\": \"780\",\n                \"CurrentDirectory\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\ath\\\\x64\\\\Release\\\\\",\n                \"OriginalFileName\": \"NOTEPAD.EXE\",\n                \"ParentCommandLine\": \"\\\"C:\\\\Windows\\\\system32\\\\rundll32.exe\\\" C:\\\\Windows\\\\system32\\\\shell32.dll,OpenAs_RunDLL C:\\\\Users\\\\superman\\\\Desktop\\\\ath\\\\x64\\\\Release\\\\AllTheThings.dll\",\n                \"ParentProcessGuid\": \"{D1BE7B41-0000-0000-0000-00103EACF70F}\",\n                \"TerminalSessionId\": \"1\"\n              },\n              \"event_type\": \"sysmon\",\n              \"image_path\": \"C:\\\\Windows\\\\System32\\\\notepad.exe\",\n              \"process_id\": 1408,\n              \"source_name\": \"Microsoft-Windows-Sysmon\",\n              \"computer_name\": \"admin-PC4.batman.local\",\n              \"logstash_time\": 0.000888824462890625,\n              \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n              \"record_number\": \"535173\",\n              \"parent_image_path\": \"C:\\\\Windows\\\\System32\\\\rundll32.exe\"\n            }\n          }\n        ],\n        \"total\": {\n          \"value\": 1,\n          \"relation\": \"eq\"\n        },\n        \"max_score\": 3.7260923\n      },\n      \"took\": 318,\n      \"_shards\": {\n        \"total\": 95,\n        \"failed\": 0,\n        \"skipped\": 0,\n        \"successful\": 95\n      },\n      \"timed_out\": false\n    },\n    \"status\": \"Success\",\n    \"message\": \"\",\n    \"operation\": null\n  }",
+                "operationTitle": "Execute Lucene Query",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "1515",
+            "left": "126",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "dff048cb-a403-4e41-870e-05e3ddbf5aba",
+            "id": 4738
+        }
+    ],
+    "routes": [
+        {
+            "@type": "WorkflowRoute",
+            "name": "Elastic Query for Sysmon MSHTA -> Elastic Query for MSHTA Child",
+            "targetStep": "\/api\/3\/workflow_steps\/62f05a75-5572-4274-aea6-f9f68697af26",
+            "sourceStep": "\/api\/3\/workflow_steps\/027808d0-c64f-4234-8284-3bf2716e6128",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "2076109e-e728-4d15-8dbb-f656fac2156c"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Elastic Query for processes spawned by Regsvcs and Regasm -> Elastic Query for Regsvcs and Regasm command line",
+            "targetStep": "\/api\/3\/workflow_steps\/16a60af7-9330-41cc-ae89-b973671a12e9",
+            "sourceStep": "\/api\/3\/workflow_steps\/fdc984d3-dd8c-4f8b-ac39-68dde49daefd",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "48139847-6653-45fe-8a88-ab55c24f3a4b"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Elastic Query for Sysmon Compiled HTML -> Elastic Query for Control Panel Item Execution",
+            "targetStep": "\/api\/3\/workflow_steps\/409fca22-d67f-474e-a930-83929964c44c",
+            "sourceStep": "\/api\/3\/workflow_steps\/516704f3-0e10-4c3b-a54b-d2d3b21dc989",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "5d1b1c16-73d5-4919-8f1a-5b31bc822813"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Elastic query for InstallUtil Via Command Line -> Elastic query for Sysmon InstallUtil Child",
+            "targetStep": "\/api\/3\/workflow_steps\/036b5ea0-ed22-4cf1-a6b4-12f0e5979f12",
+            "sourceStep": "\/api\/3\/workflow_steps\/c223da07-0998-4bb9-81c7-6b51777515f3",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "f5b3c030-0f37-41ab-bdbc-28bcffef4cb7"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Elastic query for Sysmon Rundll32 -> Step Output",
+            "targetStep": "\/api\/3\/workflow_steps\/303ec6d8-74de-4800-9f56-58b904ea1909",
+            "sourceStep": "\/api\/3\/workflow_steps\/dff048cb-a403-4e41-870e-05e3ddbf5aba",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "70c8fea9-1b31-434a-baa3-f539ba10190e"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Elastic Query for Regsvcs and Regasm command line -> Elastic query for Sysmon Rundll32",
+            "targetStep": "\/api\/3\/workflow_steps\/dff048cb-a403-4e41-870e-05e3ddbf5aba",
+            "sourceStep": "\/api\/3\/workflow_steps\/16a60af7-9330-41cc-ae89-b973671a12e9",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "3ce47ca5-70d8-452f-9f80-c28052985f67"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Configuration -> Elastic Query for Sysmon CMSTP",
+            "targetStep": "\/api\/3\/workflow_steps\/357707c4-f022-413e-ace9-4b1b1543304f",
+            "sourceStep": "\/api\/3\/workflow_steps\/66b13d9f-b337-401e-be7e-9807b672da11",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "0b85f6a0-f407-49db-9d44-46a9edd05d04"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Elastic Query for MSHTA Child -> Elastic Query for processes spawned by Regsvcs and Regasm",
+            "targetStep": "\/api\/3\/workflow_steps\/fdc984d3-dd8c-4f8b-ac39-68dde49daefd",
+            "sourceStep": "\/api\/3\/workflow_steps\/62f05a75-5572-4274-aea6-f9f68697af26",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "11e9645a-7c5e-48f8-85cb-51235bac8485"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Elastic query for Sysmon InstallUtil Child -> Elastic Query for Sysmon MSHTA",
+            "targetStep": "\/api\/3\/workflow_steps\/027808d0-c64f-4234-8284-3bf2716e6128",
+            "sourceStep": "\/api\/3\/workflow_steps\/036b5ea0-ed22-4cf1-a6b4-12f0e5979f12",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "10e8b66f-e2e0-43ba-8aa8-195a5cc27b30"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Elastic Query for Sysmon CMSTP -> Elastic Query for Sysmon Compiled HTML",
+            "targetStep": "\/api\/3\/workflow_steps\/516704f3-0e10-4c3b-a54b-d2d3b21dc989",
+            "sourceStep": "\/api\/3\/workflow_steps\/357707c4-f022-413e-ace9-4b1b1543304f",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "eac341ef-cc64-4f41-8488-383e78fb85c7"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Elastic Query for Control Panel Item Execution -> Elastic query for InstallUtil Via Command Line",
+            "targetStep": "\/api\/3\/workflow_steps\/c223da07-0998-4bb9-81c7-6b51777515f3",
+            "sourceStep": "\/api\/3\/workflow_steps\/409fca22-d67f-474e-a930-83929964c44c",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "14e15272-3336-4804-9771-a3d486976cb8"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Start -> Configuration",
+            "targetStep": "\/api\/3\/workflow_steps\/66b13d9f-b337-401e-be7e-9807b672da11",
+            "sourceStep": "\/api\/3\/workflow_steps\/110889bd-0b67-462c-af2e-d3c035ae6957",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "e58d326c-c0d4-437a-ba59-12d3a37c2fcd"
+        }
+    ],
+    "priority": "\/api\/3\/picklists\/2b563c61-ae2c-41c0-a85a-c9709585e3f2",
+    "uuid": "2f92c737-3836-4b06-bef9-86aee19f2f59",
+    "recordTags": [
+        "Referenced"
+    ],
+    "id": 1145,
+    "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "createDate": 1644165547,
+    "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "modifyDate": 1644165547,
+    "owners": [],
+    "isPrivate": false
+}

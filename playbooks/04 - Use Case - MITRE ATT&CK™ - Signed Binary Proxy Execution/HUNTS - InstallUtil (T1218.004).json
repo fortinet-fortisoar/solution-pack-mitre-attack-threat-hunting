@@ -1,0 +1,796 @@
+{
+    "@type": "Workflow",
+    "triggerLimit": null,
+    "name": "HUNTS - InstallUtil (T1218.004)",
+    "aliasName": null,
+    "tag": "ATT&CK, InstallUtil, Execution",
+    "description": "Identifies process execution via InstallUtil and Installutil being passed via the command line (CMD,PS.WMIC)",
+    "isActive": true,
+    "debug": false,
+    "singleRecordExecution": false,
+    "remoteExecutableFlag": false,
+    "parameters": [
+        "sourceIP",
+        "destinationIP",
+        "processname",
+        "processID",
+        "processGUID",
+        "parentprocessname",
+        "parentprocessGUID",
+        "accountname",
+        "computername",
+        "commandline",
+        "sourcetool"
+    ],
+    "synchronous": false,
+    "lastModifyDate": 1644165542,
+    "collection": "\/api\/3\/workflow_collections\/c926f317-8aba-41c5-8f71-2f0f23d992fb",
+    "versions": [],
+    "triggerStep": "\/api\/3\/workflow_steps\/d41063fa-0fea-49de-b5b1-9c9209b5f051",
+    "steps": [
+        {
+            "@type": "WorkflowStep",
+            "name": "Create and Link Alert1",
+            "description": null,
+            "arguments": {
+                "for_each": {
+                    "item": "{{vars.steps.Get_Results_1.data.results}}",
+                    "parallel": false,
+                    "condition": ""
+                },
+                "arguments": {
+                    "MD5": "{{vars.item.MD5}}",
+                    "url": "",
+                    "source": "{{vars.item.EventChannel}}",
+                    "comment": "SIEM query identified InstallUtil.exe spawned child process {{vars.item.process_exec}} on {{vars.item.host}} at {{vars.item.UtcTime}}.",
+                    "huntIRI": "{{vars.input.records[0]['@id']}}",
+                    "service": "",
+                    "filePath": "{{vars.item.Image}}",
+                    "hostName": "{{vars.item.host}}",
+                    "sourceIP": "null",
+                    "userName": "{{vars.item.User}}",
+                    "alertName": "ATT&CK-InstallUtil-{{vars.item.process_exec}} spawned",
+                    "alertType": "{{\"AlertType\" | picklist(\"Signed Binary Proxy Execution\", \"@id\")}}",
+                    "epochTime": "{{ arrow.get(vars.item.UtcTime).timestamp }}",
+                    "eventName": "",
+                    "eventTime": "{{vars.item.UtcTime}}",
+                    "processID": "{{vars.item.ProcessId}}",
+                    "technique": "InstallUtil-Child Process",
+                    "sourceData": "{{vars.item}}",
+                    "sourceTool": "{{vars.item.EventChannel}}",
+                    "commandline": "{{vars.item.CommandLine}}",
+                    "description": "An attempt by installutil.exe to spawn a process was observed. InstallUtil.exe is digitally signed by Microsoft and can be used to execute a malicious binary on a host while bypassing processes whitelisting. Special attention should be paid to command line arguments passed with the InstallUtil.exe command and any child processes of InstallUtil.exe.",
+                    "processGUID": "{{vars.item.ProcessGuid}}",
+                    "processName": "{{vars.item.process_exec}}",
+                    "registryKey": "",
+                    "sourceImage": "",
+                    "targetImage": "",
+                    "computerName": "{{vars.item.Computer}}",
+                    "destinationIP": "null",
+                    "mitre_tech_id": "T1118",
+                    "parentProcess": "{{vars.item.ParentImage}}",
+                    "scheduledTask": "",
+                    "bitstransferid": "",
+                    "parentProcessID": "{{vars.item.ParentProcessId}}",
+                    "bytestransferred": "",
+                    "registryKeyValue": "",
+                    "parentCommandLine": "{{vars.item.ParentCommandLine}}",
+                    "decodedCommandLine": ""
+                },
+                "apply_async": false,
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/bf7d418b-7ff3-44c1-b473-90d0a03c4641"
+            },
+            "status": null,
+            "top": "190",
+            "left": "1750",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "baa5e8fa-0777-4c8d-8f17-1f97f094544c",
+            "id": 4776
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Deduplicate Comments",
+            "description": null,
+            "arguments": {
+                "arguments": {
+                    "hunt_iri": "{{vars.input.records[0]['@id']}}"
+                },
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/3fd311be-a1c6-41c7-99a3-8794b33d8f8a"
+            },
+            "status": null,
+            "top": "270",
+            "left": "2075",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "fce19773-670a-4eb6-98a2-9249a45bc002",
+            "id": 4777
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Set Splunk hunt times",
+            "description": null,
+            "arguments": {
+                "splunkHuntEnd": "{% if vars.input.records[0].huntEnd %}latest={{vars.input.records[0].huntEnd}}{% endif %}",
+                "splunkHuntStart": "earliest={{vars.input.records[0].huntStart}}"
+            },
+            "status": null,
+            "top": "110",
+            "left": "775",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "ad067dd9-3435-427d-8f52-8e641a97d149",
+            "id": 4778
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Elastic query for Sysmon InstallUtil Child",
+            "description": null,
+            "arguments": {
+                "name": "ElasticSearch",
+                "config": "8d03a01d-1cef-40a8-992a-63d8de2b339f",
+                "params": {
+                    "index": "logstash-beats-*",
+                    "query": "event_type:sysmon AND event_id:\"1\" AND @timestamp:{ {{vars.elasticHuntStart}} TO {{vars.elasticHuntEnd}} } AND (parent_image_path.keyword:C\\:\\\\Windows\\\\Microsoft.NET\\\\Framework\\\\v*\\\\InstallUtil.exe OR parent_image_path.keyword:C\\:\\\\Windows\\\\Microsoft.NET\\\\Framework64\\\\v*\\\\InstallUtil.exe)",
+                    "run_as_user": ""
+                },
+                "version": "2.2.1",
+                "connector": "elasticsearch",
+                "operation": "execute_lucene_query",
+                "mock_result": "{\n  \"data\": {\n    \"hits\": {\n      \"hits\": [],\n      \"total\": {\n        \"value\": 0,\n        \"relation\": \"eq\"\n      },\n      \"max_score\": null\n    },\n    \"took\": 2331,\n    \"_shards\": {\n      \"total\": 95,\n      \"failed\": 0,\n      \"skipped\": 0,\n      \"successful\": 95\n    },\n    \"timed_out\": false\n  },\n  \"status\": \"Success\",\n  \"message\": \"\",\n  \"operation\": null\n}",
+                "operationTitle": "Execute Lucene Query",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "350",
+            "left": "1425",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "52fff140-702e-4748-aea8-e0047729f204",
+            "id": 4779
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Set Elastic hunt times",
+            "description": null,
+            "arguments": {
+                "elasticHuntEnd": "{% if vars.input.records[0].huntEnd %} {{ arrow.get(vars.input.records[0].huntEnd).format('YYYY-MM-DDTHH:mm:ss.SSSSSSSSSZ') }} {% else %} now {% endif %}",
+                "elasticHuntStart": "{{ arrow.get(vars.input.records[0].huntStart).format('YYYY-MM-DDTHH:mm:ss.SSSSSSSSSZ') }}"
+            },
+            "status": null,
+            "top": "430",
+            "left": "1100",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "6896f444-db64-4dd8-9f6d-36ff44c3af22",
+            "id": 4780
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Splunk query for Sysmon InstallUtil Child",
+            "description": null,
+            "arguments": {
+                "name": "Splunk",
+                "config": "55bf97af-75c2-45ca-ae75-f4d27220cc52",
+                "params": {
+                    "query": "index=sysmon EventCode=1 {{vars.splunkHuntStart}} {{vars.splunkHuntEnd}} (ParentImage=\"C:\\\\Windows\\\\Microsoft.NET\\\\Framework\\\\v*\\\\installutil.exe\" OR ParentImage=\"C:\\\\Windows\\\\Microsoft.NET\\\\Framework64\\\\v*\\\\*installutil.exe\") | table host Image MD5 ParentImage User CommandLine process_exec vendor_product TimeCreated ParentProcessId ProcessId ParentCommandLine ProcessGuid UtcTime EventChannel Computer",
+                    "exec_mode": "",
+                    "auto_cancel": "",
+                    "latest_time": "",
+                    "earliest_time": "",
+                    "additional_search_args": "{\"a\":\"B\"}"
+                },
+                "version": "1.5.0",
+                "connector": "splunk",
+                "operation": "invoke_search",
+                "operationTitle": "Invoke Search",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "190",
+            "left": "1100",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "97d4f0f9-e7c1-4a2c-8acf-0847e5ebbaca",
+            "id": 4781
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create and Link Alert2",
+            "description": null,
+            "arguments": {
+                "for_each": {
+                    "item": "{{vars.steps.Get_Results_2.data.results}}",
+                    "parallel": false,
+                    "condition": ""
+                },
+                "arguments": {
+                    "MD5": "{{vars.item.MD5}}",
+                    "url": "",
+                    "source": "{{vars.item.EventChannel}}",
+                    "comment": "SIEM query identified InstallUtil.exe was executed via command line on {{vars.item.host}} at {{vars.item.UtcTime}}.",
+                    "huntIRI": "{{vars.input.records[0]['@id']}}",
+                    "service": "",
+                    "filePath": "{{vars.item.Image}}",
+                    "hostName": "{{vars.item.host}}",
+                    "sourceIP": "null",
+                    "userName": "{{vars.item.User}}",
+                    "alertName": "ATT&CK-InstallUtil-Command line with InstallUtil detected",
+                    "alertType": "{{\"AlertType\" | picklist(\"Signed Binary Proxy Execution\", \"@id\")}}",
+                    "epochTime": "{{ arrow.get(vars.item.UtcTime).timestamp }}",
+                    "eventName": "",
+                    "eventTime": "{{vars.item.UtcTime}}",
+                    "processID": "{{vars.item.ProcessId}}",
+                    "technique": "InstallUtil-Commandline",
+                    "sourceData": "{{vars.item}}",
+                    "sourceTool": "{{vars.item.EventChannel}}",
+                    "commandline": "{{vars.item.CommandLine}}",
+                    "description": "An attempt to invoke installutil.exe via command line was observed. InstallUtil.exe is digitally signed by Microsoft and can be used to execute a malicious binary on a host while bypassing processes whitelisting. Special attention should be paid to command line arguments passed with the InstallUtil.exe command and any child processes of InstallUtil.exe.",
+                    "processGUID": "{{vars.item.ProcessGuid}}",
+                    "processName": "{{vars.item.process_exec}}",
+                    "registryKey": "",
+                    "sourceImage": "",
+                    "targetImage": "",
+                    "computerName": "{{vars.item.Computer}}",
+                    "destinationIP": "null",
+                    "mitre_tech_id": "T1118",
+                    "parentProcess": "{{vars.item.ParentImage}}",
+                    "scheduledTask": "",
+                    "bitstransferid": "",
+                    "parentProcessID": "{{vars.item.ParentProcessId}}",
+                    "bytestransferred": "",
+                    "registryKeyValue": "",
+                    "parentCommandLine": "{{vars.item.ParentCommandLine}}",
+                    "decodedCommandLine": ""
+                },
+                "apply_async": false,
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/bf7d418b-7ff3-44c1-b473-90d0a03c4641"
+            },
+            "status": null,
+            "top": "30",
+            "left": "1750",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "06a86b3d-fa3e-41ba-bb27-979651050f35",
+            "id": 4782
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create and Link Elastic Alert",
+            "description": null,
+            "arguments": {
+                "for_each": {
+                    "item": "{{vars.steps.Elastic_query_for_InstallUtil_Via_Command_Line.data.hits.hits}}",
+                    "parallel": false,
+                    "condition": ""
+                },
+                "arguments": {
+                    "MD5": "{{vars.item._source.event_data.Hashes.split(\"MD5=\")[1].split(',')[0]}}",
+                    "url": "",
+                    "source": "{{vars.item._source.source_name}}",
+                    "comment": "SIEM query identified InstallUtil.exe was executed via command line on {{vars.item._source.beat.hostname}} at {{vars.item._source.event_data.UtcTime}}.",
+                    "huntIRI": "{{vars.input.records[0]['@id']}}",
+                    "service": "",
+                    "filePath": "{{vars.item._source.image_path}}",
+                    "hostName": "{{vars.item._source.beat.hostname}}",
+                    "sourceIP": "",
+                    "userName": "{{vars.item._source.username}}",
+                    "alertName": "ATT&CK-InstallUtil-Command line with InstallUtil detected",
+                    "alertType": "{{\"AlertType\" | picklist(\"Signed Binary Proxy Execution\", \"@id\")}}",
+                    "epochTime": "{{ arrow.get(vars.item._source.event_data.UtcTime).timestamp }}",
+                    "eventName": "",
+                    "eventTime": "{{vars.item._source.event_data.UtcTime}}",
+                    "processID": "{{vars.item._source.event_data.ProcessId}}",
+                    "technique": "InstallUtil-Commandline",
+                    "sourceData": "{{vars.item}}",
+                    "sourceTool": "{{vars.item._source.source_name}}",
+                    "commandline": "{{vars.item._source.event_data.CommandLine}}",
+                    "description": "An attempt to invoke installutil.exe via command line was observed. InstallUtil.exe is digitally signed by Microsoft and can be used to execute a malicious binary on a host while bypassing processes whitelisting. Special attention should be paid to command line arguments passed with the InstallUtil.exe command and any child processes of InstallUtil.exe.",
+                    "processGUID": "{{vars.item._source.event_data.ProcessGuid}}",
+                    "processName": "{{vars.item._source.image_path.split(\"\\\\\")[-1] }}",
+                    "registryKey": "",
+                    "sourceImage": "",
+                    "targetImage": "",
+                    "computerName": "{{vars.item._source.computer_name}}",
+                    "destinationIP": "",
+                    "mitre_tech_id": "T1218.004",
+                    "parentProcess": "{{vars.item._source.parent_image_path}}",
+                    "scheduledTask": "",
+                    "bitstransferid": "",
+                    "parentProcessID": "{{vars.item._source.event_data.ParentProcessId}}",
+                    "bytestransferred": "",
+                    "registryKeyValue": "",
+                    "parentCommandLine": "{{vars.item._source.event_data.ParentCommandLine}}",
+                    "decodedCommandLine": ""
+                },
+                "apply_async": false,
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/bf7d418b-7ff3-44c1-b473-90d0a03c4641"
+            },
+            "status": null,
+            "top": "510",
+            "left": "1750",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "bc8f1f2c-26c2-4969-ae85-d7a53c19fd9d",
+            "id": 4783
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Get Results 1",
+            "description": null,
+            "arguments": {
+                "name": "Splunk",
+                "config": "55bf97af-75c2-45ca-ae75-f4d27220cc52",
+                "params": {
+                    "sid": "{'value': \"{{vars.steps.Splunk_query_for_Sysmon_InstallUtil_Child.data.sid}}\"}",
+                    "additional_args": "{\"a\":\"B\"}"
+                },
+                "version": "1.4.0",
+                "do_until": {
+                    "delay": "1",
+                    "retries": "300",
+                    "condition": "{{\"results\" in vars.result.data}}"
+                },
+                "connector": "splunk",
+                "operation": "get_results",
+                "operationTitle": "Get Results for a Search",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "190",
+            "left": "1425",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "5edd24ff-c957-4b78-bfb5-6a7c481c996d",
+            "id": 4784
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Elastic query for InstallUtil Via Command Line",
+            "description": null,
+            "arguments": {
+                "name": "ElasticSearch",
+                "config": "8d03a01d-1cef-40a8-992a-63d8de2b339f",
+                "params": {
+                    "index": "logstash-beats-*",
+                    "query": "event_type:sysmon AND event_id:\"1\" AND @timestamp:{ {{vars.elasticHuntStart}} TO {{vars.elasticHuntEnd}} } AND (parent_image_path:C\\:\\\\Windows\\\\System32\\\\wmic.exe OR parent_image_path:C\\:\\\\Windows\\\\System32\\\\cmd.exe OR parent_image_path:C\\:\\\\Windows\\\\SysWOW64\\\\wmic.exe OR parent_image_path:C\\:\\\\Windows\\\\SysWOW64\\\\cmd.exe OR parent_image_path:C\\:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe OR parent_image_path:C\\:\\\\Windows\\\\SysWOW64\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe) AND event_data.CommandLine:*InstallUtil*",
+                    "run_as_user": ""
+                },
+                "version": "2.2.1",
+                "connector": "elasticsearch",
+                "operation": "execute_lucene_query",
+                "mock_result": "{\n  \"data\": {\n    \"hits\": {\n      \"hits\": [\n        {\n          \"_id\": \"ZA3RVGoBqSmy6R6gdn4D\",\n          \"_type\": \"doc\",\n          \"_index\": \"logstash-beats-installutil\",\n          \"_score\": 8.178278,\n          \"_source\": {\n            \"beat\": {\n              \"name\": \"admin-PC4\",\n              \"version\": \"6.5.3\",\n              \"hostname\": \"admin-PC4\"\n            },\n            \"tags\": [\n              \"beat\",\n              \"beats_input_codec_plain_applied\"\n            ],\n            \"task\": \"Process Create (rule: ProcessCreate)\",\n            \"user\": {\n              \"name\": \"SYSTEM\",\n              \"type\": \"User\",\n              \"domain\": \"NT AUTHORITY\",\n              \"identifier\": \"S-1-5-18\"\n            },\n            \"level\": \"Information\",\n            \"opcode\": \"Info\",\n            \"message\": \"Process Create:\\nRuleName: \\nUtcTime: 2019-04-25 14:05:55.748\\nProcessGuid: {D1BE7B41-BEC3-5CC1-0000-0010664F7D01}\\nProcessId: 3760\\nImage: C:\\\\Windows\\\\Microsoft.NET\\\\Framework64\\\\v4.0.30319\\\\InstallUtil.exe\\nFileVersion: 4.6.81.0 built by: NETFXREL2\\nDescription: .NET Framework installation utility\\nProduct: Microsoft\u00ae .NET Framework\\nCompany: Microsoft Corporation\\nCommandLine: C:\\\\Windows\\\\Microsoft.NET\\\\Framework64\\\\v4.0.30319\\\\InstallUtil.exe  \/logfile= \/LogtoConsole=false \/U AllTheThings.dll\\nCurrentDirectory: C:\\\\Users\\\\superman\\\\Desktop\\\\ath\\\\x64\\\\Release\\\\\\nUser: batman\\\\superman\\nLogonGuid: {D1BE7B41-AF27-5CC0-0000-0020AB7A0400}\\nLogonId: 0x47aab\\nTerminalSessionId: 1\\nIntegrityLevel: High\\nHashes: MD5=2F0E46C89AAC4C34EDD5920C69F06441,SHA256=386188380586A54E2CFB737C0632BD6F1BF1F84CB557691631D82B2DFFE94621\\nParentProcessGuid: {D1BE7B41-E538-5CC1-0000-0010EE037901}\\nParentProcessId: 3880\\nParentImage: C:\\\\Windows\\\\System32\\\\cmd.exe\\nParentCommandLine: \\\"C:\\\\Windows\\\\system32\\\\cmd.exe\\\" \",\n            \"version\": 5,\n            \"@version\": \"1\",\n            \"event_id\": 1,\n            \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n            \"username\": \"batman\\\\superman\",\n            \"beat_host\": {\n              \"id\": \"d1be7b41-2fc5-49e3-9ff1-ec91443d27c3\",\n              \"os\": {\n                \"build\": \"7601.0\",\n                \"family\": \"windows\",\n                \"version\": \"6.1\",\n                \"platform\": \"windows\"\n              },\n              \"name\": \"admin-PC4\",\n              \"architecture\": \"x86_64\"\n            },\n            \"thread_id\": 1492,\n            \"@timestamp\": \"2019-04-25T14:05:56.398Z\",\n            \"event_data\": {\n              \"Hashes\": \"MD5=2F0E46C89AAC4C34EDD5920C69F06441,SHA256=386188380586A54E2CFB737C0632BD6F1BF1F84CB557691631D82B2DFFE94621\",\n              \"Company\": \"Microsoft Corporation\",\n              \"LogonId\": \"0x47aab\",\n              \"Product\": \"Microsoft\u00ae .NET Framework\",\n              \"UtcTime\": \"2019-04-25 14:05:55.748\",\n              \"LogonGuid\": \"{D1BE7B41-AF27-5CC0-0000-0020AB7A0400}\",\n              \"ProcessId\": \"3760\",\n              \"CommandLine\": \"C:\\\\Windows\\\\Microsoft.NET\\\\Framework64\\\\v4.0.30319\\\\InstallUtil.exe  \/logfile= \/LogtoConsole=false \/U AllTheThings.dll\",\n              \"Description\": \".NET Framework installation utility\",\n              \"FileVersion\": \"4.6.81.0 built by: NETFXREL2\",\n              \"ProcessGuid\": \"{D1BE7B41-BEC3-5CC1-0000-0010664F7D01}\",\n              \"IntegrityLevel\": \"High\",\n              \"ParentProcessId\": \"3880\",\n              \"CurrentDirectory\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\ath\\\\x64\\\\Release\\\\\",\n              \"ParentCommandLine\": \"\\\"C:\\\\Windows\\\\system32\\\\cmd.exe\\\" \",\n              \"ParentProcessGuid\": \"{D1BE7B41-E538-5CC1-0000-0010EE037901}\",\n              \"TerminalSessionId\": \"1\"\n            },\n            \"event_type\": \"sysmon\",\n            \"image_path\": \"C:\\\\Windows\\\\Microsoft.NET\\\\Framework64\\\\v4.0.30319\\\\InstallUtil.exe\",\n            \"process_id\": 1428,\n            \"source_name\": \"Microsoft-Windows-Sysmon\",\n            \"computer_name\": \"admin-PC4.batman.local\",\n            \"logstash_time\": 0.0011229515075683594,\n            \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n            \"record_number\": \"338680\",\n            \"parent_image_path\": \"C:\\\\Windows\\\\System32\\\\cmd.exe\"\n          }\n        }\n      ],\n      \"total\": {\n        \"value\": 1,\n        \"relation\": \"eq\"\n      },\n      \"max_score\": 8.178278\n    },\n    \"took\": 1194,\n    \"_shards\": {\n      \"total\": 95,\n      \"failed\": 0,\n      \"skipped\": 0,\n      \"successful\": 95\n    },\n    \"timed_out\": false\n  },\n  \"status\": \"Success\",\n  \"message\": \"\",\n  \"operation\": null\n}",
+                "operationTitle": "Execute Lucene Query",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "510",
+            "left": "1425",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "584c3863-f38e-4208-966c-acb3598039fd",
+            "id": 4785
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create and Link Elastic Alert2",
+            "description": null,
+            "arguments": {
+                "for_each": {
+                    "item": "{{vars.steps.Elastic_query_for_Sysmon_InstallUtil_Child.data.hits.hits}}",
+                    "parallel": false,
+                    "condition": ""
+                },
+                "arguments": {
+                    "MD5": "{{vars.item._source.event_data.Hashes.split(\"MD5=\")[1].split(',')[0]}}",
+                    "url": "",
+                    "source": "{{vars.item._source.source_name}}",
+                    "comment": "SIEM query identified InstallUtil.exe spawned child process {{vars.item._source.image_path.split(\"\\\\\")[-1] }} on {{vars.item._source.beat.hostname}} at {{vars.item._source.event_data.UtcTime}}.",
+                    "huntIRI": "{{vars.input.records[0]['@id']}}",
+                    "service": "",
+                    "filePath": "{{vars.item._source.image_path}}",
+                    "hostName": "{{vars.item._source.beat.hostname}}",
+                    "sourceIP": "",
+                    "userName": "{{vars.item._source.username}}",
+                    "alertName": "ATT&CK-InstallUtil-{{vars.item._source.image_path.split(\"\\\\\")[-1] }} spawned",
+                    "alertType": "{{\"AlertType\" | picklist(\"Signed Binary Proxy Execution\", \"@id\")}}",
+                    "epochTime": "{{ arrow.get(vars.item._source.event_data.UtcTime).timestamp }}",
+                    "eventName": "",
+                    "eventTime": "{{vars.item._source.event_data.UtcTime}}",
+                    "processID": "{{vars.item._source.event_data.ProcessId}}",
+                    "technique": "InstallUtil-Commandline",
+                    "sourceData": "{{vars.item}}",
+                    "sourceTool": "{{vars.item._source.source_name}}",
+                    "commandline": "{{vars.item._source.event_data.CommandLine}}",
+                    "description": "An attempt by installutil.exe to spawn a process was observed. InstallUtil.exe is digitally signed by Microsoft and can be used to execute a malicious binary on a host while bypassing processes whitelisting. Special attention should be paid to command line arguments passed with the InstallUtil.exe command and any child processes of InstallUtil.exe.",
+                    "processGUID": "{{vars.item._source.event_data.ProcessGuid}}",
+                    "processName": "{{vars.item._source.image_path.split(\"\\\\\")[-1] }}",
+                    "registryKey": "",
+                    "sourceImage": "",
+                    "targetImage": "",
+                    "computerName": "{{vars.item._source.computer_name}}",
+                    "destinationIP": "",
+                    "mitre_tech_id": "T1218.004",
+                    "parentProcess": "{{vars.item._source.parent_image_path}}",
+                    "scheduledTask": "",
+                    "bitstransferid": "",
+                    "parentProcessID": "{{vars.item._source.event_data.ParentProcessId}}",
+                    "bytestransferred": "",
+                    "registryKeyValue": "",
+                    "parentCommandLine": "{{vars.item._source.event_data.ParentCommandLine}}",
+                    "decodedCommandLine": ""
+                },
+                "apply_async": false,
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/bf7d418b-7ff3-44c1-b473-90d0a03c4641"
+            },
+            "status": null,
+            "top": "350",
+            "left": "1750",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "f2a788ed-0217-4620-a328-be80f5611f2b",
+            "id": 4786
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Splunk query for InstallUtil Via Command Line",
+            "description": null,
+            "arguments": {
+                "name": "Splunk",
+                "config": "55bf97af-75c2-45ca-ae75-f4d27220cc52",
+                "params": {
+                    "query": "index=sysmon EventCode=1 {{vars.splunkHuntStart}} {{vars.splunkHuntEnd}} (ParentImage=\"C:\\\\Windows\\\\System32\\\\wmic.exe\" OR ParentImage=\"C:\\\\Windows\\\\System32\\\\cmd.exe\" OR ParentImage=\"C:\\\\Windows\\\\SysWOW64\\\\wmic.exe\" OR ParentImage=\"C:\\\\Windows\\\\SysWOW64\\\\cmd.exe\" OR ParentImage=\"C:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\" OR ParentImage=\"C:\\\\Windows\\\\SysWOW64\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\") AND CommandLine=\"*installutil*\" | table host Image MD5 ParentImage User CommandLine process_exec vendor_product TimeCreated ParentProcessId ProcessId ParentCommandLine ProcessGuid UtcTime EventChannel Computer",
+                    "exec_mode": "",
+                    "auto_cancel": "",
+                    "latest_time": "",
+                    "earliest_time": "",
+                    "additional_search_args": "{\"a\":\"B\"}"
+                },
+                "version": "1.5.0",
+                "connector": "splunk",
+                "operation": "invoke_search",
+                "operationTitle": "Invoke Search",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "30",
+            "left": "1100",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "f1ff8b4f-cfc9-403e-8fd8-3b1351afce65",
+            "id": 4787
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Hunt for InstallUtil",
+            "description": null,
+            "arguments": {
+                "route": "16e04520-b041-4dea-b271-b1db7e077ccf",
+                "title": "T1218.004 - Hunt for InstallUtil",
+                "resources": [
+                    "hunt"
+                ],
+                "inputVariables": [
+                    {
+                        "name": "siem",
+                        "type": "picklists",
+                        "label": "SIEM",
+                        "title": "Picklist",
+                        "usable": true,
+                        "tooltip": "Choose your SIEM",
+                        "dataType": "picklist",
+                        "formType": "picklist",
+                        "required": true,
+                        "_expanded": true,
+                        "mmdUpdate": true,
+                        "collection": false,
+                        "dataSource": {
+                            "model": "picklists",
+                            "query": {
+                                "sort": [
+                                    {
+                                        "field": "orderIndex",
+                                        "direction": "ASC"
+                                    }
+                                ],
+                                "logic": "AND",
+                                "filters": [
+                                    {
+                                        "field": "listName__name",
+                                        "value": "SIEMs",
+                                        "operator": "eq"
+                                    }
+                                ]
+                            },
+                            "displayConditions": {
+                                "876c1483-416b-4d2f-8138-15769ae16d5c": {
+                                    "conditions": null,
+                                    "visibility": "visible"
+                                },
+                                "bcebcab1-3f93-468a-9f3f-91e5c511a0b5": {
+                                    "conditions": null,
+                                    "visibility": "visible"
+                                }
+                            }
+                        },
+                        "searchable": false,
+                        "templateUrl": "app\/components\/form\/fields\/typeahead.html",
+                        "_nameTouched": true,
+                        "defaultValue": {
+                            "id": 280,
+                            "@id": "\/api\/3\/picklists\/876c1483-416b-4d2f-8138-15769ae16d5c",
+                            "icon": null,
+                            "@type": "Picklist",
+                            "color": null,
+                            "display": "Elastic",
+                            "listName": "\/api\/3\/picklist_names\/98830189-afff-40e6-bed1-94012551dc67",
+                            "itemValue": "Elastic",
+                            "orderIndex": 1
+                        },
+                        "displayTemplate": "{{ itemValue }}",
+                        "lengthConstraint": false,
+                        "allowedEncryption": false,
+                        "allowedGridColumn": true,
+                        "useRecordFieldDefault": false
+                    }
+                ],
+                "step_variables": {
+                    "input": {
+                        "params": {
+                            "siem": "{{vars.request.data[\"siem\"]}}",
+                            "sourceIP": "{{ vars.sourceIP }}",
+                            "processID": "{{ vars.processID }}",
+                            "sourcetool": "{{ vars.sourcetool }}",
+                            "accountname": "{{ vars.accountname }}",
+                            "commandline": "{{ vars.commandline }}",
+                            "processGUID": "{{ vars.processGUID }}",
+                            "processname": "{{ vars.processname }}",
+                            "computername": "{{ vars.computername }}",
+                            "destinationIP": "{{ vars.destinationIP }}",
+                            "parentprocessGUID": "{{ vars.parentprocessGUID }}",
+                            "parentprocessname": "{{ vars.parentprocessname }}"
+                        },
+                        "records": "{{vars.input.records}}"
+                    },
+                    "useMockOutput": "{{globalVars.Demo_mode}}"
+                },
+                "_promptexpanded": true,
+                "displayConditions": {
+                    "hunt": {
+                        "sort": [],
+                        "limit": 30,
+                        "logic": "AND",
+                        "filters": []
+                    },
+                    "alerts": {
+                        "sort": [],
+                        "limit": 30,
+                        "logic": "AND",
+                        "filters": []
+                    }
+                },
+                "executeButtonText": "Execute",
+                "noRecordExecution": false,
+                "singleRecordExecution": false
+            },
+            "status": null,
+            "top": "270",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/f414d039-bb0d-4e59-9c39-a8f1e880b18a",
+            "uuid": "d41063fa-0fea-49de-b5b1-9c9209b5f051",
+            "id": 4788
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Get Results 2",
+            "description": null,
+            "arguments": {
+                "name": "Splunk",
+                "config": "55bf97af-75c2-45ca-ae75-f4d27220cc52",
+                "params": {
+                    "sid": "{'value': \"{{vars.steps.Splunk_query_for_InstallUtil_Via_Command_Line.data.sid}}\"}",
+                    "additional_args": "{\"a\":\"B\"}"
+                },
+                "version": "1.4.0",
+                "do_until": {
+                    "delay": "1",
+                    "retries": "300",
+                    "condition": "{{\"results\" in vars.result.data}}"
+                },
+                "connector": "splunk",
+                "operation": "get_results",
+                "operationTitle": "Get Results for a Search",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "30",
+            "left": "1425",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "ec8d827d-7559-4dae-b231-df3298411f14",
+            "id": 4789
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Which SIEM",
+            "description": null,
+            "arguments": {
+                "conditions": [
+                    {
+                        "step_iri": "\/api\/3\/workflow_steps\/ad067dd9-3435-427d-8f52-8e641a97d149",
+                        "condition": "{{ vars.input.params.siem.itemValue == \"Splunk\" }}"
+                    },
+                    {
+                        "step_iri": "\/api\/3\/workflow_steps\/6896f444-db64-4dd8-9f6d-36ff44c3af22",
+                        "condition": "{{ vars.input.params.siem.itemValue == \"Elastic\" }}"
+                    }
+                ]
+            },
+            "status": null,
+            "top": "270",
+            "left": "450",
+            "stepType": "\/api\/3\/workflow_step_types\/12254cf5-5db7-4b1a-8cb1-3af081924b28",
+            "uuid": "0b3e32b2-cbf0-42c5-b055-d1fba88da596",
+            "id": 4790
+        }
+    ],
+    "routes": [
+        {
+            "@type": "WorkflowRoute",
+            "name": "Get Results for Sysmon Regsvr32 DLL Load -> Copy  of Create Splunk Alert",
+            "targetStep": "\/api\/3\/workflow_steps\/06a86b3d-fa3e-41ba-bb27-979651050f35",
+            "sourceStep": "\/api\/3\/workflow_steps\/ec8d827d-7559-4dae-b231-df3298411f14",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "a39fed44-062d-4b17-862c-9454bf77109d"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Create and Link Alert2 -> Deduplicate Comments",
+            "targetStep": "\/api\/3\/workflow_steps\/fce19773-670a-4eb6-98a2-9249a45bc002",
+            "sourceStep": "\/api\/3\/workflow_steps\/06a86b3d-fa3e-41ba-bb27-979651050f35",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "14b88d5a-41d7-49e7-8519-979c2ff0d56c"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Set Elastic hunt times -> Copy  of a",
+            "targetStep": "\/api\/3\/workflow_steps\/52fff140-702e-4748-aea8-e0047729f204",
+            "sourceStep": "\/api\/3\/workflow_steps\/6896f444-db64-4dd8-9f6d-36ff44c3af22",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "5477ece4-10c7-461d-84a2-6f66c4e19e09"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Set Elastic hunt times -> a",
+            "targetStep": "\/api\/3\/workflow_steps\/584c3863-f38e-4208-966c-acb3598039fd",
+            "sourceStep": "\/api\/3\/workflow_steps\/6896f444-db64-4dd8-9f6d-36ff44c3af22",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "d3ad2c8b-f583-4c14-b13f-ceee0d1d45ce"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Set Splunk hunt times -> Splunk query for InstallUtil Via Command Line",
+            "targetStep": "\/api\/3\/workflow_steps\/f1ff8b4f-cfc9-403e-8fd8-3b1351afce65",
+            "sourceStep": "\/api\/3\/workflow_steps\/ad067dd9-3435-427d-8f52-8e641a97d149",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "2ddeb322-9156-488a-9c32-c4919900b68b"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Copy  of Create and Link Elastic Alert -> Deduplicate Comments",
+            "targetStep": "\/api\/3\/workflow_steps\/fce19773-670a-4eb6-98a2-9249a45bc002",
+            "sourceStep": "\/api\/3\/workflow_steps\/f2a788ed-0217-4620-a328-be80f5611f2b",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "8454ba15-e4ce-415c-af46-c9420d8948d0"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "a -> Copy  of Create and Link Alert2",
+            "targetStep": "\/api\/3\/workflow_steps\/bc8f1f2c-26c2-4969-ae85-d7a53c19fd9d",
+            "sourceStep": "\/api\/3\/workflow_steps\/584c3863-f38e-4208-966c-acb3598039fd",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "6d183109-dd9a-41d9-9160-57a85d2f43ad"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Elastic query for Sysmon InstallUtil Child -> Copy  of Create and Link Elastic Alert",
+            "targetStep": "\/api\/3\/workflow_steps\/f2a788ed-0217-4620-a328-be80f5611f2b",
+            "sourceStep": "\/api\/3\/workflow_steps\/52fff140-702e-4748-aea8-e0047729f204",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "775ca08b-e55e-4e01-8d27-5a386fc68267"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Which SIEM -> Set Splunk hunt times",
+            "targetStep": "\/api\/3\/workflow_steps\/ad067dd9-3435-427d-8f52-8e641a97d149",
+            "sourceStep": "\/api\/3\/workflow_steps\/0b3e32b2-cbf0-42c5-b055-d1fba88da596",
+            "label": "",
+            "isExecuted": false,
+            "uuid": "ea249502-f246-4744-977f-d4ae49956d3c"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Hunt for InstallUtil Start -> Which SIEM",
+            "targetStep": "\/api\/3\/workflow_steps\/0b3e32b2-cbf0-42c5-b055-d1fba88da596",
+            "sourceStep": "\/api\/3\/workflow_steps\/d41063fa-0fea-49de-b5b1-9c9209b5f051",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "8fefee8b-b968-4a17-9702-3d2b9276ab9d"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Which SIEM -> Copy  of Set Splunk hunt times",
+            "targetStep": "\/api\/3\/workflow_steps\/6896f444-db64-4dd8-9f6d-36ff44c3af22",
+            "sourceStep": "\/api\/3\/workflow_steps\/0b3e32b2-cbf0-42c5-b055-d1fba88da596",
+            "label": "",
+            "isExecuted": false,
+            "uuid": "a6072653-4b00-40b7-9c75-cf4de34f705e"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Splunk query for Sysmon CMSTP -> Get Results for Sysmon CMSTP",
+            "targetStep": "\/api\/3\/workflow_steps\/5edd24ff-c957-4b78-bfb5-6a7c481c996d",
+            "sourceStep": "\/api\/3\/workflow_steps\/97d4f0f9-e7c1-4a2c-8acf-0847e5ebbaca",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "d1d3d570-3aeb-4b7c-a76e-3e85b3e1c851"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Create and Link Alert1 -> Deduplicate Comments",
+            "targetStep": "\/api\/3\/workflow_steps\/fce19773-670a-4eb6-98a2-9249a45bc002",
+            "sourceStep": "\/api\/3\/workflow_steps\/baa5e8fa-0777-4c8d-8f17-1f97f094544c",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "1d25af64-66d7-47e4-a0eb-6051cd833ad9"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Splunk query for Regsvr32 DLL Load -> Copy  of Get Results for Sysmon Regsvr32 Child",
+            "targetStep": "\/api\/3\/workflow_steps\/ec8d827d-7559-4dae-b231-df3298411f14",
+            "sourceStep": "\/api\/3\/workflow_steps\/f1ff8b4f-cfc9-403e-8fd8-3b1351afce65",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "1edac77f-278d-4995-ae71-e41cca94f1e2"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Get Results for Sysmon Regsvr32 Child -> Create Splunk Alert",
+            "targetStep": "\/api\/3\/workflow_steps\/baa5e8fa-0777-4c8d-8f17-1f97f094544c",
+            "sourceStep": "\/api\/3\/workflow_steps\/5edd24ff-c957-4b78-bfb5-6a7c481c996d",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "f35a7542-d3a4-41b2-a1f0-b58d575e1590"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Set Splunk hunt times -> Splunk query for Sysmon InstallUtil Child",
+            "targetStep": "\/api\/3\/workflow_steps\/97d4f0f9-e7c1-4a2c-8acf-0847e5ebbaca",
+            "sourceStep": "\/api\/3\/workflow_steps\/ad067dd9-3435-427d-8f52-8e641a97d149",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "00648db4-331e-497d-8c2a-b176cfe92202"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Copy  of Create and Link Alert2 -> Deduplicate Comments",
+            "targetStep": "\/api\/3\/workflow_steps\/fce19773-670a-4eb6-98a2-9249a45bc002",
+            "sourceStep": "\/api\/3\/workflow_steps\/bc8f1f2c-26c2-4969-ae85-d7a53c19fd9d",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "f7c99a38-bcdd-4a46-9cfa-151897395ea0"
+        }
+    ],
+    "priority": null,
+    "uuid": "3f61a4b1-08a5-450b-9706-b2966d9b2b2b",
+    "recordTags": [
+        "ManualTrigger"
+    ],
+    "id": 1150,
+    "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "createDate": 1644165547,
+    "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "modifyDate": 1644165547,
+    "owners": [],
+    "isPrivate": false
+}

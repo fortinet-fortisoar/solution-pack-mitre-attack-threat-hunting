@@ -1,0 +1,1059 @@
+{
+    "@type": "Workflow",
+    "triggerLimit": null,
+    "name": "HUNTS - Screensaver (T1546.002)",
+    "aliasName": null,
+    "tag": "ATT&CK, Persistence, Screensaver",
+    "description": "Hunts for use of Windows Screensaver to enable attacker persistence. Hunts for abnormal screensaver executions, processes spawned by a screensaver, and abnormal modifications to screensaver registry keys.",
+    "isActive": true,
+    "debug": false,
+    "singleRecordExecution": false,
+    "remoteExecutableFlag": false,
+    "parameters": [],
+    "synchronous": false,
+    "lastModifyDate": 1644165542,
+    "collection": "\/api\/3\/workflow_collections\/35ba77a8-b970-4530-ac9d-b1ddc38ae755",
+    "versions": [],
+    "triggerStep": "\/api\/3\/workflow_steps\/004d4d13-995d-49ae-ba8c-d25a9b5104b8",
+    "steps": [
+        {
+            "@type": "WorkflowStep",
+            "name": "Select SIEM",
+            "description": null,
+            "arguments": {
+                "conditions": [
+                    {
+                        "option": "Elastic",
+                        "step_iri": "\/api\/3\/workflow_steps\/7e921c6f-42e5-4cfa-8218-cd85287a6e71",
+                        "condition": "{{ vars.input.params.siem.itemValue == \"Elastic\" }}"
+                    },
+                    {
+                        "option": "Splunk",
+                        "step_iri": "\/api\/3\/workflow_steps\/cfe053a5-2f1a-4b98-8858-b469b3c31b60",
+                        "condition": "{{ vars.input.params.siem.itemValue == \"Splunk\" }}"
+                    }
+                ]
+            },
+            "status": null,
+            "top": "430",
+            "left": "450",
+            "stepType": "\/api\/3\/workflow_step_types\/12254cf5-5db7-4b1a-8cb1-3af081924b28",
+            "uuid": "a53ea7c5-65c0-4b44-99f9-ccccff43aec3",
+            "id": 4510
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Query for modification of scrnsave_exe registry key using reg_exe",
+            "description": null,
+            "arguments": {
+                "name": "Splunk",
+                "config": "55bf97af-75c2-45ca-ae75-f4d27220cc52",
+                "params": {
+                    "query": "index=sysmon EventCode=1 {{vars.splunkHuntStart}} {{vars.splunkHuntEnd}} (Image=\"C:\\\\Windows\\\\System32\\\\reg.exe\" OR Image=\"C:\\\\Windows\\\\SysWOW64\\\\reg.exe\") AND (CommandLine=\"reg*add*\\\"HKCU\\\\Control Panel\\\\Desktop\\\"*\/v*\\\"SCRNSAVE.EXE\\\"*\" OR CommandLine=\"reg*add*\\\"HKEY_CURRENT_USER\\\\Control Panel\\\\Desktop\\\"*\/v*\\\"SCRNSAVE.EXE\\\"*\")   | table host Image MD5 ParentImage User CommandLine process_exec vendor_product TimeCreated ParentProcessId ProcessId ParentCommandLine ProcessGuid UtcTime EventChannel Computer",
+                    "exec_mode": "",
+                    "auto_cancel": "",
+                    "latest_time": "",
+                    "earliest_time": "",
+                    "additional_search_args": "{\"a\":\"B\"}"
+                },
+                "version": "1.5.0",
+                "connector": "splunk",
+                "operation": "invoke_search",
+                "operationTitle": "Invoke Search",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "670",
+            "left": "1100",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "9658fbfe-313c-4cda-8e29-06cb2ce7f66a",
+            "id": 4511
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Copy  of Create and Link Alert2",
+            "description": null,
+            "arguments": {
+                "for_each": {
+                    "item": "{{vars.steps.Elastic_Query_for_modification_of_scrnsave_exe_registry_key_using_reg_exe.data.hits.hits}}",
+                    "parallel": false,
+                    "condition": ""
+                },
+                "arguments": {
+                    "MD5": "{{vars.item._source.event_data.Hashes.split(\"MD5=\")[1].split(',')[0]}}",
+                    "url": "",
+                    "source": "{{vars.item._source.source_name}}",
+                    "comment": "SIEM queried for Sysmon logs indicating the scrnsave.exe Registry key was modified via reg.exe on host {{vars.item._source.beat.hostname}}} at {{vars.item._source.event_data.UtcTime}}.",
+                    "huntIRI": "{{vars.input.records[0]['@id']}}",
+                    "service": "",
+                    "filePath": "{{vars.item._source.image_path}}",
+                    "hostName": "{{vars.item._source.beat.hostname}}",
+                    "sourceIP": "",
+                    "userName": "{{vars.item._source.username}}",
+                    "alertName": "ATT&CK-Screensaver-{{vars.item._source.image_path.split(\"\\\\\")[-1] }} modified screensaver Registry key",
+                    "alertType": "{{\"AlertType\" | picklist(\"Event Triggered Execution\", \"@id\")}}",
+                    "epochTime": "{{ arrow.get(vars.item._source.event_data.UtcTime).timestamp }}",
+                    "eventName": "",
+                    "eventTime": "{{vars.item._source.event_data.UtcTime}}",
+                    "processID": "{{vars.item._source.event_data.ProcessId}}",
+                    "technique": "Screensaver-Registry Key Modification for Persistence",
+                    "sourceData": "{{vars.item}}",
+                    "sourceTool": "{{vars.item._source.source_name}}",
+                    "commandline": "{{vars.item._source.event_data.CommandLine}}",
+                    "description": "An attempt to modify the scrnsave.exe Registry key using reg.exe was observed. This is potentially indicative of an adversary establishing persistence by setting the screensaver to execute malware after a user or device has been inactive for a set period of time. The contents of the command line arguments should be evaluated and the host where this command was executed should be investigated for signs of compromise.",
+                    "processGUID": "{{vars.item._source.event_data.ProcessGuid}}",
+                    "processName": "{{vars.item._source.image_path.split(\"\\\\\")[-1] }}",
+                    "registryKey": "",
+                    "sourceImage": "",
+                    "targetImage": "",
+                    "computerName": "{{vars.item._source.computer_name}}",
+                    "destinationIP": "",
+                    "mitre_tech_id": "T1546.002",
+                    "parentProcess": "{{vars.item._source.parent_image_path}}",
+                    "scheduledTask": "",
+                    "bitstransferid": "",
+                    "parentProcessID": "{{vars.item._source.event_data.ParentProcessId}}",
+                    "bytestransferred": "",
+                    "registryKeyValue": "",
+                    "parentCommandLine": "{{vars.item._source.event_data.ParentCommandLine}}",
+                    "decodedCommandLine": ""
+                },
+                "apply_async": false,
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/bf7d418b-7ff3-44c1-b473-90d0a03c4641"
+            },
+            "status": null,
+            "top": "30",
+            "left": "1425",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "d58b86ab-2fde-431f-8d0b-d57d1e4982b8",
+            "id": 4512
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Copy of Create and Link Alert1",
+            "description": null,
+            "arguments": {
+                "for_each": {
+                    "item": "{{vars.steps.Elastic_Query_for_modification_of_scrnsave_exe_registry_key_using_powershell.data.hits.hits}}",
+                    "parallel": false,
+                    "condition": ""
+                },
+                "arguments": {
+                    "MD5": "{{vars.item._source.event_data.Hashes.split(\"MD5=\")[1].split(',')[0]}}",
+                    "url": "",
+                    "source": "{{vars.item._source.source_name}}",
+                    "comment": "SIEM queried for Sysmon logs indicating the scrnsave.exe Registry key was modified using Powershell on host {{vars.item._source.beat.hostname}} at {{vars.item._source.event_data.UtcTime}}.",
+                    "huntIRI": "{{vars.input.records[0]['@id']}}",
+                    "service": "",
+                    "filePath": "{{vars.item._source.image_path}}",
+                    "hostName": "{{vars.item._source.beat.hostname}}",
+                    "sourceIP": "",
+                    "userName": "{{vars.item._source.username}}",
+                    "alertName": "ATT&CK-Screensaver-{{vars.item._source.image_path.split(\"\\\\\")[-1] }} modified screensaver Registry key",
+                    "alertType": "{{\"AlertType\" | picklist(\"Event Triggered Execution\", \"@id\")}}",
+                    "epochTime": "{{ arrow.get(vars.item._source.event_data.UtcTime).timestamp }}",
+                    "eventName": "",
+                    "eventTime": "{{vars.item._source.event_data.UtcTime}}",
+                    "processID": "{{vars.item._source.event_data.ProcessId}}",
+                    "technique": "Screensaver-Registry Key Modification for Persistence",
+                    "sourceData": "{{vars.item}}",
+                    "sourceTool": "{{vars.item._source.source_name}}",
+                    "commandline": "{{vars.item._source.event_data.CommandLine}}",
+                    "description": "An attempt to modify the scrnsave.exe Registry key using Powershell was observed. This is potentially indicative of an adversary establishing persistence by setting the screensaver to execute malware after a user or device has been inactive for a set period of time. The contents of the command line arguments should be evaluated and the host where this command was executed should be investigated for signs of compromise.",
+                    "processGUID": "{{vars.item._source.event_data.ProcessGuid}}",
+                    "processName": "{{vars.item._source.image_path.split(\"\\\\\")[-1] }}",
+                    "registryKey": "",
+                    "sourceImage": "",
+                    "targetImage": "",
+                    "computerName": "{{vars.item._source.computer_name}}",
+                    "destinationIP": "",
+                    "mitre_tech_id": "T1546.002",
+                    "parentProcess": "{{vars.item._source.parent_image_path}}",
+                    "scheduledTask": "",
+                    "bitstransferid": "",
+                    "parentProcessID": "{{vars.item._source.event_data.ParentProcessId}}",
+                    "bytestransferred": "",
+                    "registryKeyValue": "",
+                    "parentCommandLine": "{{vars.item._source.event_data.ParentCommandLine}}",
+                    "decodedCommandLine": ""
+                },
+                "apply_async": false,
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/bf7d418b-7ff3-44c1-b473-90d0a03c4641"
+            },
+            "status": null,
+            "top": "350",
+            "left": "1425",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "a3d56554-96b7-4d6f-a431-21e6e64bb5fc",
+            "id": 4513
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Elastic Query for modification of scrnsave_exe registry key using reg_exe",
+            "description": null,
+            "arguments": {
+                "name": "ElasticSearch",
+                "config": "8d03a01d-1cef-40a8-992a-63d8de2b339f",
+                "params": {
+                    "index": "logstash-beats-*",
+                    "query": "event_type:sysmon AND event_id:\"1\" AND @timestamp:{ {{vars.elasticHuntStart}} TO {{vars.elasticHuntEnd}} } AND (image_path:C\\:\\\\Windows\\\\SysWOW64\\\\reg.exe OR image_path:C\\:\\\\Windows\\\\System32\\\\reg.exe) AND (image_path:C\\:\\\\Windows\\\\SysWOW64\\\\reg.exe OR image_path:C\\:\\\\Windows\\\\System32\\\\reg.exe) AND event_data.CommandLine:reg*add\\ \\\"HK*\\\\Control\\ Panel*\\\\Desktop\\\"\\ \\\/v*\"SCRNSAVE.EXE\"*",
+                    "run_as_user": ""
+                },
+                "version": "2.2.1",
+                "connector": "elasticsearch",
+                "operation": "execute_lucene_query",
+                "mock_result": "{\n  \"data\": {\n    \"hits\": {\n      \"hits\": [],\n      \"total\": {\n        \"value\": 0,\n        \"relation\": \"eq\"\n      },\n      \"max_score\": null\n    },\n    \"took\": 1441,\n    \"_shards\": {\n      \"total\": 95,\n      \"failed\": 0,\n      \"skipped\": 0,\n      \"successful\": 95\n    },\n    \"timed_out\": false\n  },\n  \"status\": \"Success\",\n  \"message\": \"\",\n  \"operation\": null\n}",
+                "operationTitle": "Execute Lucene Query",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "30",
+            "left": "1100",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "18661d7a-75bf-4bbf-ba1d-8c3f9c830739",
+            "id": 4514
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Query for modification of scrnsave_exe registry key using powershell",
+            "description": null,
+            "arguments": {
+                "name": "Splunk",
+                "config": "55bf97af-75c2-45ca-ae75-f4d27220cc52",
+                "params": {
+                    "query": "index=sysmon EventCode=1 {{vars.splunkHuntStart}} {{vars.splunkHuntEnd}} CommandLine=\"*New-ItemProperty*-Path*\\\"HKCU:\\\\Control Panel\\\\Desktop\\\"*-Name*\\\"SCRNSAVE.EXE\\\"*\" | table host Image MD5 ParentImage User CommandLine process_exec vendor_product TimeCreated ParentProcessId ProcessId ParentCommandLine ProcessGuid UtcTime EventChannel Computer",
+                    "exec_mode": "",
+                    "auto_cancel": "",
+                    "latest_time": "",
+                    "earliest_time": "",
+                    "additional_search_args": "{\"a\":\"B\"}"
+                },
+                "version": "1.5.0",
+                "connector": "splunk",
+                "operation": "invoke_search",
+                "operationTitle": "Invoke Search",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "510",
+            "left": "1100",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "b11bab96-7c89-44ed-8a7a-93fb0ef51ef1",
+            "id": 4515
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Elastic Query for modification of scrnsave_exe registry key using powershell",
+            "description": null,
+            "arguments": {
+                "name": "ElasticSearch",
+                "config": "8d03a01d-1cef-40a8-992a-63d8de2b339f",
+                "params": {
+                    "index": "logstash-beats-*",
+                    "query": "event_type:sysmon AND event_id:\"1\" AND @timestamp:{ {{vars.elasticHuntStart}} TO {{vars.elasticHuntEnd}} } AND event_data.CommandLine:*New-ItemProperty*-Path*\\\"HKCU\\:\\\\Control\\ Panel\\\\Desktop\\\"\\ -Name\\ \\\"SCRNSAVE.EXE\\\"*",
+                    "run_as_user": ""
+                },
+                "version": "2.2.1",
+                "connector": "elasticsearch",
+                "operation": "execute_lucene_query",
+                "mock_result": "{\n  \"data\": {\n    \"hits\": {\n      \"hits\": [],\n      \"total\": {\n        \"value\": 0,\n        \"relation\": \"eq\"\n      },\n      \"max_score\": null\n    },\n    \"took\": 5973,\n    \"_shards\": {\n      \"total\": 95,\n      \"failed\": 0,\n      \"skipped\": 0,\n      \"successful\": 95\n    },\n    \"timed_out\": false\n  },\n  \"status\": \"Success\",\n  \"message\": \"\",\n  \"operation\": null\n}",
+                "operationTitle": "Execute Lucene Query",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "350",
+            "left": "1100",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "7e3a99c7-b719-455d-8e3b-2c6693c5863b",
+            "id": 4516
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create and Link Alert2",
+            "description": null,
+            "arguments": {
+                "for_each": {
+                    "item": "{{vars.steps.get_results_reg.data.results}}",
+                    "parallel": false,
+                    "condition": ""
+                },
+                "arguments": {
+                    "MD5": "{{vars.item.MD5}}",
+                    "url": "",
+                    "source": "{{vars.item.EventChannel}}",
+                    "comment": "SIEM queried for Sysmon logs indicating the scrnsave.exe Registry key was modified via reg.exe on host {{vars.item.host}} at {{vars.item.UtcTime}} and generated Alerts from the search results.",
+                    "huntIRI": "{{vars.input.records[0]['@id']}}",
+                    "service": "",
+                    "filePath": "{{vars.item.Image}}",
+                    "hostName": "{{vars.item.host}}",
+                    "sourceIP": "null",
+                    "userName": "{{vars.item.User}}",
+                    "alertName": "ATT&CK-Screensaver-{{vars.item.process_exec}} modified screensaver Registry key",
+                    "alertType": "{{\"AlertType\" | picklist(\"Event Triggered Execution\", \"@id\")}}",
+                    "epochTime": "{{ arrow.get(vars.item.UtcTime).timestamp }}",
+                    "eventName": "",
+                    "eventTime": "{{vars.item.UtcTime}}",
+                    "processID": "{{vars.item.ProcessId}}",
+                    "technique": "Screensaver-Registry Key Modification for Persistence",
+                    "sourceData": "{{vars.item}}",
+                    "sourceTool": "{{vars.item.vendor_product}}",
+                    "commandline": "{{vars.item.CommandLine}}",
+                    "description": "An attempt to modify the scrnsave.exe Registry key using reg.exe was observed. This is potentially indicative of an adversary establishing persistence by setting the screensaver to execute malware after a user or device has been inactive for a set period of time. The contents of the command line arguments should be evaluated and the host where this command was executed should be investigated for signs of compromise.",
+                    "processGUID": "{{vars.item.ProcessGuid}}",
+                    "processName": "{{vars.item.process_exec}}",
+                    "registryKey": "",
+                    "sourceImage": "",
+                    "targetImage": "",
+                    "computerName": "{{vars.item.Computer}}",
+                    "destinationIP": "null",
+                    "mitre_tech_id": "T1180",
+                    "parentProcess": "{{vars.item.ParentImage}}",
+                    "scheduledTask": "",
+                    "bitstransferid": "",
+                    "parentProcessID": "{{vars.item.ParentProcessId}}",
+                    "bytestransferred": "",
+                    "registryKeyValue": "",
+                    "parentCommandLine": "{{vars.item.ParentCommandLine}}",
+                    "decodedCommandLine": ""
+                },
+                "apply_async": false,
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/bf7d418b-7ff3-44c1-b473-90d0a03c4641"
+            },
+            "status": null,
+            "top": "670",
+            "left": "1750",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "7a377768-4ea3-484e-9680-d07114f0659c",
+            "id": 4517
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Copy  of Deduplicate Comments",
+            "description": null,
+            "arguments": {
+                "arguments": {
+                    "hunt_iri": "{{vars.input.records[0]['@id']}}"
+                },
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/3fd311be-a1c6-41c7-99a3-8794b33d8f8a"
+            },
+            "status": null,
+            "top": "190",
+            "left": "1750",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "9009c867-9f86-404c-99db-f7346b95a92a",
+            "id": 4518
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Deduplicate Comments",
+            "description": null,
+            "arguments": {
+                "arguments": {
+                    "hunt_iri": "{{vars.input.records[0]['@id']}}"
+                },
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/3fd311be-a1c6-41c7-99a3-8794b33d8f8a"
+            },
+            "status": null,
+            "top": "670",
+            "left": "2075",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "d131e8ae-cb46-413f-9d3b-f45dee126638",
+            "id": 4519
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create and Link Alert1",
+            "description": null,
+            "arguments": {
+                "for_each": {
+                    "item": "{{vars.steps.get_results_powershell.data.results}}",
+                    "parallel": false,
+                    "condition": ""
+                },
+                "arguments": {
+                    "MD5": "{{vars.item.MD5}}",
+                    "url": "",
+                    "source": "{{vars.item.EventChannel}}",
+                    "comment": "SIEM queried for Sysmon logs indicating the scrnsave.exe Registry key was modified using Powershell on host {{vars.item.host}} at {{vars.item.UtcTime}} and generated Alerts from the search results.",
+                    "huntIRI": "{{vars.input.records[0]['@id']}}",
+                    "service": "",
+                    "filePath": "{{vars.item.Image}}",
+                    "hostName": "{{vars.item.host}}",
+                    "sourceIP": "null",
+                    "userName": "{{vars.item.User}}",
+                    "alertName": "ATT&CK-Screensaver-{{vars.item.process_exec}} modified screensaver Registry key",
+                    "alertType": "{{\"AlertType\" | picklist(\"Event Triggered Execution\", \"@id\")}}",
+                    "epochTime": "{{ arrow.get(vars.item.UtcTime).timestamp }}",
+                    "eventName": "",
+                    "eventTime": "{{vars.item.UtcTime}}",
+                    "processID": "{{vars.item.ProcessId}}",
+                    "technique": "Screensaver-Registry Key Modification for Persistence",
+                    "sourceData": "{{vars.item}}",
+                    "sourceTool": "{{vars.item.vendor_product}}",
+                    "commandline": "{{vars.item.CommandLine}}",
+                    "description": "An attempt to modify the scrnsave.exe Registry key using Powershell was observed. This is potentially indicative of an adversary establishing persistence by setting the screensaver to execute malware after a user or device has been inactive for a set period of time. The contents of the command line arguments should be evaluated and the host where this command was executed should be investigated for signs of compromise.",
+                    "processGUID": "{{vars.item.ProcessGuid}}",
+                    "processName": "{{vars.item.process_exec}}",
+                    "registryKey": "",
+                    "sourceImage": "",
+                    "targetImage": "",
+                    "computerName": "{{vars.item.Computer}}",
+                    "destinationIP": "null",
+                    "mitre_tech_id": "T1180",
+                    "parentProcess": "{{vars.item.ParentImage}}",
+                    "scheduledTask": "",
+                    "bitstransferid": "",
+                    "parentProcessID": "{{vars.item.ParentProcessId}}",
+                    "bytestransferred": "",
+                    "registryKeyValue": "",
+                    "parentCommandLine": "{{vars.item.ParentCommandLine}}",
+                    "decodedCommandLine": ""
+                },
+                "apply_async": false,
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/bf7d418b-7ff3-44c1-b473-90d0a03c4641"
+            },
+            "status": null,
+            "top": "510",
+            "left": "1750",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "d61cb1ac-c6cf-45bc-aea1-051423cd793d",
+            "id": 4520
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Start",
+            "description": null,
+            "arguments": {
+                "route": "a4b1d66a-0963-402e-98ad-0f94566decec",
+                "title": "T1546.002 - Hunt for Screensaver",
+                "resources": [
+                    "hunt"
+                ],
+                "inputVariables": [
+                    {
+                        "name": "siem",
+                        "type": "picklists",
+                        "label": "SIEM",
+                        "title": "Picklist",
+                        "usable": true,
+                        "_ignore": false,
+                        "tooltip": "Choose your SIEM",
+                        "dataType": "picklist",
+                        "formType": "picklist",
+                        "required": true,
+                        "_expanded": true,
+                        "collection": false,
+                        "dataSource": {
+                            "model": "picklists",
+                            "query": {
+                                "sort": [
+                                    {
+                                        "field": "orderIndex",
+                                        "direction": "ASC"
+                                    }
+                                ],
+                                "logic": "AND",
+                                "filters": [
+                                    {
+                                        "field": "listName__name",
+                                        "value": "SIEMs",
+                                        "operator": "eq"
+                                    }
+                                ]
+                            },
+                            "displayConditions": {
+                                "876c1483-416b-4d2f-8138-15769ae16d5c": {
+                                    "conditions": null,
+                                    "visibility": "visible"
+                                },
+                                "bcebcab1-3f93-468a-9f3f-91e5c511a0b5": {
+                                    "conditions": null,
+                                    "visibility": "visible"
+                                }
+                            }
+                        },
+                        "searchable": false,
+                        "templateUrl": "app\/components\/form\/fields\/typeahead.html",
+                        "_nameTouched": true,
+                        "defaultValue": {
+                            "id": 280,
+                            "@id": "\/api\/3\/picklists\/876c1483-416b-4d2f-8138-15769ae16d5c",
+                            "icon": null,
+                            "@type": "Picklist",
+                            "color": null,
+                            "display": "Elastic",
+                            "listName": "\/api\/3\/picklist_names\/98830189-afff-40e6-bed1-94012551dc67",
+                            "itemValue": "Elastic",
+                            "orderIndex": 1
+                        },
+                        "useModuleField": false,
+                        "displayTemplate": "{{ itemValue }}",
+                        "allowedEncryption": false,
+                        "allowedGridColumn": true,
+                        "useRecordFieldDefault": false
+                    }
+                ],
+                "step_variables": {
+                    "input": {
+                        "params": {
+                            "siem": "{{vars.request.data[\"siem\"]}}"
+                        },
+                        "records": "{{vars.input.records}}"
+                    },
+                    "useMockOutput": "{{globalVars.Demo_mode}}"
+                },
+                "_promptexpanded": true,
+                "displayConditions": {
+                    "hunt": {
+                        "sort": [],
+                        "limit": 30,
+                        "logic": "AND",
+                        "filters": []
+                    },
+                    "alerts": {
+                        "sort": [],
+                        "limit": 30,
+                        "logic": "AND",
+                        "filters": []
+                    }
+                },
+                "executeButtonText": "Execute",
+                "noRecordExecution": false,
+                "singleRecordExecution": false
+            },
+            "status": null,
+            "top": "430",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/f414d039-bb0d-4e59-9c39-a8f1e880b18a",
+            "uuid": "004d4d13-995d-49ae-ba8c-d25a9b5104b8",
+            "id": 4521
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "get results powershell",
+            "description": null,
+            "arguments": {
+                "name": "Splunk",
+                "config": "55bf97af-75c2-45ca-ae75-f4d27220cc52",
+                "params": {
+                    "sid": "{'value': \"{{vars.steps.Query_for_modification_of_scrnsave_exe_registry_key_using_powershell.data.sid}}\"}",
+                    "additional_args": "{\"A\":\"B\"}"
+                },
+                "version": "1.4.0",
+                "do_until": {
+                    "delay": "1",
+                    "retries": "300",
+                    "condition": "{{\"results\" in vars.result.data}}"
+                },
+                "connector": "splunk",
+                "operation": "get_results",
+                "operationTitle": "Get Results for a Search",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "510",
+            "left": "1425",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "567fb6f4-f6b4-4a4c-9a1e-c04cc61ecc3b",
+            "id": 4522
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Set Splunk hunt times",
+            "description": null,
+            "arguments": {
+                "splunkHuntEnd": "{% if vars.input.records[0].huntEnd %}latest={{vars.input.records[0].huntEnd}}{% endif %}",
+                "splunkHuntStart": "earliest={{vars.input.records[0].huntStart}}"
+            },
+            "status": null,
+            "top": "670",
+            "left": "775",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "cfe053a5-2f1a-4b98-8858-b469b3c31b60",
+            "id": 4523
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "get results scr",
+            "description": null,
+            "arguments": {
+                "name": "Splunk",
+                "config": "55bf97af-75c2-45ca-ae75-f4d27220cc52",
+                "params": {
+                    "sid": "{'value': \"{{vars.steps.Query_for_scr_file_executed_outside_of_system32_or_syswow64.data.sid}}\"}",
+                    "additional_args": "{\"A\":\"B\"}"
+                },
+                "version": "1.4.0",
+                "do_until": {
+                    "delay": "1",
+                    "retries": "300",
+                    "condition": "{{\"results\" in vars.result.data}}"
+                },
+                "connector": "splunk",
+                "operation": "get_results",
+                "operationTitle": "Get Results for a Search",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "830",
+            "left": "1425",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "6094bccd-8d2f-47a7-8158-eabc0274d244",
+            "id": 4524
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "get results reg",
+            "description": null,
+            "arguments": {
+                "name": "Splunk",
+                "config": "55bf97af-75c2-45ca-ae75-f4d27220cc52",
+                "params": {
+                    "sid": "{'value': \"{{vars.steps.Query_for_modification_of_scrnsave_exe_registry_key_using_reg_exe.data.sid}}\"}",
+                    "additional_args": "{\"A\":\"B\"}"
+                },
+                "version": "1.4.0",
+                "do_until": {
+                    "delay": "1",
+                    "retries": "300",
+                    "condition": "{{\"results\" in vars.result.data}}"
+                },
+                "connector": "splunk",
+                "operation": "get_results",
+                "operationTitle": "Get Results for a Search",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "670",
+            "left": "1425",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "8de5aed6-8484-4933-baf4-635f67a9fdd2",
+            "id": 4525
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Elastic Query for scr file executed outside of system32 or syswow64",
+            "description": null,
+            "arguments": {
+                "name": "ElasticSearch",
+                "config": "8d03a01d-1cef-40a8-992a-63d8de2b339f",
+                "params": {
+                    "index": "logstash-beats-*",
+                    "query": "event_type:sysmon AND event_id:\"1\" AND @timestamp:{ {{vars.elasticHuntStart}} TO {{vars.elasticHuntEnd}} } AND image_path:\"*.scr\" NOT(image_path:\"C:\\\\Windows\\\\System32\\\\*\" OR image_path:\"C:\\\\Windows\\\\SysWOW64\\\\*\")",
+                    "run_as_user": ""
+                },
+                "version": "2.2.1",
+                "connector": "elasticsearch",
+                "operation": "execute_lucene_query",
+                "mock_result": "{\n  \"data\": {\n    \"hits\": {\n      \"hits\": [\n        {\n          \"_id\": \"weOluGsBiKk7UqmIGjOt\",\n          \"_type\": \"doc\",\n          \"_index\": \"logstash-beats-sid_history_injection\",\n          \"_score\": 2.575364,\n          \"_source\": {\n            \"beat\": {\n              \"name\": \"win7-host1-PC\",\n              \"version\": \"6.5.3\",\n              \"hostname\": \"win7-host1-PC\"\n            },\n            \"tags\": [\n              \"beat\",\n              \"beats_input_codec_plain_applied\"\n            ],\n            \"task\": \"Process Create (rule: ProcessCreate)\",\n            \"user\": {\n              \"name\": \"SYSTEM\",\n              \"type\": \"User\",\n              \"domain\": \"NT AUTHORITY\",\n              \"identifier\": \"S-1-5-18\"\n            },\n            \"level\": \"Information\",\n            \"opcode\": \"Info\",\n            \"message\": \"Process Create:\\nRuleName: \\nUtcTime: 2019-07-03 16:22:34.466\\nProcessGuid: {DA929735-D64A-5D1C-0000-0010B5B81A00}\\nProcessId: 3236\\nImage: C:\\\\Users\\\\superman\\\\Desktop\\\\invoice-156784.scr\\nFileVersion: 2.1.1.0\\nDescription: mimikatz for Windows\\nProduct: mimikatz\\nCompany: gentilkiwi (Benjamin DELPY)\\nOriginalFileName: mimikatz.exe\\nCommandLine: invoice-156784.scr  \\\"misc::addsid \/sam:superman \/new:Builtin\\\\administrators\\\"\\nCurrentDirectory: C:\\\\Users\\\\superman\\\\Desktop\\\\\\nUser: batman\\\\superman\\nLogonGuid: {DA929735-CD18-5D1C-0000-002019FE0700}\\nLogonId: 0x7fe19\\nTerminalSessionId: 1\\nIntegrityLevel: High\\nHashes: MD5=332A5371389A8953A96BF09B69EDCB6E,SHA256=E46BA4BDD4168A399EE5BC2161A8C918095FA30EB20AC88CAC6AB1D6DBEA2B4A\\nParentProcessGuid: {DA929735-D5DC-5D1C-0000-00103B251A00}\\nParentProcessId: 756\\nParentImage: C:\\\\Windows\\\\System32\\\\cmd.exe\\nParentCommandLine: \\\"cmd.exe\\\" \/s \/k pushd \\\"C:\\\\Users\\\\superman\\\\Desktop\\\"\",\n            \"version\": 5,\n            \"@version\": \"1\",\n            \"event_id\": 1,\n            \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n            \"username\": \"batman\\\\superman\",\n            \"beat_host\": {\n              \"id\": \"da929735-a8f9-4b38-8348-7664a570a0a2\",\n              \"os\": {\n                \"build\": \"7601.24356\",\n                \"family\": \"windows\",\n                \"version\": \"6.1\",\n                \"platform\": \"windows\"\n              },\n              \"name\": \"win7-host1-PC\",\n              \"architecture\": \"x86_64\"\n            },\n            \"thread_id\": 1412,\n            \"@timestamp\": \"2019-07-03T16:22:34.560Z\",\n            \"event_data\": {\n              \"Hashes\": \"MD5=332A5371389A8953A96BF09B69EDCB6E,SHA256=E46BA4BDD4168A399EE5BC2161A8C918095FA30EB20AC88CAC6AB1D6DBEA2B4A\",\n              \"Company\": \"gentilkiwi (Benjamin DELPY)\",\n              \"LogonId\": \"0x7fe19\",\n              \"Product\": \"mimikatz\",\n              \"UtcTime\": \"2019-07-03 16:22:34.466\",\n              \"LogonGuid\": \"{DA929735-CD18-5D1C-0000-002019FE0700}\",\n              \"ProcessId\": \"3236\",\n              \"CommandLine\": \"invoice-156784.scr  \\\"misc::addsid \/sam:superman \/new:Builtin\\\\administrators\\\"\",\n              \"Description\": \"mimikatz for Windows\",\n              \"FileVersion\": \"2.1.1.0\",\n              \"ProcessGuid\": \"{DA929735-D64A-5D1C-0000-0010B5B81A00}\",\n              \"IntegrityLevel\": \"High\",\n              \"ParentProcessId\": \"756\",\n              \"CurrentDirectory\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\\",\n              \"OriginalFileName\": \"mimikatz.exe\",\n              \"ParentCommandLine\": \"\\\"cmd.exe\\\" \/s \/k pushd \\\"C:\\\\Users\\\\superman\\\\Desktop\\\"\",\n              \"ParentProcessGuid\": \"{DA929735-D5DC-5D1C-0000-00103B251A00}\",\n              \"TerminalSessionId\": \"1\"\n            },\n            \"event_type\": \"sysmon\",\n            \"image_path\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\invoice-156784.scr\",\n            \"process_id\": 1424,\n            \"source_name\": \"Microsoft-Windows-Sysmon\",\n            \"computer_name\": \"win7-host1-PC.batman.local\",\n            \"logstash_time\": 0.000885009765625,\n            \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n            \"record_number\": \"1985088\",\n            \"parent_image_path\": \"C:\\\\Windows\\\\System32\\\\cmd.exe\"\n          }\n        },\n        {\n          \"_id\": \"NeOluGsBiKk7UqmI7jYg\",\n          \"_type\": \"doc\",\n          \"_index\": \"logstash-beats-sid_history_injection\",\n          \"_score\": 2.575364,\n          \"_source\": {\n            \"beat\": {\n              \"name\": \"win7-host1-PC\",\n              \"version\": \"6.5.3\",\n              \"hostname\": \"win7-host1-PC\"\n            },\n            \"tags\": [\n              \"beat\",\n              \"beats_input_codec_plain_applied\"\n            ],\n            \"task\": \"Process Create (rule: ProcessCreate)\",\n            \"user\": {\n              \"name\": \"SYSTEM\",\n              \"type\": \"User\",\n              \"domain\": \"NT AUTHORITY\",\n              \"identifier\": \"S-1-5-18\"\n            },\n            \"level\": \"Information\",\n            \"opcode\": \"Info\",\n            \"message\": \"Process Create:\\nRuleName: \\nUtcTime: 2019-07-03 16:23:27.080\\nProcessGuid: {DA929735-D67F-5D1C-0000-0010492C1B00}\\nProcessId: 3832\\nImage: C:\\\\Users\\\\superman\\\\Desktop\\\\invoice-156784.scr\\nFileVersion: 2.1.1.0\\nDescription: mimikatz for Windows\\nProduct: mimikatz\\nCompany: gentilkiwi (Benjamin DELPY)\\nOriginalFileName: mimikatz.exe\\nCommandLine: invoice-156784.scr  \\\"sid::add \/sam:Superman \/new:Builtin\\\\administrators\\\"\\nCurrentDirectory: C:\\\\Users\\\\superman\\\\Desktop\\\\\\nUser: batman\\\\superman\\nLogonGuid: {DA929735-CD18-5D1C-0000-002019FE0700}\\nLogonId: 0x7fe19\\nTerminalSessionId: 1\\nIntegrityLevel: High\\nHashes: MD5=332A5371389A8953A96BF09B69EDCB6E,SHA256=E46BA4BDD4168A399EE5BC2161A8C918095FA30EB20AC88CAC6AB1D6DBEA2B4A\\nParentProcessGuid: {DA929735-D65B-5D1C-0000-001067EA1A00}\\nParentProcessId: 3932\\nParentImage: C:\\\\Windows\\\\System32\\\\cmd.exe\\nParentCommandLine: \\\"cmd.exe\\\" \/s \/k pushd \\\"C:\\\\Users\\\\superman\\\\Desktop\\\"\",\n            \"version\": 5,\n            \"@version\": \"1\",\n            \"event_id\": 1,\n            \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n            \"username\": \"batman\\\\superman\",\n            \"beat_host\": {\n              \"id\": \"da929735-a8f9-4b38-8348-7664a570a0a2\",\n              \"os\": {\n                \"build\": \"7601.24356\",\n                \"family\": \"windows\",\n                \"version\": \"6.1\",\n                \"platform\": \"windows\"\n              },\n              \"name\": \"win7-host1-PC\",\n              \"architecture\": \"x86_64\"\n            },\n            \"thread_id\": 1412,\n            \"@timestamp\": \"2019-07-03T16:23:27.159Z\",\n            \"event_data\": {\n              \"Hashes\": \"MD5=332A5371389A8953A96BF09B69EDCB6E,SHA256=E46BA4BDD4168A399EE5BC2161A8C918095FA30EB20AC88CAC6AB1D6DBEA2B4A\",\n              \"Company\": \"gentilkiwi (Benjamin DELPY)\",\n              \"LogonId\": \"0x7fe19\",\n              \"Product\": \"mimikatz\",\n              \"UtcTime\": \"2019-07-03 16:23:27.080\",\n              \"LogonGuid\": \"{DA929735-CD18-5D1C-0000-002019FE0700}\",\n              \"ProcessId\": \"3832\",\n              \"CommandLine\": \"invoice-156784.scr  \\\"sid::add \/sam:Superman \/new:Builtin\\\\administrators\\\"\",\n              \"Description\": \"mimikatz for Windows\",\n              \"FileVersion\": \"2.1.1.0\",\n              \"ProcessGuid\": \"{DA929735-D67F-5D1C-0000-0010492C1B00}\",\n              \"IntegrityLevel\": \"High\",\n              \"ParentProcessId\": \"3932\",\n              \"CurrentDirectory\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\\",\n              \"OriginalFileName\": \"mimikatz.exe\",\n              \"ParentCommandLine\": \"\\\"cmd.exe\\\" \/s \/k pushd \\\"C:\\\\Users\\\\superman\\\\Desktop\\\"\",\n              \"ParentProcessGuid\": \"{DA929735-D65B-5D1C-0000-001067EA1A00}\",\n              \"TerminalSessionId\": \"1\"\n            },\n            \"event_type\": \"sysmon\",\n            \"image_path\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\invoice-156784.scr\",\n            \"process_id\": 1424,\n            \"source_name\": \"Microsoft-Windows-Sysmon\",\n            \"computer_name\": \"win7-host1-PC.batman.local\",\n            \"logstash_time\": 0.005793094635009766,\n            \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n            \"record_number\": \"1985149\",\n            \"parent_image_path\": \"C:\\\\Windows\\\\System32\\\\cmd.exe\"\n          }\n        },\n        {\n          \"_id\": \"H74TuGsBt8nuALoCAkRs\",\n          \"_type\": \"doc\",\n          \"_index\": \"logstash-beats-screensaver\",\n          \"_score\": 2.364643,\n          \"_source\": {\n            \"beat\": {\n              \"name\": \"admin-PC4\",\n              \"version\": \"6.5.3\",\n              \"hostname\": \"admin-PC4\"\n            },\n            \"tags\": [\n              \"beat\",\n              \"beats_input_codec_plain_applied\"\n            ],\n            \"task\": \"Process Create (rule: ProcessCreate)\",\n            \"user\": {\n              \"name\": \"SYSTEM\",\n              \"type\": \"User\",\n              \"domain\": \"NT AUTHORITY\",\n              \"identifier\": \"S-1-5-18\"\n            },\n            \"level\": \"Information\",\n            \"opcode\": \"Info\",\n            \"message\": \"Process Create:\\nRuleName: \\nUtcTime: 2019-07-03 13:42:59.600\\nProcessGuid: {D1BE7B41-0000-0000-0000-0010F8C4E70F}\\nProcessId: 428\\nImage: C:\\\\Users\\\\superman\\\\Desktop\\\\invoice-185637.scr\\nFileVersion: 2.1.1.0\\nDescription: mimikatz for Windows\\nProduct: mimikatz\\nCompany: gentilkiwi (Benjamin DELPY)\\nOriginalFileName: mimikatz.exe\\nCommandLine: \\\"C:\\\\Users\\\\superman\\\\Desktop\\\\invoice-185637.scr\\\" \/S\\nCurrentDirectory: C:\\\\Users\\\\superman\\\\Desktop\\\\\\nUser: batman\\\\superman\\nLogonGuid: {D1BE7B41-0000-0000-0000-0020C9B70500}\\nLogonId: 0x5b7c9\\nTerminalSessionId: 1\\nIntegrityLevel: High\\nHashes: MD5=332A5371389A8953A96BF09B69EDCB6E,SHA256=E46BA4BDD4168A399EE5BC2161A8C918095FA30EB20AC88CAC6AB1D6DBEA2B4A\\nParentProcessGuid: {D1BE7B41-0000-0000-0000-00102E680800}\\nParentProcessId: 3216\\nParentImage: C:\\\\Windows\\\\explorer.exe\\nParentCommandLine: C:\\\\Windows\\\\Explorer.EXE\",\n            \"version\": 5,\n            \"@version\": \"1\",\n            \"event_id\": 1,\n            \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n            \"username\": \"batman\\\\superman\",\n            \"beat_host\": {\n              \"id\": \"d1be7b41-2fc5-49e3-9ff1-ec91443d27c3\",\n              \"os\": {\n                \"build\": \"7601.0\",\n                \"family\": \"windows\",\n                \"version\": \"6.1\",\n                \"platform\": \"windows\"\n              },\n              \"name\": \"admin-PC4\",\n              \"architecture\": \"x86_64\"\n            },\n            \"thread_id\": 2116,\n            \"@timestamp\": \"2019-07-03T13:42:59.694Z\",\n            \"event_data\": {\n              \"Hashes\": \"MD5=332A5371389A8953A96BF09B69EDCB6E,SHA256=E46BA4BDD4168A399EE5BC2161A8C918095FA30EB20AC88CAC6AB1D6DBEA2B4A\",\n              \"Company\": \"gentilkiwi (Benjamin DELPY)\",\n              \"LogonId\": \"0x5b7c9\",\n              \"Product\": \"mimikatz\",\n              \"UtcTime\": \"2019-07-03 13:42:59.600\",\n              \"LogonGuid\": \"{D1BE7B41-0000-0000-0000-0020C9B70500}\",\n              \"ProcessId\": \"428\",\n              \"CommandLine\": \"\\\"C:\\\\Users\\\\superman\\\\Desktop\\\\invoice-185637.scr\\\" \/S\",\n              \"Description\": \"mimikatz for Windows\",\n              \"FileVersion\": \"2.1.1.0\",\n              \"ProcessGuid\": \"{D1BE7B41-0000-0000-0000-0010F8C4E70F}\",\n              \"IntegrityLevel\": \"High\",\n              \"ParentProcessId\": \"3216\",\n              \"CurrentDirectory\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\\",\n              \"OriginalFileName\": \"mimikatz.exe\",\n              \"ParentCommandLine\": \"C:\\\\Windows\\\\Explorer.EXE\",\n              \"ParentProcessGuid\": \"{D1BE7B41-0000-0000-0000-00102E680800}\",\n              \"TerminalSessionId\": \"1\"\n            },\n            \"event_type\": \"sysmon\",\n            \"image_path\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\invoice-185637.scr\",\n            \"process_id\": 1408,\n            \"source_name\": \"Microsoft-Windows-Sysmon\",\n            \"computer_name\": \"admin-PC4.batman.local\",\n            \"logstash_time\": 0.03190493583679199,\n            \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n            \"record_number\": \"534544\",\n            \"parent_image_path\": \"C:\\\\Windows\\\\explorer.exe\"\n          }\n        },\n        {\n          \"_id\": \"Eb4luGsBt8nuALoC726Q\",\n          \"_type\": \"doc\",\n          \"_index\": \"logstash-beats-screensaver\",\n          \"_score\": 2.364643,\n          \"_source\": {\n            \"beat\": {\n              \"name\": \"win7-host1-PC\",\n              \"version\": \"6.5.3\",\n              \"hostname\": \"win7-host1-PC\"\n            },\n            \"tags\": [\n              \"beat\",\n              \"beats_input_codec_plain_applied\"\n            ],\n            \"task\": \"Process Create (rule: ProcessCreate)\",\n            \"user\": {\n              \"name\": \"SYSTEM\",\n              \"type\": \"User\",\n              \"domain\": \"NT AUTHORITY\",\n              \"identifier\": \"S-1-5-18\"\n            },\n            \"level\": \"Information\",\n            \"opcode\": \"Info\",\n            \"message\": \"Process Create:\\nRuleName: \\nUtcTime: 2019-07-03 14:03:40.047\\nProcessGuid: {DA929735-B5BC-5D1C-0000-0010AB301118}\\nProcessId: 2704\\nImage: C:\\\\Users\\\\superman\\\\Desktop\\\\invoice-156783.scr\\nFileVersion: 2.1.1.0\\nDescription: mimikatz for Windows\\nProduct: mimikatz\\nCompany: gentilkiwi (Benjamin DELPY)\\nOriginalFileName: mimikatz.exe\\nCommandLine: \\\"C:\\\\Users\\\\superman\\\\Desktop\\\\invoice-156783.scr\\\" \/S\\nCurrentDirectory: C:\\\\Users\\\\superman\\\\Desktop\\\\\\nUser: batman\\\\superman\\nLogonGuid: {DA929735-A7BD-5D0B-0000-002046760300}\\nLogonId: 0x37646\\nTerminalSessionId: 1\\nIntegrityLevel: High\\nHashes: MD5=332A5371389A8953A96BF09B69EDCB6E,SHA256=E46BA4BDD4168A399EE5BC2161A8C918095FA30EB20AC88CAC6AB1D6DBEA2B4A\\nParentProcessGuid: {DA929735-A7D1-5D0B-0000-00108BFE0500}\\nParentProcessId: 2256\\nParentImage: C:\\\\Windows\\\\explorer.exe\\nParentCommandLine: C:\\\\Windows\\\\Explorer.EXE\",\n            \"version\": 5,\n            \"@version\": \"1\",\n            \"event_id\": 1,\n            \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n            \"username\": \"batman\\\\superman\",\n            \"beat_host\": {\n              \"id\": \"da929735-a8f9-4b38-8348-7664a570a0a2\",\n              \"os\": {\n                \"build\": \"7601.24356\",\n                \"family\": \"windows\",\n                \"version\": \"6.1\",\n                \"platform\": \"windows\"\n              },\n              \"name\": \"win7-host1-PC\",\n              \"architecture\": \"x86_64\"\n            },\n            \"thread_id\": 1824,\n            \"@timestamp\": \"2019-07-03T14:03:40.131Z\",\n            \"event_data\": {\n              \"Hashes\": \"MD5=332A5371389A8953A96BF09B69EDCB6E,SHA256=E46BA4BDD4168A399EE5BC2161A8C918095FA30EB20AC88CAC6AB1D6DBEA2B4A\",\n              \"Company\": \"gentilkiwi (Benjamin DELPY)\",\n              \"LogonId\": \"0x37646\",\n              \"Product\": \"mimikatz\",\n              \"UtcTime\": \"2019-07-03 14:03:40.047\",\n              \"LogonGuid\": \"{DA929735-A7BD-5D0B-0000-002046760300}\",\n              \"ProcessId\": \"2704\",\n              \"CommandLine\": \"\\\"C:\\\\Users\\\\superman\\\\Desktop\\\\invoice-156783.scr\\\" \/S\",\n              \"Description\": \"mimikatz for Windows\",\n              \"FileVersion\": \"2.1.1.0\",\n              \"ProcessGuid\": \"{DA929735-B5BC-5D1C-0000-0010AB301118}\",\n              \"IntegrityLevel\": \"High\",\n              \"ParentProcessId\": \"2256\",\n              \"CurrentDirectory\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\\",\n              \"OriginalFileName\": \"mimikatz.exe\",\n              \"ParentCommandLine\": \"C:\\\\Windows\\\\Explorer.EXE\",\n              \"ParentProcessGuid\": \"{DA929735-A7D1-5D0B-0000-00108BFE0500}\",\n              \"TerminalSessionId\": \"1\"\n            },\n            \"event_type\": \"sysmon\",\n            \"image_path\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\invoice-156783.scr\",\n            \"process_id\": 1408,\n            \"source_name\": \"Microsoft-Windows-Sysmon\",\n            \"computer_name\": \"win7-host1-PC.batman.local\",\n            \"logstash_time\": 0.0017659664154052734,\n            \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n            \"record_number\": \"1975234\",\n            \"parent_image_path\": \"C:\\\\Windows\\\\explorer.exe\"\n          }\n        }\n      ],\n      \"total\": {\n        \"value\": 4,\n        \"relation\": \"eq\"\n      },\n      \"max_score\": 2.575364\n    },\n    \"took\": 3589,\n    \"_shards\": {\n      \"total\": 95,\n      \"failed\": 0,\n      \"skipped\": 0,\n      \"successful\": 95\n    },\n    \"timed_out\": false\n  },\n  \"status\": \"Success\",\n  \"message\": \"\",\n  \"operation\": null\n}",
+                "operationTitle": "Execute Lucene Query",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "190",
+            "left": "1100",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "738a14a7-f39a-45c5-82f4-1475b1656e4d",
+            "id": 4526
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Copy  of Create and Link Alert3",
+            "description": null,
+            "arguments": {
+                "for_each": {
+                    "item": "{{vars.steps.Elastic_Query_for_scr_file_executed_outside_of_system32_or_syswow64.data.hits.hits}}",
+                    "parallel": false,
+                    "condition": ""
+                },
+                "arguments": {
+                    "MD5": "{{vars.item._source.event_data.Hashes.split(\"MD5=\")[1].split(',')[0]}}",
+                    "url": "",
+                    "source": "{{vars.item._source.source_name}}",
+                    "comment": "SIEM queried for Sysmon logs indicating an .scr file was executed from a nonstandard directory on host {{vars.item._source.beat.hostname}} at {{ arrow.get(vars.item._source.event_data.UtcTime).timestamp }}.",
+                    "huntIRI": "{{vars.input.records[0]['@id']}}",
+                    "service": "",
+                    "filePath": "{{vars.item._source.image_path}}",
+                    "hostName": "{{vars.item._source.beat.hostname}}",
+                    "sourceIP": "",
+                    "userName": "{{vars.item._source.username}}",
+                    "alertName": "ATT&CK-Screensaver-{{vars.item._source.image_path.split(\"\\\\\")[-1] }} executed as an .SCR file by {{vars.item._source.parent_image_path.split(\"\\\\\")[-1] }}",
+                    "alertType": "{{\"AlertType\" | picklist(\"Event Triggered Execution\", \"@id\")}}",
+                    "epochTime": "{{ arrow.get(vars.item._source.event_data.UtcTime).timestamp }}",
+                    "eventName": "",
+                    "eventTime": "{{vars.item._source.event_data.UtcTime}}",
+                    "processID": "{{vars.item._source.event_data.ProcessId}}",
+                    "technique": "Screensaver-.scr File Executed",
+                    "sourceData": "{{vars.item}}",
+                    "sourceTool": "{{vars.item._source.source_name}}",
+                    "commandline": "{{vars.item._source.event_data.CommandLine}}",
+                    "description": "An attempt to execute a screensaver file (.scr) from a nonstandard directory was observed. Screensaver files are portable executables that are stored in specific directories in a traditional Windows environment. Execution of a .scr file from outside those directories is suspicious and the host that generated this alert should be investigated for signs of compromise.",
+                    "processGUID": "{{vars.item._source.event_data.ProcessGuid}}",
+                    "processName": "{{vars.item._source.image_path.split(\"\\\\\")[-1] }}",
+                    "registryKey": "",
+                    "sourceImage": "",
+                    "targetImage": "",
+                    "computerName": "{{vars.item._source.computer_name}}",
+                    "destinationIP": "",
+                    "mitre_tech_id": "T1546.002",
+                    "parentProcess": "{{vars.item._source.parent_image_path}}",
+                    "scheduledTask": "",
+                    "bitstransferid": "",
+                    "parentProcessID": "{{vars.item._source.event_data.ParentProcessId}}",
+                    "bytestransferred": "",
+                    "registryKeyValue": "",
+                    "parentCommandLine": "{{vars.item._source.event_data.ParentCommandLine}}",
+                    "decodedCommandLine": ""
+                },
+                "apply_async": false,
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/bf7d418b-7ff3-44c1-b473-90d0a03c4641"
+            },
+            "status": null,
+            "top": "190",
+            "left": "1425",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "13b9f964-45f5-47a3-928c-c26bbd23d944",
+            "id": 4527
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Query for scr file executed outside of system32 or syswow64",
+            "description": null,
+            "arguments": {
+                "name": "Splunk",
+                "config": "55bf97af-75c2-45ca-ae75-f4d27220cc52",
+                "params": {
+                    "query": "index=sysmon EventCode=1 {{vars.splunkHuntStart}} {{vars.splunkHuntEnd}} Image=\"*.scr\" Image!=\"C:\\\\Windows\\\\System32\\\\*.scr\" Image!=\"C:\\\\Windows\\\\SysWOW64\\\\*.scr\"  | table host Image MD5 ParentImage User CommandLine process_exec vendor_product TimeCreated ParentProcessId ProcessId ParentCommandLine ProcessGuid UtcTime EventChannel Computer",
+                    "exec_mode": "",
+                    "auto_cancel": "",
+                    "latest_time": "",
+                    "earliest_time": "",
+                    "additional_search_args": "{\"a\":\"B\"}"
+                },
+                "version": "1.5.0",
+                "connector": "splunk",
+                "operation": "invoke_search",
+                "operationTitle": "Invoke Search",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "830",
+            "left": "1100",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "9d032508-a8a5-4ac5-b486-32adde7dd77c",
+            "id": 4528
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create and Link Alert3",
+            "description": null,
+            "arguments": {
+                "for_each": {
+                    "item": "{{vars.steps.get_results_scr.data.results}}",
+                    "parallel": false,
+                    "condition": ""
+                },
+                "arguments": {
+                    "MD5": "{{vars.item.MD5}}",
+                    "url": "",
+                    "source": "{{vars.item.EventChannel}}",
+                    "comment": "SIEM queried for Sysmon logs indicating an .scr file was executed from a nonstandard directory on host {{vars.item.host}} at {{vars.item.UtcTime}} and generated Alerts from the search results.",
+                    "huntIRI": "{{vars.input.records[0]['@id']}}",
+                    "service": "",
+                    "filePath": "{{vars.item.Image}}",
+                    "hostName": "{{vars.item.host}}",
+                    "sourceIP": "null",
+                    "userName": "{{vars.item.User}}",
+                    "alertName": "ATT&CK-Screensaver-{{vars.item.process_exec}} executed as an .SCR file by {{vars.item.ParentImage.split(\"\\\\\")[-1]}}",
+                    "alertType": "{{\"AlertType\" | picklist(\"Event Triggered Execution\", \"@id\")}}",
+                    "epochTime": "{{ arrow.get(vars.item.UtcTime).timestamp }}",
+                    "eventName": "",
+                    "eventTime": "{{vars.item.UtcTime}}",
+                    "processID": "{{vars.item.ProcessId}}",
+                    "technique": "Screensaver-.scr File Executed",
+                    "sourceData": "{{vars.item}}",
+                    "sourceTool": "{{vars.item.vendor_product}}",
+                    "commandline": "{{vars.item.CommandLine}}",
+                    "description": "An attempt to execute a screensaver file (.scr) from a nonstandard directory was observed. Screensaver files are portable executables that are stored in specific directories in a traditional Windows environment. Execution of a .scr file from outside those directories is suspicious and the host that generated this alert should be investigated for signs of compromise.",
+                    "processGUID": "{{vars.item.ProcessGuid}}",
+                    "processName": "{{vars.item.process_exec}}",
+                    "registryKey": "",
+                    "sourceImage": "",
+                    "targetImage": "",
+                    "computerName": "{{vars.item.Computer}}",
+                    "destinationIP": "null",
+                    "mitre_tech_id": "T1180",
+                    "parentProcess": "{{vars.item.ParentImage}}",
+                    "scheduledTask": "",
+                    "bitstransferid": "",
+                    "parentProcessID": "{{vars.item.ParentProcessId}}",
+                    "bytestransferred": "",
+                    "registryKeyValue": "",
+                    "parentCommandLine": "{{vars.item.ParentCommandLine}}",
+                    "decodedCommandLine": ""
+                },
+                "apply_async": false,
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/bf7d418b-7ff3-44c1-b473-90d0a03c4641"
+            },
+            "status": null,
+            "top": "830",
+            "left": "1750",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "2b3b34b2-705d-4691-b8bb-b57e941cedc7",
+            "id": 4529
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Set Elasticsearch hunt times",
+            "description": null,
+            "arguments": {
+                "elasticHuntEnd": "{% if vars.input.records[0].huntEnd %} {{ arrow.get(vars.input.records[0].huntEnd).format('YYYY-MM-DDTHH:mm:ss.SSSSSSSSSZ') }} {% else %} now {% endif %}",
+                "elasticHuntStart": "{{ arrow.get(vars.input.records[0].huntStart).format('YYYY-MM-DDTHH:mm:ss.SSSSSSSSSZ') }}"
+            },
+            "status": null,
+            "top": "190",
+            "left": "775",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "7e921c6f-42e5-4cfa-8218-cd85287a6e71",
+            "id": 4530
+        }
+    ],
+    "routes": [
+        {
+            "@type": "WorkflowRoute",
+            "name": "Elastic Query for modification of scrnsave_exe registry key using powershell -> Copy  of Create and Link Alert1",
+            "targetStep": "\/api\/3\/workflow_steps\/a3d56554-96b7-4d6f-a431-21e6e64bb5fc",
+            "sourceStep": "\/api\/3\/workflow_steps\/7e3a99c7-b719-455d-8e3b-2c6693c5863b",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "0228194d-673e-46b8-9b72-d6838118c98b"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Create and Link Alert2 -> Deduplicate Comments",
+            "targetStep": "\/api\/3\/workflow_steps\/d131e8ae-cb46-413f-9d3b-f45dee126638",
+            "sourceStep": "\/api\/3\/workflow_steps\/7a377768-4ea3-484e-9680-d07114f0659c",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "27aed8d8-cae7-4799-a62f-719f7a0f1461"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Elastic Query for modification of scrnsave_exe registry key using reg_exe -> Copy  of Create and Link Alert2",
+            "targetStep": "\/api\/3\/workflow_steps\/d58b86ab-2fde-431f-8d0b-d57d1e4982b8",
+            "sourceStep": "\/api\/3\/workflow_steps\/18661d7a-75bf-4bbf-ba1d-8c3f9c830739",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "ade892da-7b83-4607-9698-c84bf6967744"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "get results powershell -> Create Splunk Alert",
+            "targetStep": "\/api\/3\/workflow_steps\/d61cb1ac-c6cf-45bc-aea1-051423cd793d",
+            "sourceStep": "\/api\/3\/workflow_steps\/567fb6f4-f6b4-4a4c-9a1e-c04cc61ecc3b",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "a21721ed-612f-4a8c-ba49-35d18e3d224a"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Copy of Create and Link Alert1 -> Copy  of Deduplicate Comments",
+            "targetStep": "\/api\/3\/workflow_steps\/9009c867-9f86-404c-99db-f7346b95a92a",
+            "sourceStep": "\/api\/3\/workflow_steps\/a3d56554-96b7-4d6f-a431-21e6e64bb5fc",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "88d65c89-045d-4131-8d52-126e10031f46"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Select SIEM -> Set Elasticsearch hunt times",
+            "targetStep": "\/api\/3\/workflow_steps\/7e921c6f-42e5-4cfa-8218-cd85287a6e71",
+            "sourceStep": "\/api\/3\/workflow_steps\/a53ea7c5-65c0-4b44-99f9-ccccff43aec3",
+            "label": "Elastic",
+            "isExecuted": false,
+            "uuid": "71de23bd-20e0-42a8-b366-1324df5f2ade"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Copy  of Create and Link Alert2 -> Copy  of Deduplicate Comments",
+            "targetStep": "\/api\/3\/workflow_steps\/9009c867-9f86-404c-99db-f7346b95a92a",
+            "sourceStep": "\/api\/3\/workflow_steps\/d58b86ab-2fde-431f-8d0b-d57d1e4982b8",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "be92b5d6-9c1f-42ec-992e-40543889b8c6"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Query for modification of scrnsave_exe registry key using powershell -> a",
+            "targetStep": "\/api\/3\/workflow_steps\/567fb6f4-f6b4-4a4c-9a1e-c04cc61ecc3b",
+            "sourceStep": "\/api\/3\/workflow_steps\/b11bab96-7c89-44ed-8a7a-93fb0ef51ef1",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "dee264e9-3608-4dd1-a5ad-bb705409c651"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "get results scr -> Copy 1 of Create Splunk Alert Powershell",
+            "targetStep": "\/api\/3\/workflow_steps\/2b3b34b2-705d-4691-b8bb-b57e941cedc7",
+            "sourceStep": "\/api\/3\/workflow_steps\/6094bccd-8d2f-47a7-8158-eabc0274d244",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "33209011-ba62-4572-9e49-96acc475398a"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Query for scr file executed outside of system32 or syswow64 -> Copy  of get results reg",
+            "targetStep": "\/api\/3\/workflow_steps\/6094bccd-8d2f-47a7-8158-eabc0274d244",
+            "sourceStep": "\/api\/3\/workflow_steps\/9d032508-a8a5-4ac5-b486-32adde7dd77c",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "b0f8580f-4afa-40d6-9998-9bea696ceda2"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Set Splunk hunt times -> Query for modification of scrnsave_exe registry key using powershell",
+            "targetStep": "\/api\/3\/workflow_steps\/b11bab96-7c89-44ed-8a7a-93fb0ef51ef1",
+            "sourceStep": "\/api\/3\/workflow_steps\/cfe053a5-2f1a-4b98-8858-b469b3c31b60",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "5171841b-6ebe-4d93-8c92-addc9ef86279"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Set Elasticsearch hunt times -> Elastic Query for modification of scrnsave_exe registry key using reg_exe",
+            "targetStep": "\/api\/3\/workflow_steps\/18661d7a-75bf-4bbf-ba1d-8c3f9c830739",
+            "sourceStep": "\/api\/3\/workflow_steps\/7e921c6f-42e5-4cfa-8218-cd85287a6e71",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "3aab88d1-c428-41ca-b528-f9376068e825"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Set Splunk hunt times -> Query for modification of scrnsave_exe registry key using reg_exe",
+            "targetStep": "\/api\/3\/workflow_steps\/9658fbfe-313c-4cda-8e29-06cb2ce7f66a",
+            "sourceStep": "\/api\/3\/workflow_steps\/cfe053a5-2f1a-4b98-8858-b469b3c31b60",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "a5bcf070-96b5-445d-affd-cd86fc8ff3ea"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Copy  of Create and Link Alert3 -> Copy  of Deduplicate Comments",
+            "targetStep": "\/api\/3\/workflow_steps\/9009c867-9f86-404c-99db-f7346b95a92a",
+            "sourceStep": "\/api\/3\/workflow_steps\/13b9f964-45f5-47a3-928c-c26bbd23d944",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "43898e25-b4bb-405b-a87f-6b5f867ae7d6"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "get results reg -> Copy  of Create Splunk Alert Reg",
+            "targetStep": "\/api\/3\/workflow_steps\/7a377768-4ea3-484e-9680-d07114f0659c",
+            "sourceStep": "\/api\/3\/workflow_steps\/8de5aed6-8484-4933-baf4-635f67a9fdd2",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "0861394f-7ced-4e0b-aee1-f80596f6880f"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Set Elasticsearch hunt times -> Elastic Query for scr file executed outside of system32 or syswow64",
+            "targetStep": "\/api\/3\/workflow_steps\/738a14a7-f39a-45c5-82f4-1475b1656e4d",
+            "sourceStep": "\/api\/3\/workflow_steps\/7e921c6f-42e5-4cfa-8218-cd85287a6e71",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "832b2f38-b583-435e-919d-47ef77e68f8c"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Create and Link Alert3 -> Deduplicate Comments",
+            "targetStep": "\/api\/3\/workflow_steps\/d131e8ae-cb46-413f-9d3b-f45dee126638",
+            "sourceStep": "\/api\/3\/workflow_steps\/2b3b34b2-705d-4691-b8bb-b57e941cedc7",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "03af146b-af36-4fad-8802-8f263df1e73a"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Elastic Query for scr file executed outside of system32 or syswow64 -> Copy  of Create and Link Alert3",
+            "targetStep": "\/api\/3\/workflow_steps\/13b9f964-45f5-47a3-928c-c26bbd23d944",
+            "sourceStep": "\/api\/3\/workflow_steps\/738a14a7-f39a-45c5-82f4-1475b1656e4d",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "df5fd715-9396-4dbd-9165-49639407943e"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Set Elasticsearch hunt times -> Elastic Query for modification of scrnsave_exe registry key using powershell",
+            "targetStep": "\/api\/3\/workflow_steps\/7e3a99c7-b719-455d-8e3b-2c6693c5863b",
+            "sourceStep": "\/api\/3\/workflow_steps\/7e921c6f-42e5-4cfa-8218-cd85287a6e71",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "5db0884e-fe84-4b5c-bfbd-cae1b77ce28e"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Select SIEM -> Set Splunk hunt times",
+            "targetStep": "\/api\/3\/workflow_steps\/cfe053a5-2f1a-4b98-8858-b469b3c31b60",
+            "sourceStep": "\/api\/3\/workflow_steps\/a53ea7c5-65c0-4b44-99f9-ccccff43aec3",
+            "label": "Splunk",
+            "isExecuted": false,
+            "uuid": "154ed70a-c43c-46bf-b73a-0f8cea2c3022"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Set Splunk hunt times -> Query for scr file executed outside of system32 or syswow64",
+            "targetStep": "\/api\/3\/workflow_steps\/9d032508-a8a5-4ac5-b486-32adde7dd77c",
+            "sourceStep": "\/api\/3\/workflow_steps\/cfe053a5-2f1a-4b98-8858-b469b3c31b60",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "1db605b9-97c0-47c5-8b3c-6c29b395655c"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Start -> Select SIEM",
+            "targetStep": "\/api\/3\/workflow_steps\/a53ea7c5-65c0-4b44-99f9-ccccff43aec3",
+            "sourceStep": "\/api\/3\/workflow_steps\/004d4d13-995d-49ae-ba8c-d25a9b5104b8",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "9ba105f1-d9e4-4105-8340-ef77d9c335e2"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Create and Link Alert1 -> Deduplicate Comments",
+            "targetStep": "\/api\/3\/workflow_steps\/d131e8ae-cb46-413f-9d3b-f45dee126638",
+            "sourceStep": "\/api\/3\/workflow_steps\/d61cb1ac-c6cf-45bc-aea1-051423cd793d",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "4b0704d9-4113-4827-9ae8-b545f28a169b"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Query for modification of scrnsave_exe registry key using reg_exe -> get results reg",
+            "targetStep": "\/api\/3\/workflow_steps\/8de5aed6-8484-4933-baf4-635f67a9fdd2",
+            "sourceStep": "\/api\/3\/workflow_steps\/9658fbfe-313c-4cda-8e29-06cb2ce7f66a",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "347a0714-7eb3-4246-af28-ca6cd462e4f1"
+        }
+    ],
+    "priority": null,
+    "uuid": "b299808a-71e2-4ba3-ab82-673f0844cf98",
+    "recordTags": [
+        "ManualTrigger"
+    ],
+    "id": 1126,
+    "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "createDate": 1644165545,
+    "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "modifyDate": 1644165545,
+    "owners": [],
+    "isPrivate": false
+}

