@@ -1,0 +1,790 @@
+{
+    "@type": "Workflow",
+    "triggerLimit": null,
+    "name": "HUNTS - Mshta (T1218.005)",
+    "aliasName": null,
+    "tag": "ATT&CK, MSHTA, Defense_Evasion, Execution",
+    "description": "Identifies Processes spawned by Mshta.exe",
+    "isActive": true,
+    "debug": false,
+    "singleRecordExecution": false,
+    "remoteExecutableFlag": false,
+    "parameters": [
+        "sourceIP",
+        "destinationIP",
+        "processname",
+        "processID",
+        "processGUID",
+        "parentprocessname",
+        "parentprocessGUID",
+        "accountname",
+        "computername",
+        "commandline",
+        "sourcetool"
+    ],
+    "synchronous": false,
+    "lastModifyDate": 1644165542,
+    "collection": "\/api\/3\/workflow_collections\/c926f317-8aba-41c5-8f71-2f0f23d992fb",
+    "versions": [],
+    "triggerStep": "\/api\/3\/workflow_steps\/51b30287-7142-41a3-9d30-6971d65bd567",
+    "steps": [
+        {
+            "@type": "WorkflowStep",
+            "name": "Set Elastic hunt times",
+            "description": null,
+            "arguments": {
+                "elasticHuntEnd": "{% if vars.input.records[0].huntEnd %} {{ arrow.get(vars.input.records[0].huntEnd).format('YYYY-MM-DDTHH:mm:ss.SSSSSSSSSZ') }} {% else %} now {% endif %}",
+                "elasticHuntStart": "{{ arrow.get(vars.input.records[0].huntStart).format('YYYY-MM-DDTHH:mm:ss.SSSSSSSSSZ') }}"
+            },
+            "status": null,
+            "top": "430",
+            "left": "1100",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "7c665606-173d-4133-b427-40ef1f90e957",
+            "id": 4791
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Get Results for MSHTA Child",
+            "description": null,
+            "arguments": {
+                "name": "Splunk",
+                "config": "55bf97af-75c2-45ca-ae75-f4d27220cc52",
+                "params": {
+                    "sid": "{'value': \"{{vars.steps.Splunk_query_for_MSHTA_Child.data.sid}}\"}",
+                    "additional_args": "{\"a\":\"B\"}"
+                },
+                "version": "1.5.0",
+                "do_until": {
+                    "delay": "1",
+                    "retries": "300",
+                    "condition": "{{\"results\" in vars.result.data}}"
+                },
+                "connector": "splunk",
+                "operation": "get_results",
+                "operationTitle": "Get Results for a Search",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "30",
+            "left": "1425",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "12eece5d-819b-4977-b5e1-b5c121e9aa71",
+            "id": 4792
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Copy  of Create and Link Splunk Alert",
+            "description": null,
+            "arguments": {
+                "for_each": {
+                    "item": "{{vars.steps.Get_Results_for_MSHTA_Child.data.results}}",
+                    "parallel": false,
+                    "condition": ""
+                },
+                "arguments": {
+                    "MD5": "{{vars.item.MD5}}",
+                    "url": "",
+                    "source": "{{vars.item.EventChannel}}",
+                    "comment": "SIEM query identified MSHTA.exe spawned child process {{vars.item.process_exec}} on {{vars.item.host}} at {{vars.item.UtcTime}}.",
+                    "huntIRI": "{{vars.input.records[0]['@id']}}",
+                    "service": "",
+                    "filePath": "{{vars.item.Image}}",
+                    "hostName": "{{vars.item.host}}",
+                    "sourceIP": "null",
+                    "userName": "{{vars.item.User}}",
+                    "alertName": "ATT&CK-Mshta-{{vars.item.process_exec}} spawned",
+                    "alertType": "{{\"AlertType\" | picklist(\"Signed Binary Proxy Execution\", \"@id\")}}",
+                    "epochTime": "{{ arrow.get(vars.item.UtcTime).timestamp }}",
+                    "eventName": "",
+                    "eventTime": "{{vars.item.UtcTime}}",
+                    "processID": "{{vars.item.ProcessId}}",
+                    "technique": "MSHTA-Child Process",
+                    "sourceData": "{{vars.item}}",
+                    "sourceTool": "{{vars.item.EventChannel}}",
+                    "commandline": "{{vars.item.CommandLine}}",
+                    "description": "An attempt to invoke mshta.exe was observed. MSHTA can be used as an alternate method of executing local and remotely hosted executables. In most networks execution of MSHTA.exe is an uncommon occurrence and should be investigated as a potential sign of compromise.",
+                    "processGUID": "{{vars.item.ProcessGuid}}",
+                    "processName": "{{vars.item.process_exec}}",
+                    "registryKey": "",
+                    "sourceImage": "",
+                    "targetImage": "",
+                    "computerName": "{{vars.item.Computer}}",
+                    "destinationIP": "null",
+                    "mitre_tech_id": "T1170",
+                    "parentProcess": "{{vars.item.ParentImage}}",
+                    "scheduledTask": "",
+                    "bitstransferid": "",
+                    "parentProcessID": "{{vars.item.ParentProcessId}}",
+                    "bytestransferred": "",
+                    "registryKeyValue": "",
+                    "parentCommandLine": "{{vars.item.ParentCommandLine}}",
+                    "decodedCommandLine": ""
+                },
+                "apply_async": false,
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/bf7d418b-7ff3-44c1-b473-90d0a03c4641"
+            },
+            "status": null,
+            "top": "30",
+            "left": "1750",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "39118900-d9be-48d8-8562-f41d5f8dcd5b",
+            "id": 4793
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Set Splunk hunt times",
+            "description": null,
+            "arguments": {
+                "splunkHuntEnd": "{% if vars.input.records[0].huntEnd %}latest={{vars.input.records[0].huntEnd}}{% endif %}",
+                "splunkHuntStart": "earliest={{vars.input.records[0].huntStart}}"
+            },
+            "status": null,
+            "top": "110",
+            "left": "775",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "c01fb750-3305-4f1a-827f-37f880d2b40d",
+            "id": 4794
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Elastic Query for MSHTA Child",
+            "description": null,
+            "arguments": {
+                "name": "ElasticSearch",
+                "config": "8d03a01d-1cef-40a8-992a-63d8de2b339f",
+                "params": {
+                    "index": "logstash-beats-*",
+                    "query": "event_type:sysmon AND event_id:\"1\" AND @timestamp:{ {{vars.elasticHuntStart}} TO {{vars.elasticHuntEnd}} } AND (parent_image_path:\"C:\\\\Windows\\\\System32\\\\mshta.exe\" OR parent_image_path:\"C:\\\\Windows\\\\SysWOW64\\\\mshta.exe\")",
+                    "run_as_user": ""
+                },
+                "version": "2.2.1",
+                "connector": "elasticsearch",
+                "operation": "execute_lucene_query",
+                "mock_result": "{\n  \"data\": {\n    \"hits\": {\n      \"hits\": [\n        {\n          \"_id\": \"2F2JdWsBlqecEBF3bG6u\",\n          \"_type\": \"doc\",\n          \"_index\": \"logstash-beats-mshta\",\n          \"_score\": 3.4384105,\n          \"_source\": {\n            \"beat\": {\n              \"name\": \"win7-host1-PC\",\n              \"version\": \"6.5.3\",\n              \"hostname\": \"win7-host1-PC\"\n            },\n            \"tags\": [\n              \"beat\",\n              \"beats_input_codec_plain_applied\"\n            ],\n            \"task\": \"Process Create (rule: ProcessCreate)\",\n            \"user\": {\n              \"name\": \"SYSTEM\",\n              \"type\": \"User\",\n              \"domain\": \"NT AUTHORITY\",\n              \"identifier\": \"S-1-5-18\"\n            },\n            \"level\": \"Information\",\n            \"opcode\": \"Info\",\n            \"message\": \"Process Create:\\nRuleName: \\nUtcTime: 2019-06-20 15:37:43.813\\nProcessGuid: {DA929735-A847-5D0B-0000-00108E740E00}\\nProcessId: 2388\\nImage: C:\\\\Windows\\\\SysWOW64\\\\cmd.exe\\nFileVersion: 6.1.7601.17514 (win7sp1_rtm.101119-1850)\\nDescription: Windows Command Processor\\nProduct: Microsoft\u00ae Windows\u00ae Operating System\\nCompany: Microsoft Corporation\\nOriginalFileName: Cmd.Exe\\nCommandLine: \\\"C:\\\\Windows\\\\System32\\\\cmd.exe\\\" \/c calc.exe\\nCurrentDirectory: C:\\\\Users\\\\superman\\\\Desktop\\\\\\nUser: batman\\\\superman\\nLogonGuid: {DA929735-A7BD-5D0B-0000-002046760300}\\nLogonId: 0x37646\\nTerminalSessionId: 1\\nIntegrityLevel: High\\nHashes: MD5=AD7B9C14083B52BC532FBA5948342B98,SHA256=17F746D82695FA9B35493B41859D39D786D32B23A9D2E00F4011DEC7A02402AE\\nParentProcessGuid: {DA929735-A846-5D0B-0000-0010813C0E00}\\nParentProcessId: 3148\\nParentImage: C:\\\\Windows\\\\SysWOW64\\\\mshta.exe\\nParentCommandLine: C:\\\\Windows\\\\SysWOW64\\\\mshta.exe  C:\\\\Users\\\\superman\\\\Desktop\\\\calc.hta\",\n            \"version\": 5,\n            \"@version\": \"1\",\n            \"event_id\": 1,\n            \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n            \"username\": \"batman\\\\superman\",\n            \"beat_host\": {\n              \"id\": \"da929735-a8f9-4b38-8348-7664a570a0a2\",\n              \"os\": {\n                \"build\": \"7601.24356\",\n                \"family\": \"windows\",\n                \"version\": \"6.1\",\n                \"platform\": \"windows\"\n              },\n              \"name\": \"win7-host1-PC\",\n              \"architecture\": \"x86_64\"\n            },\n            \"thread_id\": 1824,\n            \"@timestamp\": \"2019-06-20T15:37:44.003Z\",\n            \"event_data\": {\n              \"Hashes\": \"MD5=AD7B9C14083B52BC532FBA5948342B98,SHA256=17F746D82695FA9B35493B41859D39D786D32B23A9D2E00F4011DEC7A02402AE\",\n              \"Company\": \"Microsoft Corporation\",\n              \"LogonId\": \"0x37646\",\n              \"Product\": \"Microsoft\u00ae Windows\u00ae Operating System\",\n              \"UtcTime\": \"2019-06-20 15:37:43.813\",\n              \"LogonGuid\": \"{DA929735-A7BD-5D0B-0000-002046760300}\",\n              \"ProcessId\": \"2388\",\n              \"CommandLine\": \"\\\"C:\\\\Windows\\\\System32\\\\cmd.exe\\\" \/c calc.exe\",\n              \"Description\": \"Windows Command Processor\",\n              \"FileVersion\": \"6.1.7601.17514 (win7sp1_rtm.101119-1850)\",\n              \"ProcessGuid\": \"{DA929735-A847-5D0B-0000-00108E740E00}\",\n              \"IntegrityLevel\": \"High\",\n              \"ParentProcessId\": \"3148\",\n              \"CurrentDirectory\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\\",\n              \"OriginalFileName\": \"Cmd.Exe\",\n              \"ParentCommandLine\": \"C:\\\\Windows\\\\SysWOW64\\\\mshta.exe  C:\\\\Users\\\\superman\\\\Desktop\\\\calc.hta\",\n              \"ParentProcessGuid\": \"{DA929735-A846-5D0B-0000-0010813C0E00}\",\n              \"TerminalSessionId\": \"1\"\n            },\n            \"event_type\": \"sysmon\",\n            \"image_path\": \"C:\\\\Windows\\\\SysWOW64\\\\cmd.exe\",\n            \"process_id\": 1408,\n            \"source_name\": \"Microsoft-Windows-Sysmon\",\n            \"computer_name\": \"win7-host1-PC.batman.local\",\n            \"logstash_time\": 0.0026938915252685547,\n            \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n            \"record_number\": \"933572\",\n            \"parent_image_path\": \"C:\\\\Windows\\\\SysWOW64\\\\mshta.exe\"\n          }\n        }\n      ],\n      \"total\": {\n        \"value\": 1,\n        \"relation\": \"eq\"\n      },\n      \"max_score\": 3.4384105\n    },\n    \"took\": 229,\n    \"_shards\": {\n      \"total\": 95,\n      \"failed\": 0,\n      \"skipped\": 0,\n      \"successful\": 95\n    },\n    \"timed_out\": false\n  },\n  \"status\": \"Success\",\n  \"message\": \"\",\n  \"operation\": null\n}",
+                "operationTitle": "Execute Lucene Query",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "350",
+            "left": "1425",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "cf34d61f-3d0d-4973-9102-5a447f54d75f",
+            "id": 4795
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Splunk query for Sysmon MSHTA",
+            "description": null,
+            "arguments": {
+                "name": "Splunk",
+                "config": "55bf97af-75c2-45ca-ae75-f4d27220cc52",
+                "params": {
+                    "query": "index=\"sysmon\" EventCode=1 {{vars.splunkHuntStart}} {{vars.splunkHuntEnd}} (Image=\"C:\\\\Windows\\\\System32\\\\mshta.exe\" OR Image=\"C:\\\\Windows\\\\SysWOW64\\\\mshta.exe\") | table host Image MD5 ParentImage User CommandLine process_exec vendor_product TimeCreated ParentProcessId ProcessId ParentCommandLine ProcessGuid UtcTime EventChannel Computer",
+                    "exec_mode": "",
+                    "auto_cancel": "",
+                    "latest_time": "",
+                    "earliest_time": "",
+                    "additional_search_args": "{\"a\":\"B\"}"
+                },
+                "version": "1.5.0",
+                "connector": "splunk",
+                "operation": "invoke_search",
+                "operationTitle": "Invoke Search",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "190",
+            "left": "1100",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "3c04910b-0ee2-458d-91e2-2c6f28475979",
+            "id": 4796
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Hunt for MSHTA",
+            "description": null,
+            "arguments": {
+                "route": "9458baee-6731-4a49-ba2b-1e96ce0db714",
+                "title": "T1218.005 - Hunt for Mshta",
+                "resources": [
+                    "hunt"
+                ],
+                "inputVariables": [
+                    {
+                        "name": "siem",
+                        "type": "picklists",
+                        "label": "SIEM",
+                        "title": "Picklist",
+                        "usable": true,
+                        "tooltip": "Choose your SIEM",
+                        "dataType": "picklist",
+                        "formType": "picklist",
+                        "required": true,
+                        "_expanded": true,
+                        "mmdUpdate": true,
+                        "collection": false,
+                        "dataSource": {
+                            "model": "picklists",
+                            "query": {
+                                "sort": [
+                                    {
+                                        "field": "orderIndex",
+                                        "direction": "ASC"
+                                    }
+                                ],
+                                "logic": "AND",
+                                "filters": [
+                                    {
+                                        "field": "listName__name",
+                                        "value": "SIEMs",
+                                        "operator": "eq"
+                                    }
+                                ]
+                            },
+                            "displayConditions": {
+                                "876c1483-416b-4d2f-8138-15769ae16d5c": {
+                                    "conditions": null,
+                                    "visibility": "visible"
+                                },
+                                "bcebcab1-3f93-468a-9f3f-91e5c511a0b5": {
+                                    "conditions": null,
+                                    "visibility": "visible"
+                                }
+                            }
+                        },
+                        "searchable": false,
+                        "templateUrl": "app\/components\/form\/fields\/typeahead.html",
+                        "_nameTouched": true,
+                        "defaultValue": {
+                            "id": 280,
+                            "@id": "\/api\/3\/picklists\/876c1483-416b-4d2f-8138-15769ae16d5c",
+                            "icon": null,
+                            "@type": "Picklist",
+                            "color": null,
+                            "display": "Elastic",
+                            "listName": "\/api\/3\/picklist_names\/98830189-afff-40e6-bed1-94012551dc67",
+                            "itemValue": "Elastic",
+                            "orderIndex": 1
+                        },
+                        "displayTemplate": "{{ itemValue }}",
+                        "lengthConstraint": false,
+                        "allowedEncryption": false,
+                        "allowedGridColumn": true,
+                        "useRecordFieldDefault": false
+                    }
+                ],
+                "step_variables": {
+                    "input": {
+                        "params": {
+                            "siem": "{{vars.request.data[\"siem\"]}}",
+                            "sourceIP": "{{ vars.sourceIP }}",
+                            "processID": "{{ vars.processID }}",
+                            "sourcetool": "{{ vars.sourcetool }}",
+                            "accountname": "{{ vars.accountname }}",
+                            "commandline": "{{ vars.commandline }}",
+                            "processGUID": "{{ vars.processGUID }}",
+                            "processname": "{{ vars.processname }}",
+                            "computername": "{{ vars.computername }}",
+                            "destinationIP": "{{ vars.destinationIP }}",
+                            "parentprocessGUID": "{{ vars.parentprocessGUID }}",
+                            "parentprocessname": "{{ vars.parentprocessname }}"
+                        },
+                        "records": "{{vars.input.records}}"
+                    },
+                    "useMockOutput": "{{globalVars.Demo_mode}}"
+                },
+                "_promptexpanded": true,
+                "displayConditions": {
+                    "hunt": {
+                        "sort": [],
+                        "limit": 30,
+                        "logic": "AND",
+                        "filters": []
+                    }
+                },
+                "executeButtonText": "Execute",
+                "noRecordExecution": false,
+                "singleRecordExecution": false
+            },
+            "status": null,
+            "top": "270",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/f414d039-bb0d-4e59-9c39-a8f1e880b18a",
+            "uuid": "51b30287-7142-41a3-9d30-6971d65bd567",
+            "id": 4797
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create and Link Elastic Alert",
+            "description": null,
+            "arguments": {
+                "for_each": {
+                    "item": "{{vars.steps.Elastic_Query_for_Sysmon_MSHTA.data.hits.hits}}",
+                    "parallel": false,
+                    "condition": ""
+                },
+                "arguments": {
+                    "MD5": "{{vars.item._source.event_data.Hashes.split(\"MD5=\")[1].split(',')[0]}}",
+                    "url": "",
+                    "source": "{{vars.item._source.source_name}}",
+                    "comment": "SIEM query identified MSHTA.exe was invoked on {{vars.item._source.beat.hostname}} at {{vars.item._source.event_data.UtcTime}}.",
+                    "huntIRI": "{{vars.input.records[0]['@id']}}",
+                    "service": "",
+                    "filePath": "{{vars.item._source.image_path}}",
+                    "hostName": "{{vars.item._source.beat.hostname}}",
+                    "sourceIP": "",
+                    "userName": "{{vars.item._source.username}}",
+                    "alertName": "ATT&CK-Mshta-{{vars.item._source.image_path.split(\"\\\\\")[-1] }} executed",
+                    "alertType": "{{\"AlertType\" | picklist(\"Signed Binary Proxy Execution\", \"@id\")}}",
+                    "epochTime": "{{ arrow.get(vars.item._source.event_data.UtcTime).timestamp }}",
+                    "eventName": "",
+                    "eventTime": "{{vars.item._source.event_data.UtcTime}}",
+                    "processID": "{{vars.item._source.event_data.ProcessId}}",
+                    "technique": "MSHTA",
+                    "sourceData": "{{vars.item}}",
+                    "sourceTool": "{{vars.item._source.source_name}}",
+                    "commandline": "{{vars.item._source.event_data.CommandLine}}",
+                    "description": "An attempt to invoke mshta.exe was observed. MSHTA can be used as an alternate method of executing local and remotely hosted executables. In most networks execution of MSHTA.exe is an uncommon occurrence and should be investigated as a potential sign of compromise.",
+                    "processGUID": "{{vars.item._source.event_data.ProcessGuid}}",
+                    "processName": "{{vars.item._source.image_path.split(\"\\\\\")[-1] }}",
+                    "registryKey": "",
+                    "sourceImage": "",
+                    "targetImage": "",
+                    "computerName": "{{vars.item._source.computer_name}}",
+                    "destinationIP": "",
+                    "mitre_tech_id": "T1218.005",
+                    "parentProcess": "{{vars.item._source.parent_image_path}}",
+                    "scheduledTask": "",
+                    "bitstransferid": "",
+                    "parentProcessID": "{{vars.item._source.event_data.ParentProcessId}}",
+                    "bytestransferred": "",
+                    "registryKeyValue": "",
+                    "parentCommandLine": "{{vars.item._source.event_data.ParentCommandLine}}",
+                    "decodedCommandLine": ""
+                },
+                "apply_async": false,
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/bf7d418b-7ff3-44c1-b473-90d0a03c4641"
+            },
+            "status": null,
+            "top": "510",
+            "left": "1750",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "29ca0944-15eb-4c02-9a53-9b83e7239508",
+            "id": 4798
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Deduplicate Comments",
+            "description": null,
+            "arguments": {
+                "arguments": {
+                    "hunt_iri": "{{vars.input.records[0]['@id']}}"
+                },
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/3fd311be-a1c6-41c7-99a3-8794b33d8f8a"
+            },
+            "status": null,
+            "top": "270",
+            "left": "2075",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "0b294b90-8bd6-4f8e-954c-4c81855ed342",
+            "id": 4799
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create and Link Splunk Alert",
+            "description": null,
+            "arguments": {
+                "for_each": {
+                    "item": "{{vars.steps.Get_Results_for_Sysmon_MSHTA.data.results}}",
+                    "parallel": false,
+                    "condition": ""
+                },
+                "arguments": {
+                    "MD5": "{{vars.item.MD5}}",
+                    "url": "",
+                    "source": "{{vars.item.EventChannel}}",
+                    "comment": "SIEM query identified MSHTA.exe was invoked on {{vars.item.host}} at {{vars.item.UtcTime}}.",
+                    "huntIRI": "{{vars.input.records[0]['@id']}}",
+                    "service": "",
+                    "filePath": "{{vars.item.Image}}",
+                    "hostName": "{{vars.item.host}}",
+                    "sourceIP": "null",
+                    "userName": "{{vars.item.User}}",
+                    "alertName": "ATT&CK-Mshta-{{vars.item.process_exec}} executed",
+                    "alertType": "{{\"AlertType\" | picklist(\"Signed Binary Proxy Execution\", \"@id\")}}",
+                    "epochTime": "{{ arrow.get(vars.item.UtcTime).timestamp }}",
+                    "eventName": "",
+                    "eventTime": "{{vars.item.UtcTime}}",
+                    "processID": "{{vars.item.ProcessId}}",
+                    "technique": "MSHTA",
+                    "sourceData": "{{vars.item}}",
+                    "sourceTool": "{{vars.item.EventChannel}}",
+                    "commandline": "{{vars.item.CommandLine}}",
+                    "description": "An attempt to invoke mshta.exe was observed. MSHTA can be used as an alternate method of executing local and remotely hosted executables. In most networks execution of MSHTA.exe is an uncommon occurrence and should be investigated as a potential sign of compromise.",
+                    "processGUID": "{{vars.item.ProcessGuid}}",
+                    "processName": "{{vars.item.process_exec}}",
+                    "registryKey": "",
+                    "sourceImage": "",
+                    "targetImage": "",
+                    "computerName": "{{vars.item.Computer}}",
+                    "destinationIP": "null",
+                    "mitre_tech_id": "T1170",
+                    "parentProcess": "{{vars.item.ParentImage}}",
+                    "scheduledTask": "",
+                    "bitstransferid": "",
+                    "parentProcessID": "{{vars.item.ParentProcessId}}",
+                    "bytestransferred": "",
+                    "registryKeyValue": "",
+                    "parentCommandLine": "{{vars.item.ParentCommandLine}}",
+                    "decodedCommandLine": ""
+                },
+                "apply_async": false,
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/bf7d418b-7ff3-44c1-b473-90d0a03c4641"
+            },
+            "status": null,
+            "top": "190",
+            "left": "1750",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "131bf303-29ba-40fc-88a1-5237bf6dfc14",
+            "id": 4800
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Get Results for Sysmon MSHTA",
+            "description": null,
+            "arguments": {
+                "name": "Splunk",
+                "config": "55bf97af-75c2-45ca-ae75-f4d27220cc52",
+                "params": {
+                    "sid": "{'value': \"{{vars.steps.Splunk_query_for_Sysmon_MSHTA.data.sid}}\"}",
+                    "additional_args": "{\"a\":\"B\"}"
+                },
+                "version": "1.4.0",
+                "do_until": {
+                    "delay": "1",
+                    "retries": "300",
+                    "condition": "{{\"results\" in vars.result.data}}"
+                },
+                "connector": "splunk",
+                "operation": "get_results",
+                "operationTitle": "Get Results for a Search",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "190",
+            "left": "1425",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "5d5522b8-2312-4d07-b447-7a85943c2b59",
+            "id": 4801
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Which SIEM",
+            "description": null,
+            "arguments": {
+                "conditions": [
+                    {
+                        "step_iri": "\/api\/3\/workflow_steps\/c01fb750-3305-4f1a-827f-37f880d2b40d",
+                        "condition": "{{ vars.input.params.siem.itemValue == \"Splunk\" }}"
+                    },
+                    {
+                        "step_iri": "\/api\/3\/workflow_steps\/7c665606-173d-4133-b427-40ef1f90e957",
+                        "condition": "{{ vars.input.params.siem.itemValue == \"Elastic\" }}"
+                    }
+                ]
+            },
+            "status": null,
+            "top": "270",
+            "left": "450",
+            "stepType": "\/api\/3\/workflow_step_types\/12254cf5-5db7-4b1a-8cb1-3af081924b28",
+            "uuid": "4b353ae0-ae7d-4e79-906d-dfe5ff67e2ee",
+            "id": 4802
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Splunk query for MSHTA Child",
+            "description": null,
+            "arguments": {
+                "name": "Splunk",
+                "config": "55bf97af-75c2-45ca-ae75-f4d27220cc52",
+                "params": {
+                    "query": "index=\"sysmon\" EventCode=1 {{vars.splunkHuntStart}} {{vars.splunkHuntEnd}} (ParentImage=\"C:\\\\Windows\\\\System32\\\\mshta.exe\" OR ParentImage=\"C:\\\\Windows\\\\SysWOW64\\\\mshta.exe\") | table host Image MD5 ParentImage User CommandLine process_exec vendor_product TimeCreated ParentProcessId ProcessId ParentCommandLine ProcessGuid UtcTime EventChannel Computer",
+                    "exec_mode": "",
+                    "auto_cancel": "",
+                    "latest_time": "",
+                    "earliest_time": "",
+                    "additional_search_args": "{\"a\":\"B\"}"
+                },
+                "version": "1.5.0",
+                "connector": "splunk",
+                "operation": "invoke_search",
+                "operationTitle": "Invoke Search",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "30",
+            "left": "1100",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "242c2e33-876d-4551-9029-a2f286be30c7",
+            "id": 4803
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Elastic Query for Sysmon MSHTA",
+            "description": null,
+            "arguments": {
+                "name": "ElasticSearch",
+                "config": "8d03a01d-1cef-40a8-992a-63d8de2b339f",
+                "params": {
+                    "index": "logstash-beats-*",
+                    "query": "event_type:sysmon AND event_id:\"1\" AND @timestamp:{ {{vars.elasticHuntStart}} TO {{vars.elasticHuntEnd}} } AND (image_path:\"C:\\\\Windows\\\\System32\\\\mshta.exe\" OR image_path:\"C:\\\\Windows\\\\SysWOW64\\\\mshta.exe\")",
+                    "run_as_user": ""
+                },
+                "version": "2.2.1",
+                "connector": "elasticsearch",
+                "operation": "execute_lucene_query",
+                "mock_result": "{\n  \"data\": {\n    \"hits\": {\n      \"hits\": [\n        {\n          \"_id\": \"w12JdWsBlqecEBF3X246\",\n          \"_type\": \"doc\",\n          \"_index\": \"logstash-beats-mshta\",\n          \"_score\": 3.4384105,\n          \"_source\": {\n            \"beat\": {\n              \"name\": \"win7-host1-PC\",\n              \"version\": \"6.5.3\",\n              \"hostname\": \"win7-host1-PC\"\n            },\n            \"tags\": [\n              \"beat\",\n              \"beats_input_codec_plain_applied\"\n            ],\n            \"task\": \"Process Create (rule: ProcessCreate)\",\n            \"user\": {\n              \"name\": \"SYSTEM\",\n              \"type\": \"User\",\n              \"domain\": \"NT AUTHORITY\",\n              \"identifier\": \"S-1-5-18\"\n            },\n            \"level\": \"Information\",\n            \"opcode\": \"Info\",\n            \"message\": \"Process Create:\\nRuleName: \\nUtcTime: 2019-06-20 15:37:42.620\\nProcessGuid: {DA929735-A846-5D0B-0000-0010813C0E00}\\nProcessId: 3148\\nImage: C:\\\\Windows\\\\SysWOW64\\\\mshta.exe\\nFileVersion: 8.00.7601.19104 (win7sp1_gdr.151210-0600)\\nDescription: Microsoft (R) HTML Application host\\nProduct: Windows\u00ae Internet Explorer\\nCompany: Microsoft Corporation\\nOriginalFileName: MSHTA.EXE\\nCommandLine: C:\\\\Windows\\\\SysWOW64\\\\mshta.exe  C:\\\\Users\\\\superman\\\\Desktop\\\\calc.hta\\nCurrentDirectory: C:\\\\Users\\\\superman\\\\Desktop\\\\\\nUser: batman\\\\superman\\nLogonGuid: {DA929735-A7BD-5D0B-0000-002046760300}\\nLogonId: 0x37646\\nTerminalSessionId: 1\\nIntegrityLevel: High\\nHashes: MD5=B53D7530178E4576A65EF3FE353DB6D4,SHA256=A0F90FACBE2173D3F6D9296E6C1A1F305321D69B02C5AC0D812645871C781FA7\\nParentProcessGuid: {DA929735-A7F1-5D0B-0000-0010A89E0A00}\\nParentProcessId: 3708\\nParentImage: C:\\\\Windows\\\\System32\\\\cmd.exe\\nParentCommandLine: \\\"cmd.exe\\\" \/s \/k pushd \\\"C:\\\\Users\\\\superman\\\\Desktop\\\"\",\n            \"version\": 5,\n            \"@version\": \"1\",\n            \"event_id\": 1,\n            \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n            \"username\": \"batman\\\\superman\",\n            \"beat_host\": {\n              \"id\": \"da929735-a8f9-4b38-8348-7664a570a0a2\",\n              \"os\": {\n                \"build\": \"7601.24356\",\n                \"family\": \"windows\",\n                \"version\": \"6.1\",\n                \"platform\": \"windows\"\n              },\n              \"name\": \"win7-host1-PC\",\n              \"architecture\": \"x86_64\"\n            },\n            \"thread_id\": 1824,\n            \"@timestamp\": \"2019-06-20T15:37:42.651Z\",\n            \"event_data\": {\n              \"Hashes\": \"MD5=B53D7530178E4576A65EF3FE353DB6D4,SHA256=A0F90FACBE2173D3F6D9296E6C1A1F305321D69B02C5AC0D812645871C781FA7\",\n              \"Company\": \"Microsoft Corporation\",\n              \"LogonId\": \"0x37646\",\n              \"Product\": \"Windows\u00ae Internet Explorer\",\n              \"UtcTime\": \"2019-06-20 15:37:42.620\",\n              \"LogonGuid\": \"{DA929735-A7BD-5D0B-0000-002046760300}\",\n              \"ProcessId\": \"3148\",\n              \"CommandLine\": \"C:\\\\Windows\\\\SysWOW64\\\\mshta.exe  C:\\\\Users\\\\superman\\\\Desktop\\\\calc.hta\",\n              \"Description\": \"Microsoft (R) HTML Application host\",\n              \"FileVersion\": \"8.00.7601.19104 (win7sp1_gdr.151210-0600)\",\n              \"ProcessGuid\": \"{DA929735-A846-5D0B-0000-0010813C0E00}\",\n              \"IntegrityLevel\": \"High\",\n              \"ParentProcessId\": \"3708\",\n              \"CurrentDirectory\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\\",\n              \"OriginalFileName\": \"MSHTA.EXE\",\n              \"ParentCommandLine\": \"\\\"cmd.exe\\\" \/s \/k pushd \\\"C:\\\\Users\\\\superman\\\\Desktop\\\"\",\n              \"ParentProcessGuid\": \"{DA929735-A7F1-5D0B-0000-0010A89E0A00}\",\n              \"TerminalSessionId\": \"1\"\n            },\n            \"event_type\": \"sysmon\",\n            \"image_path\": \"C:\\\\Windows\\\\SysWOW64\\\\mshta.exe\",\n            \"process_id\": 1408,\n            \"source_name\": \"Microsoft-Windows-Sysmon\",\n            \"computer_name\": \"win7-host1-PC.batman.local\",\n            \"logstash_time\": 0.0017402172088623047,\n            \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n            \"record_number\": \"933564\",\n            \"parent_image_path\": \"C:\\\\Windows\\\\System32\\\\cmd.exe\"\n          }\n        }\n      ],\n      \"total\": {\n        \"value\": 1,\n        \"relation\": \"eq\"\n      },\n      \"max_score\": 3.4384105\n    },\n    \"took\": 375,\n    \"_shards\": {\n      \"total\": 95,\n      \"failed\": 0,\n      \"skipped\": 0,\n      \"successful\": 95\n    },\n    \"timed_out\": false\n  },\n  \"status\": \"Success\",\n  \"message\": \"\",\n  \"operation\": null\n}",
+                "operationTitle": "Execute Lucene Query",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "510",
+            "left": "1425",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "6cf29da2-816d-4676-831d-b8a42e3265cd",
+            "id": 4804
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Copy  of Create and Link Elastic Alert",
+            "description": null,
+            "arguments": {
+                "for_each": {
+                    "item": "{{vars.steps.Elastic_Query_for_MSHTA_Child.data.hits.hits}}",
+                    "parallel": false,
+                    "condition": ""
+                },
+                "arguments": {
+                    "MD5": "{{vars.item._source.event_data.Hashes.split(\"MD5=\")[1].split(',')[0]}}",
+                    "url": "",
+                    "source": "{{vars.item._source.source_name}}",
+                    "comment": "SIEM query identified MSHTA.exe spawned child process {{vars.item._source.image_path.split(\"\\\\\")[-1] }} on {{vars.item._source.beat.hostname}} at {{vars.item._source.event_data.UtcTime}}.",
+                    "huntIRI": "{{vars.input.records[0]['@id']}}",
+                    "service": "",
+                    "filePath": "{{vars.item._source.image_path}}",
+                    "hostName": "{{vars.item._source.beat.hostname}}",
+                    "sourceIP": "",
+                    "userName": "{{vars.item._source.username}}",
+                    "alertName": "ATT&CK-Mshta-{{vars.item._source.image_path.split(\"\\\\\")[-1] }} spawned",
+                    "alertType": "{{\"AlertType\" | picklist(\"Signed Binary Proxy Execution\", \"@id\")}}",
+                    "epochTime": "{{ arrow.get(vars.item._source.event_data.UtcTime).timestamp }}",
+                    "eventName": "",
+                    "eventTime": "{{vars.item._source.event_data.UtcTime}}",
+                    "processID": "{{vars.item._source.event_data.ProcessId}}",
+                    "technique": "MSHTA-Child",
+                    "sourceData": "{{vars.item}}",
+                    "sourceTool": "{{vars.item._source.source_name}}",
+                    "commandline": "{{vars.item._source.event_data.CommandLine}}",
+                    "description": "An attempt to invoke mshta.exe was observed. MSHTA can be used as an alternate method of executing local and remotely hosted executables. In most networks execution of MSHTA.exe is an uncommon occurrence and should be investigated as a potential sign of compromise.",
+                    "processGUID": "{{vars.item._source.event_data.ProcessGuid}}",
+                    "processName": "{{vars.item._source.image_path.split(\"\\\\\")[-1] }}",
+                    "registryKey": "",
+                    "sourceImage": "",
+                    "targetImage": "",
+                    "computerName": "{{vars.item._source.computer_name}}",
+                    "destinationIP": "",
+                    "mitre_tech_id": "T1218.005",
+                    "parentProcess": "{{vars.item._source.parent_image_path}}",
+                    "scheduledTask": "",
+                    "bitstransferid": "",
+                    "parentProcessID": "{{vars.item._source.event_data.ParentProcessId}}",
+                    "bytestransferred": "",
+                    "registryKeyValue": "",
+                    "parentCommandLine": "{{vars.item._source.event_data.ParentCommandLine}}",
+                    "decodedCommandLine": ""
+                },
+                "apply_async": false,
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/bf7d418b-7ff3-44c1-b473-90d0a03c4641"
+            },
+            "status": null,
+            "top": "350",
+            "left": "1750",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "fff1537d-8837-4617-92e6-3bd26991d16a",
+            "id": 4805
+        }
+    ],
+    "routes": [
+        {
+            "@type": "WorkflowRoute",
+            "name": "Which SIEM -> Set Elastic hunt times",
+            "targetStep": "\/api\/3\/workflow_steps\/7c665606-173d-4133-b427-40ef1f90e957",
+            "sourceStep": "\/api\/3\/workflow_steps\/4b353ae0-ae7d-4e79-906d-dfe5ff67e2ee",
+            "label": "",
+            "isExecuted": false,
+            "uuid": "32f70936-c123-4bf5-8364-4f7ee0890569"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Copy  of Get Results for Sysmon MSHTA -> Copy  of Create and Link Splunk Alert",
+            "targetStep": "\/api\/3\/workflow_steps\/39118900-d9be-48d8-8562-f41d5f8dcd5b",
+            "sourceStep": "\/api\/3\/workflow_steps\/12eece5d-819b-4977-b5e1-b5c121e9aa71",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "4510574c-d0e5-4ebe-9436-e998936ead85"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Copy  of Create and Link Splunk Alert -> Deduplicate Comments",
+            "targetStep": "\/api\/3\/workflow_steps\/0b294b90-8bd6-4f8e-954c-4c81855ed342",
+            "sourceStep": "\/api\/3\/workflow_steps\/39118900-d9be-48d8-8562-f41d5f8dcd5b",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "9dfd22cd-c0ea-4df9-bf5a-1e784e17b417"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Elastic Query for Sysmon CMSTP -> Copy  of Create and Link Alert",
+            "targetStep": "\/api\/3\/workflow_steps\/29ca0944-15eb-4c02-9a53-9b83e7239508",
+            "sourceStep": "\/api\/3\/workflow_steps\/6cf29da2-816d-4676-831d-b8a42e3265cd",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "3391a6bc-4bf8-4c99-a431-21feae68fb92"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Set Splunk hunt times -> Copy  of Splunk query for Sysmon MSHTA",
+            "targetStep": "\/api\/3\/workflow_steps\/242c2e33-876d-4551-9029-a2f286be30c7",
+            "sourceStep": "\/api\/3\/workflow_steps\/c01fb750-3305-4f1a-827f-37f880d2b40d",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "ff9ab07d-ef6f-4b54-a42d-baf906a8824b"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Splunk query for Sysmon CMSTP -> Get Results for Sysmon CMSTP",
+            "targetStep": "\/api\/3\/workflow_steps\/5d5522b8-2312-4d07-b447-7a85943c2b59",
+            "sourceStep": "\/api\/3\/workflow_steps\/3c04910b-0ee2-458d-91e2-2c6f28475979",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "7706d2f2-f99d-467d-aca0-e5192ff76f3b"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Set Elastic hunt times -> Elastic Query for Sysmon CMSTP",
+            "targetStep": "\/api\/3\/workflow_steps\/6cf29da2-816d-4676-831d-b8a42e3265cd",
+            "sourceStep": "\/api\/3\/workflow_steps\/7c665606-173d-4133-b427-40ef1f90e957",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "c6d9c7ca-2a52-4a1f-b47c-9b28911ae76c"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Set Elastic hunt times -> Copy  of Elastic Query for Sysmon MSHTA",
+            "targetStep": "\/api\/3\/workflow_steps\/cf34d61f-3d0d-4973-9102-5a447f54d75f",
+            "sourceStep": "\/api\/3\/workflow_steps\/7c665606-173d-4133-b427-40ef1f90e957",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "a38d3d74-5aa5-4fcd-9f55-fe445e117e80"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Copy  of Splunk query for Sysmon MSHTA -> Copy  of Get Results for Sysmon MSHTA",
+            "targetStep": "\/api\/3\/workflow_steps\/12eece5d-819b-4977-b5e1-b5c121e9aa71",
+            "sourceStep": "\/api\/3\/workflow_steps\/242c2e33-876d-4551-9029-a2f286be30c7",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "6a29837c-8190-4fa1-be14-c9d52c94e83f"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Create and Link Alert -> Deduplicate Comments",
+            "targetStep": "\/api\/3\/workflow_steps\/0b294b90-8bd6-4f8e-954c-4c81855ed342",
+            "sourceStep": "\/api\/3\/workflow_steps\/131bf303-29ba-40fc-88a1-5237bf6dfc14",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "bacfe822-a3ce-4c05-ba13-6936078e8944"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Which SIEM -> Copy  of Set Elastic hunt times",
+            "targetStep": "\/api\/3\/workflow_steps\/c01fb750-3305-4f1a-827f-37f880d2b40d",
+            "sourceStep": "\/api\/3\/workflow_steps\/4b353ae0-ae7d-4e79-906d-dfe5ff67e2ee",
+            "label": "",
+            "isExecuted": false,
+            "uuid": "00b86d60-df9f-4c28-b461-6af503654a4d"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Set Splunk hunt times -> Splunk query for Sysmon CMSTP",
+            "targetStep": "\/api\/3\/workflow_steps\/3c04910b-0ee2-458d-91e2-2c6f28475979",
+            "sourceStep": "\/api\/3\/workflow_steps\/c01fb750-3305-4f1a-827f-37f880d2b40d",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "197a8545-c602-4694-92c8-e7358c545a12"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Get Results for Sysmon CMSTP -> Create Splunk Alert",
+            "targetStep": "\/api\/3\/workflow_steps\/131bf303-29ba-40fc-88a1-5237bf6dfc14",
+            "sourceStep": "\/api\/3\/workflow_steps\/5d5522b8-2312-4d07-b447-7a85943c2b59",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "636ca973-bb20-4fd4-9897-edd8b0c44262"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Copy  of Create and Link Elastic Alert -> Deduplicate Comments",
+            "targetStep": "\/api\/3\/workflow_steps\/0b294b90-8bd6-4f8e-954c-4c81855ed342",
+            "sourceStep": "\/api\/3\/workflow_steps\/fff1537d-8837-4617-92e6-3bd26991d16a",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "01486e65-1f03-4add-a944-74937b26c537"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Copy  of Elastic Query for Sysmon MSHTA -> Copy  of Create and Link Elastic Alert",
+            "targetStep": "\/api\/3\/workflow_steps\/fff1537d-8837-4617-92e6-3bd26991d16a",
+            "sourceStep": "\/api\/3\/workflow_steps\/cf34d61f-3d0d-4973-9102-5a447f54d75f",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "9f190047-5880-4c96-9c8b-307355182aa2"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Hunt for CMSTP -> Which SIEM",
+            "targetStep": "\/api\/3\/workflow_steps\/4b353ae0-ae7d-4e79-906d-dfe5ff67e2ee",
+            "sourceStep": "\/api\/3\/workflow_steps\/51b30287-7142-41a3-9d30-6971d65bd567",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "74a56948-949c-41ed-a6c1-bd74a3ddeaf2"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Copy  of Create and Link Alert -> Deduplicate Comments",
+            "targetStep": "\/api\/3\/workflow_steps\/0b294b90-8bd6-4f8e-954c-4c81855ed342",
+            "sourceStep": "\/api\/3\/workflow_steps\/29ca0944-15eb-4c02-9a53-9b83e7239508",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "0c714c66-c9cd-42f7-b69f-e1b7525c7ce2"
+        }
+    ],
+    "priority": null,
+    "uuid": "bdd73958-b4a9-4da2-9d03-b7749d556518",
+    "recordTags": [
+        "ManualTrigger"
+    ],
+    "id": 1151,
+    "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "createDate": 1644165547,
+    "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "modifyDate": 1644165547,
+    "owners": [],
+    "isPrivate": false
+}

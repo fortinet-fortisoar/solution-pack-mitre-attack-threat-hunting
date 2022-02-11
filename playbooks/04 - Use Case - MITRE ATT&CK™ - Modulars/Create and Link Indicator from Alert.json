@@ -1,0 +1,1663 @@
+{
+    "@type": "Workflow",
+    "triggerLimit": null,
+    "name": "Create and Link Indicator from Alert",
+    "aliasName": null,
+    "tag": null,
+    "description": "Creates and links indicators when an Alert is created.",
+    "isActive": false,
+    "debug": false,
+    "singleRecordExecution": false,
+    "remoteExecutableFlag": false,
+    "parameters": [],
+    "synchronous": false,
+    "lastModifyDate": 1644165542,
+    "collection": "\/api\/3\/workflow_collections\/e1d97fae-bb76-4989-b4d2-a30b6109e91f",
+    "versions": [],
+    "triggerStep": "\/api\/3\/workflow_steps\/8d271cec-57f6-4fa8-ae1b-eaa8c281e933",
+    "steps": [
+        {
+            "@type": "WorkflowStep",
+            "name": "Find Existing File Hash Indicators",
+            "description": null,
+            "arguments": {
+                "query": {
+                    "sort": [],
+                    "limit": 30,
+                    "logic": "AND",
+                    "filters": [
+                        {
+                            "type": "primitive",
+                            "field": "value",
+                            "value": "{{vars.input.records[0].filehash}}",
+                            "operator": "eq"
+                        }
+                    ]
+                },
+                "module": "indicators?$limit=30",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "20",
+            "left": "680",
+            "stepType": "\/api\/3\/workflow_step_types\/b593663d-7d13-40ce-a3a3-96dece928770",
+            "uuid": "16612118-76fd-4829-9677-8580133b0e26",
+            "id": 4610
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Does Alert have Hash",
+            "description": null,
+            "arguments": {
+                "conditions": [
+                    {
+                        "option": "No",
+                        "step_iri": "\/api\/3\/workflow_steps\/7f34f1fb-b78e-4747-97f6-edadfafb5e4f",
+                        "condition": "{{ not vars.input.records[0].filehash }}"
+                    },
+                    {
+                        "option": "Yes",
+                        "default": true,
+                        "step_iri": "\/api\/3\/workflow_steps\/16612118-76fd-4829-9677-8580133b0e26"
+                    }
+                ]
+            },
+            "status": null,
+            "top": "60",
+            "left": "320",
+            "stepType": "\/api\/3\/workflow_step_types\/12254cf5-5db7-4b1a-8cb1-3af081924b28",
+            "uuid": "4690de1a-b7a7-4a89-a06b-eba023ce3ffb",
+            "id": 4611
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Get Linked Incidents",
+            "description": null,
+            "arguments": {
+                "params": {
+                    "iri": "{{vars.input.records[0]['@id']}}?$relationships=true&$export=true",
+                    "body": "",
+                    "method": "GET"
+                },
+                "version": "2.4.0",
+                "connector": "cyops_utilities",
+                "operation": "make_cyops_request",
+                "operationTitle": "CyOPs: Make CyOPs API Call",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "300",
+            "left": "20",
+            "stepType": "\/api\/3\/workflow_step_types\/0109f35d-090b-4a2b-bd8a-94cbc3508562",
+            "uuid": "de6e6655-a85b-4c6f-b3fe-f0439b8c2951",
+            "id": 4612
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Start",
+            "description": null,
+            "arguments": {
+                "resource": "alerts",
+                "resources": [
+                    "alerts"
+                ],
+                "step_variables": {
+                    "input": {
+                        "records": [
+                            "{{vars.input.records[0]}}"
+                        ]
+                    }
+                },
+                "fieldbasedtrigger": {
+                    "sort": [],
+                    "limit": 30,
+                    "logic": "AND",
+                    "filters": [
+                        {
+                            "type": "object",
+                            "field": "type",
+                            "value": "\/api\/3\/picklists\/ab6d7fd7-7b16-4ac2-9cf2-b52a912baee8",
+                            "_value": {
+                                "display": "MITRE ATT&CK",
+                                "itemValue": "MITRE ATT&CK"
+                            },
+                            "operator": "eq"
+                        }
+                    ]
+                }
+            },
+            "status": null,
+            "top": "51",
+            "left": "20",
+            "stepType": "\/api\/3\/workflow_step_types\/ea155646-3821-4542-9702-b246da430a8d",
+            "uuid": "8d271cec-57f6-4fa8-ae1b-eaa8c281e933",
+            "id": 4613
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create New MD5 Indicator",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "tags": null,
+                    "hunts": null,
+                    "notes": null,
+                    "value": "{{vars.input.records[0].filehash}}",
+                    "alerts": "[\"{{vars.input.records[0]['@id']}}\"]",
+                    "assets": null,
+                    "emails": null,
+                    "events": null,
+                    "owners": null,
+                    "persons": null,
+                    "sources": null,
+                    "comments": null,
+                    "__replace": "true",
+                    "campaigns": null,
+                    "companies": null,
+                    "evidences": null,
+                    "incidents": "{% if vars.steps.Get_Linked_Incidents.data.incidents %}['{{vars.steps.Get_Linked_Incidents.data.incidents[0]}}']{% endif %}",
+                    "recordTags": null,
+                    "reputation": {
+                        "id": 6435,
+                        "@id": "\/api\/3\/picklists\/ae98ebc6-beef-4882-9980-1d88fc6d87cd",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": "#696969",
+                        "display": "TBD",
+                        "listName": "\/api\/3\/picklist_names\/e75ed3c3-9f23-4a43-832b-0daf236209ba",
+                        "itemValue": "TBD",
+                        "orderIndex": 3
+                    },
+                    "attachments": null,
+                    "description": null,
+                    "indicatorStatus": null,
+                    "typeofindicator": {
+                        "id": 4169,
+                        "@id": "\/api\/3\/picklists\/0ca054f2-d923-4992-a4a7-c516e6df281e",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": "#0d0000",
+                        "display": "FileHash-MD5",
+                        "listName": "\/api\/3\/picklist_names\/50ee5bfa-e18f-49ba-8af9-dcca25b0f9c0",
+                        "itemValue": "FileHash-MD5",
+                        "orderIndex": 3
+                    },
+                    "vulnerabilities": null,
+                    "correlationGraph": null
+                },
+                "_showJson": false,
+                "operation": "Overwrite",
+                "collection": "\/api\/3\/upsert\/indicators",
+                "tagsOperation": "OverwriteTags",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "86",
+            "left": "1700",
+            "stepType": "\/api\/3\/workflow_step_types\/2597053c-e718-44b4-8394-4d40fe26d357",
+            "uuid": "f0e1d5d0-c167-408a-85e6-5b4f01964717",
+            "id": 4614
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Source IP Private IPspace Check",
+            "description": null,
+            "arguments": {
+                "params": {
+                    "cidr": "192.168.0.0\/16,10.0.0.0\/8,172.16.0.0\/12",
+                    "ip_address": "{{vars.source_ip}}"
+                },
+                "version": "2.4.0",
+                "connector": "cyops_utilities",
+                "operation": "ip_cidr_check",
+                "operationTitle": "Utils: Is IP in CIDR",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "953",
+            "left": "1480",
+            "stepType": "\/api\/3\/workflow_step_types\/0109f35d-090b-4a2b-bd8a-94cbc3508562",
+            "uuid": "15602d82-aa46-437d-ad09-84fcad0d230c",
+            "id": 4615
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Was File Hash Indicator Found",
+            "description": null,
+            "arguments": {
+                "conditions": [
+                    {
+                        "option": "Yes",
+                        "step_iri": "\/api\/3\/workflow_steps\/30687751-6605-4bb1-b163-79d18f0fc5ed",
+                        "condition": "{{ vars.steps.Find_Existing_File_Hash_Indicators | length > 0 }}"
+                    },
+                    {
+                        "option": "No",
+                        "default": true,
+                        "step_iri": "\/api\/3\/workflow_steps\/642dae19-8078-418e-b129-d1b4fc6be464"
+                    }
+                ]
+            },
+            "status": null,
+            "top": "20",
+            "left": "1000",
+            "stepType": "\/api\/3\/workflow_step_types\/12254cf5-5db7-4b1a-8cb1-3af081924b28",
+            "uuid": "f0e26362-73ff-4bc4-879a-490643bbf173",
+            "id": 4616
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "No IP Address",
+            "description": null,
+            "arguments": {
+                "params": [],
+                "version": "2.4.0",
+                "connector": "cyops_utilities",
+                "operation": "no_op",
+                "operationTitle": "Utils: No Operation",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "860",
+            "left": "680",
+            "stepType": "\/api\/3\/workflow_step_types\/0109f35d-090b-4a2b-bd8a-94cbc3508562",
+            "uuid": "32c4a912-27b0-4ca7-8464-733bca1895e5",
+            "id": 4617
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Find Existing IP Address Indicators",
+            "description": null,
+            "arguments": {
+                "query": {
+                    "sort": [],
+                    "limit": 30,
+                    "logic": "OR",
+                    "filters": [
+                        {
+                            "type": "primitive",
+                            "field": "value",
+                            "value": "{{vars.input.records[0].sourceIP}}",
+                            "operator": "eq"
+                        },
+                        {
+                            "type": "primitive",
+                            "field": "value",
+                            "value": "{{vars.input.records[0].destinationIP}}",
+                            "operator": "eq"
+                        }
+                    ]
+                },
+                "module": "indicators?$limit=30",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "770",
+            "left": "680",
+            "stepType": "\/api\/3\/workflow_step_types\/b593663d-7d13-40ce-a3a3-96dece928770",
+            "uuid": "f1586482-d91c-4748-9cb1-6f23c144a388",
+            "id": 4618
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create New URL Indicator",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "tags": null,
+                    "hunts": null,
+                    "notes": null,
+                    "value": "{{vars.input.records[0].url}}",
+                    "alerts": "[\"{{vars.input.records[0]['@id']}}\"]",
+                    "assets": null,
+                    "emails": null,
+                    "events": null,
+                    "owners": null,
+                    "persons": null,
+                    "sources": null,
+                    "comments": null,
+                    "__replace": "true",
+                    "campaigns": null,
+                    "companies": null,
+                    "evidences": null,
+                    "incidents": "{% if vars.steps.Get_Linked_Incidents.data.incidents %}['{{vars.steps.Get_Linked_Incidents.data.incidents[0]}}']{% endif %}",
+                    "recordTags": null,
+                    "reputation": {
+                        "id": 6435,
+                        "@id": "\/api\/3\/picklists\/ae98ebc6-beef-4882-9980-1d88fc6d87cd",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": "#696969",
+                        "display": "TBD",
+                        "listName": "\/api\/3\/picklist_names\/e75ed3c3-9f23-4a43-832b-0daf236209ba",
+                        "itemValue": "TBD",
+                        "orderIndex": 3
+                    },
+                    "attachments": null,
+                    "description": null,
+                    "indicatorStatus": null,
+                    "typeofindicator": {
+                        "id": 434,
+                        "@id": "\/api\/3\/picklists\/353a37b4-3eeb-43ee-aac6-64806422cfec",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": "#0a0101",
+                        "display": "URL",
+                        "listName": "\/api\/3\/picklist_names\/50ee5bfa-e18f-49ba-8af9-dcca25b0f9c0",
+                        "itemValue": "URL",
+                        "orderIndex": 10
+                    },
+                    "vulnerabilities": null,
+                    "correlationGraph": null
+                },
+                "_showJson": false,
+                "operation": "Overwrite",
+                "collection": "\/api\/3\/upsert\/indicators",
+                "tagsOperation": "OverwriteTags",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "669",
+            "left": "1340",
+            "stepType": "\/api\/3\/workflow_step_types\/2597053c-e718-44b4-8394-4d40fe26d357",
+            "uuid": "4c432322-6d0d-4c09-a981-8e92e96ff453",
+            "id": 4619
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create New SHA1 Indicator",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "tags": null,
+                    "hunts": null,
+                    "notes": null,
+                    "value": "{{vars.input.records[0].filehash}}",
+                    "alerts": "[\"{{vars.input.records[0]['@id']}}\"]",
+                    "assets": null,
+                    "emails": null,
+                    "events": null,
+                    "owners": null,
+                    "persons": null,
+                    "sources": null,
+                    "comments": null,
+                    "__replace": "true",
+                    "campaigns": null,
+                    "companies": null,
+                    "evidences": null,
+                    "incidents": "{% if vars.steps.Get_Linked_Incidents.data.incidents %}['{{vars.steps.Get_Linked_Incidents.data.incidents[0]}}']{% endif %}",
+                    "recordTags": null,
+                    "reputation": {
+                        "id": 6435,
+                        "@id": "\/api\/3\/picklists\/ae98ebc6-beef-4882-9980-1d88fc6d87cd",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": "#696969",
+                        "display": "TBD",
+                        "listName": "\/api\/3\/picklist_names\/e75ed3c3-9f23-4a43-832b-0daf236209ba",
+                        "itemValue": "TBD",
+                        "orderIndex": 3
+                    },
+                    "attachments": null,
+                    "description": null,
+                    "indicatorStatus": null,
+                    "typeofindicator": {
+                        "id": 6836,
+                        "@id": "\/api\/3\/picklists\/143e40b0-e643-468d-b968-a542fc85f08d",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": "#0b0101",
+                        "display": "FileHash-SHA1",
+                        "listName": "\/api\/3\/picklist_names\/50ee5bfa-e18f-49ba-8af9-dcca25b0f9c0",
+                        "itemValue": "FileHash-SHA1",
+                        "orderIndex": 5
+                    },
+                    "vulnerabilities": null,
+                    "correlationGraph": null
+                },
+                "_showJson": false,
+                "operation": "Overwrite",
+                "collection": "\/api\/3\/upsert\/indicators",
+                "tagsOperation": "OverwriteTags",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "240",
+            "left": "1700",
+            "stepType": "\/api\/3\/workflow_step_types\/2597053c-e718-44b4-8394-4d40fe26d357",
+            "uuid": "7a0d935b-d92b-4d36-8891-13663aefd858",
+            "id": 4620
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Is Source IP Private",
+            "description": null,
+            "arguments": {
+                "conditions": [
+                    {
+                        "option": "No",
+                        "step_iri": "\/api\/3\/workflow_steps\/2e18ff22-c312-4b48-b39e-1bd56de756b3",
+                        "condition": "{{ vars.steps.Source_IP_Private_IPspace_Check.data['matched_cidr_ip'] | length == 0 }}"
+                    },
+                    {
+                        "option": "Yes",
+                        "default": true,
+                        "step_iri": "\/api\/3\/workflow_steps\/262c3fff-2449-444d-b8fd-5f45499aab8c"
+                    }
+                ]
+            },
+            "status": null,
+            "top": "953",
+            "left": "1820",
+            "stepType": "\/api\/3\/workflow_step_types\/12254cf5-5db7-4b1a-8cb1-3af081924b28",
+            "uuid": "dd24cd43-4fa4-4fd4-a1b1-6a2e59f44fae",
+            "id": 4621
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Update Existing URL Indicator",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "__link": {
+                        "alerts": "[\"{{vars.input.records[0]['@id']}}\"]",
+                        "incidents": "{% if vars.steps.Get_Linked_Incidents.data.incidents %}['{{vars.steps.Get_Linked_Incidents.data.incidents[0]}}']{% endif %}"
+                    }
+                },
+                "_showJson": false,
+                "operation": "Append",
+                "collection": "{{vars.steps.Find_Existing_URL_Indicators[0]['@id']}}",
+                "collectionType": "\/api\/3\/indicators",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "580",
+            "left": "1340",
+            "stepType": "\/api\/3\/workflow_step_types\/b593663d-7d13-40ce-a3a3-96dece928722",
+            "uuid": "1419206d-7646-4ca0-9d24-740a67f4bdc7",
+            "id": 4622
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "No Processname",
+            "description": null,
+            "arguments": {
+                "params": [],
+                "version": "2.4.0",
+                "connector": "cyops_utilities",
+                "operation": "no_op",
+                "operationTitle": "Utils: No Operation",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "411",
+            "left": "680",
+            "stepType": "\/api\/3\/workflow_step_types\/0109f35d-090b-4a2b-bd8a-94cbc3508562",
+            "uuid": "a730eadd-02e4-491a-94b6-27f2c273dbae",
+            "id": 4623
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Find Existing Processname Indicator",
+            "description": null,
+            "arguments": {
+                "query": {
+                    "sort": [],
+                    "limit": 30,
+                    "logic": "AND",
+                    "filters": [
+                        {
+                            "type": "primitive",
+                            "field": "value",
+                            "value": "{{vars.input.records[0].processName}}",
+                            "operator": "eq"
+                        }
+                    ]
+                },
+                "module": "indicators?$limit=30",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "290",
+            "left": "680",
+            "stepType": "\/api\/3\/workflow_step_types\/b593663d-7d13-40ce-a3a3-96dece928770",
+            "uuid": "9185d88c-bee8-4d4b-802b-00059c1e3d1f",
+            "id": 4624
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create Destination IP Address Indicator",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "tags": null,
+                    "hunts": null,
+                    "notes": null,
+                    "value": "{{vars.input.records[0].destinationIP}}",
+                    "alerts": "['{{vars.input.records[0]['@id']}}']",
+                    "assets": null,
+                    "emails": null,
+                    "events": null,
+                    "owners": null,
+                    "persons": null,
+                    "sources": null,
+                    "comments": null,
+                    "__replace": "true",
+                    "campaigns": null,
+                    "companies": null,
+                    "evidences": null,
+                    "incidents": "{% if vars.steps.Get_Linked_Incidents.data.incidents %}['{{vars.steps.Get_Linked_Incidents.data.incidents[0]}}']{% endif %}",
+                    "recordTags": null,
+                    "reputation": {
+                        "id": 6435,
+                        "@id": "\/api\/3\/picklists\/ae98ebc6-beef-4882-9980-1d88fc6d87cd",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": "#696969",
+                        "display": "TBD",
+                        "listName": "\/api\/3\/picklist_names\/e75ed3c3-9f23-4a43-832b-0daf236209ba",
+                        "itemValue": "TBD",
+                        "orderIndex": 3
+                    },
+                    "attachments": null,
+                    "description": null,
+                    "indicatorStatus": null,
+                    "typeofindicator": {
+                        "id": 433,
+                        "@id": "\/api\/3\/picklists\/c0beeda4-2c7a-4214-b7e5-53ba1649539c",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": "#0b0101",
+                        "display": "IP Address",
+                        "listName": "\/api\/3\/picklist_names\/50ee5bfa-e18f-49ba-8af9-dcca25b0f9c0",
+                        "itemValue": "IP Address",
+                        "orderIndex": 7
+                    },
+                    "vulnerabilities": null,
+                    "correlationGraph": null
+                },
+                "_showJson": false,
+                "operation": "Overwrite",
+                "collection": "\/api\/3\/upsert\/indicators",
+                "tagsOperation": "OverwriteTags",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "1100",
+            "left": "2130",
+            "stepType": "\/api\/3\/workflow_step_types\/2597053c-e718-44b4-8394-4d40fe26d357",
+            "uuid": "0aa7a41f-83ed-4ad7-9d7a-89efc722d160",
+            "id": 4625
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Do Not Create Source IP Indicator",
+            "description": null,
+            "arguments": {
+                "params": [],
+                "version": "2.4.0",
+                "connector": "cyops_utilities",
+                "operation": "no_op",
+                "operationTitle": "Utils: No Operation",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "988",
+            "left": "2130",
+            "stepType": "\/api\/3\/workflow_step_types\/0109f35d-090b-4a2b-bd8a-94cbc3508562",
+            "uuid": "262c3fff-2449-444d-b8fd-5f45499aab8c",
+            "id": 4626
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Set File Hash IRI",
+            "description": null,
+            "arguments": {
+                "file_hash_indicator": "{{vars.result['@id']}}"
+            },
+            "status": null,
+            "top": "120",
+            "left": "2060",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "fbd2fb53-733d-4554-81b5-4a6243908f8c",
+            "id": 4627
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Update Existing File Hash Indicator",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "__link": {
+                        "alerts": "[\"{{vars.input.records[0]['@id']}}\"]",
+                        "incidents": "{% if vars.steps.Get_Linked_Incidents.data.incidents %}['{{vars.steps.Get_Linked_Incidents.data.incidents[0]}}']{% endif %}"
+                    }
+                },
+                "_showJson": false,
+                "operation": "Append",
+                "collection": "{{vars.steps.Find_Existing_File_Hash_Indicators[0]['@id']}}",
+                "collectionType": "\/api\/3\/indicators",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "9",
+            "left": "1700",
+            "stepType": "\/api\/3\/workflow_step_types\/b593663d-7d13-40ce-a3a3-96dece928722",
+            "uuid": "30687751-6605-4bb1-b163-79d18f0fc5ed",
+            "id": 4628
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Identify Type of Hash",
+            "description": null,
+            "arguments": {
+                "conditions": [
+                    {
+                        "option": "MD5",
+                        "step_iri": "\/api\/3\/workflow_steps\/f0e1d5d0-c167-408a-85e6-5b4f01964717",
+                        "condition": "{{ vars.input.records[0].filehash | length == 32 }}"
+                    },
+                    {
+                        "option": "SHA256",
+                        "step_iri": "\/api\/3\/workflow_steps\/fa4dfdcd-f03e-476c-ab7c-a621e295d882",
+                        "condition": "{{ vars.input.records[0].filehash | length == 64 }}"
+                    },
+                    {
+                        "option": "SHA1",
+                        "step_iri": "\/api\/3\/workflow_steps\/7a0d935b-d92b-4d36-8891-13663aefd858",
+                        "condition": "{{ vars.input.records[0].filehash | length == 40 }}"
+                    }
+                ]
+            },
+            "status": null,
+            "top": "100",
+            "left": "1340",
+            "stepType": "\/api\/3\/workflow_step_types\/12254cf5-5db7-4b1a-8cb1-3af081924b28",
+            "uuid": "642dae19-8078-418e-b129-d1b4fc6be464",
+            "id": 4629
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Does Alert have Processname",
+            "description": null,
+            "arguments": {
+                "conditions": [
+                    {
+                        "option": "No",
+                        "step_iri": "\/api\/3\/workflow_steps\/a730eadd-02e4-491a-94b6-27f2c273dbae",
+                        "condition": "{{ not vars.input.records[0].processName }}"
+                    },
+                    {
+                        "option": "Yes",
+                        "default": true,
+                        "step_iri": "\/api\/3\/workflow_steps\/9185d88c-bee8-4d4b-802b-00059c1e3d1f"
+                    }
+                ]
+            },
+            "status": null,
+            "top": "300",
+            "left": "320",
+            "stepType": "\/api\/3\/workflow_step_types\/12254cf5-5db7-4b1a-8cb1-3af081924b28",
+            "uuid": "1c3d7ee2-602a-4378-9d5f-834fa0bad677",
+            "id": 4630
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Was IP Address Indicator Found",
+            "description": null,
+            "arguments": {
+                "conditions": [
+                    {
+                        "option": "Yes",
+                        "step_iri": "\/api\/3\/workflow_steps\/6e239c1e-2eb4-486c-a39c-8d6c3a6fea62",
+                        "condition": "{{ vars.steps.Find_Existing_IP_Address_Indicators | length > 0 }}"
+                    },
+                    {
+                        "option": "No",
+                        "default": true,
+                        "step_iri": "\/api\/3\/workflow_steps\/901e976e-6389-40a8-a607-9f8cc6aa98a9"
+                    }
+                ]
+            },
+            "status": null,
+            "top": "770",
+            "left": "1012",
+            "stepType": "\/api\/3\/workflow_step_types\/12254cf5-5db7-4b1a-8cb1-3af081924b28",
+            "uuid": "4c4dd858-03d4-424c-a027-3895bbc7fe39",
+            "id": 4631
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Destination IP Private IPspace Check",
+            "description": null,
+            "arguments": {
+                "params": {
+                    "cidr": "192.168.0.0\/16,10.0.0.0\/8,172.16.0.0\/12",
+                    "ip_address": "{{vars.dest_ip}}"
+                },
+                "version": "2.4.0",
+                "connector": "cyops_utilities",
+                "operation": "ip_cidr_check",
+                "operationTitle": "Utils: Is IP in CIDR",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "1140",
+            "left": "1471",
+            "stepType": "\/api\/3\/workflow_step_types\/0109f35d-090b-4a2b-bd8a-94cbc3508562",
+            "uuid": "5a8987f4-8784-4487-bf74-32323c5362ae",
+            "id": 4632
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Was Processname Indicator Found",
+            "description": null,
+            "arguments": {
+                "conditions": [
+                    {
+                        "option": "Yes",
+                        "step_iri": "\/api\/3\/workflow_steps\/b298c605-29db-4e21-88d9-2d9e59eddb45",
+                        "condition": "{{ vars.steps.Find_Existing_Processname_Indicator | length > 0 }}"
+                    },
+                    {
+                        "option": "No",
+                        "default": true,
+                        "step_iri": "\/api\/3\/workflow_steps\/a7c3fb0d-3688-4d76-8563-c4ed4e7415a1"
+                    }
+                ]
+            },
+            "status": null,
+            "top": "340",
+            "left": "1000",
+            "stepType": "\/api\/3\/workflow_step_types\/12254cf5-5db7-4b1a-8cb1-3af081924b28",
+            "uuid": "1e2b4702-cbdd-4faa-9b13-93456d5e338f",
+            "id": 4633
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Is Destination IP Private",
+            "description": null,
+            "arguments": {
+                "conditions": [
+                    {
+                        "option": "No",
+                        "step_iri": "\/api\/3\/workflow_steps\/0aa7a41f-83ed-4ad7-9d7a-89efc722d160",
+                        "condition": "{{ vars.steps.Destination_IP_Private_IPspace_Check.data['matched_cidr_ip'] | length == 0 }}"
+                    },
+                    {
+                        "option": "Yes",
+                        "default": true,
+                        "step_iri": "\/api\/3\/workflow_steps\/89c30782-d90a-4664-8c6f-27cc6740ac05"
+                    }
+                ]
+            },
+            "status": null,
+            "top": "1140",
+            "left": "1820",
+            "stepType": "\/api\/3\/workflow_step_types\/12254cf5-5db7-4b1a-8cb1-3af081924b28",
+            "uuid": "8a761ee9-d6db-49e6-ac89-04f9223db0ba",
+            "id": 4634
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Was URL Indicator Found",
+            "description": null,
+            "arguments": {
+                "conditions": [
+                    {
+                        "option": "Yes",
+                        "step_iri": "\/api\/3\/workflow_steps\/1419206d-7646-4ca0-9d24-740a67f4bdc7",
+                        "condition": "{{ vars.steps.Find_Existing_URL_Indicators | length > 0 }}"
+                    },
+                    {
+                        "option": "No",
+                        "default": true,
+                        "step_iri": "\/api\/3\/workflow_steps\/4c432322-6d0d-4c09-a981-8e92e96ff453"
+                    }
+                ]
+            },
+            "status": null,
+            "top": "620",
+            "left": "1014",
+            "stepType": "\/api\/3\/workflow_step_types\/12254cf5-5db7-4b1a-8cb1-3af081924b28",
+            "uuid": "d8492f89-daeb-4191-9ef1-7419e3f40eaa",
+            "id": 4635
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Does Alert have URL",
+            "description": null,
+            "arguments": {
+                "conditions": [
+                    {
+                        "option": "No",
+                        "step_iri": "\/api\/3\/workflow_steps\/7662d495-2c3b-47cd-b2f8-4e75db5c03a4",
+                        "condition": "{{ not vars.input.records[0].url }}"
+                    },
+                    {
+                        "option": "Yes",
+                        "default": true,
+                        "step_iri": "\/api\/3\/workflow_steps\/26a9de36-9de5-430a-9e6d-06ffaa9a3b5e"
+                    }
+                ]
+            },
+            "status": null,
+            "top": "600",
+            "left": "320",
+            "stepType": "\/api\/3\/workflow_step_types\/12254cf5-5db7-4b1a-8cb1-3af081924b28",
+            "uuid": "e74e9a7b-c2b5-4395-9f04-7e016af36416",
+            "id": 4636
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Set Process Name IRI",
+            "description": null,
+            "arguments": {
+                "process_name_indicator": "{{vars.result[\"@id\"]}}"
+            },
+            "status": null,
+            "top": "372",
+            "left": "2060",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "2419d901-2bd2-43a5-b050-61d5fb8b4bf0",
+            "id": 4637
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Correlate File Hash and Process Name Indicators",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "description": "<p>{{vars.file_hash_indicator}}<\/p>"
+                },
+                "_showJson": false,
+                "operation": "Append",
+                "collection": "{{vars.process_name_indicator}}",
+                "collectionType": "\/api\/3\/indicators",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "240",
+            "left": "2412",
+            "stepType": "\/api\/3\/workflow_step_types\/b593663d-7d13-40ce-a3a3-96dece928722",
+            "uuid": "b491ec59-406a-414e-8325-c2d08617cbbf",
+            "id": 4638
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "No URL",
+            "description": null,
+            "arguments": {
+                "params": [],
+                "version": "2.4.0",
+                "connector": "cyops_utilities",
+                "operation": "no_op",
+                "operationTitle": "Utils: No Operation",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "660",
+            "left": "680",
+            "stepType": "\/api\/3\/workflow_step_types\/0109f35d-090b-4a2b-bd8a-94cbc3508562",
+            "uuid": "7662d495-2c3b-47cd-b2f8-4e75db5c03a4",
+            "id": 4639
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create New Indicator Record for Processname",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "tags": null,
+                    "hunts": null,
+                    "notes": null,
+                    "value": "{{vars.input.records[0].processName}}",
+                    "alerts": "[\"{{vars.input.records[0]['@id']}}\"]",
+                    "assets": null,
+                    "emails": null,
+                    "events": null,
+                    "owners": null,
+                    "persons": null,
+                    "sources": null,
+                    "comments": null,
+                    "__replace": "true",
+                    "campaigns": null,
+                    "companies": null,
+                    "evidences": null,
+                    "incidents": "{% if vars.steps.Get_Linked_Incidents.data.incidents %}['{{vars.steps.Get_Linked_Incidents.data.incidents[0]}}']{% endif %}",
+                    "recordTags": null,
+                    "reputation": {
+                        "id": 6435,
+                        "@id": "\/api\/3\/picklists\/ae98ebc6-beef-4882-9980-1d88fc6d87cd",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": "#696969",
+                        "display": "TBD",
+                        "listName": "\/api\/3\/picklist_names\/e75ed3c3-9f23-4a43-832b-0daf236209ba",
+                        "itemValue": "TBD",
+                        "orderIndex": 3
+                    },
+                    "attachments": null,
+                    "description": null,
+                    "indicatorStatus": null,
+                    "typeofindicator": {
+                        "id": 460,
+                        "@id": "\/api\/3\/picklists\/0162241b-f5bf-4917-a150-00e920be47bd",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": "#030000",
+                        "display": "File",
+                        "listName": "\/api\/3\/picklist_names\/50ee5bfa-e18f-49ba-8af9-dcca25b0f9c0",
+                        "itemValue": "File",
+                        "orderIndex": 2
+                    },
+                    "vulnerabilities": null,
+                    "correlationGraph": null
+                },
+                "_showJson": false,
+                "operation": "Overwrite",
+                "collection": "\/api\/3\/upsert\/indicators",
+                "tagsOperation": "OverwriteTags",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "420",
+            "left": "1340",
+            "stepType": "\/api\/3\/workflow_step_types\/2597053c-e718-44b4-8394-4d40fe26d357",
+            "uuid": "a7c3fb0d-3688-4d76-8563-c4ed4e7415a1",
+            "id": 4640
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "No File Hash",
+            "description": null,
+            "arguments": {
+                "params": [],
+                "version": "2.4.0",
+                "connector": "cyops_utilities",
+                "operation": "no_op",
+                "operationTitle": "Utils: No Operation",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "120",
+            "left": "680",
+            "stepType": "\/api\/3\/workflow_step_types\/0109f35d-090b-4a2b-bd8a-94cbc3508562",
+            "uuid": "7f34f1fb-b78e-4747-97f6-edadfafb5e4f",
+            "id": 4641
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create New SHA256 Indicator",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "tags": null,
+                    "hunts": null,
+                    "notes": null,
+                    "value": "{{vars.input.records[0].filehash}}",
+                    "alerts": "[\"{{vars.input.records[0]['@id']}}\"]",
+                    "assets": null,
+                    "emails": null,
+                    "events": null,
+                    "owners": null,
+                    "persons": null,
+                    "sources": null,
+                    "comments": null,
+                    "__replace": "true",
+                    "campaigns": null,
+                    "companies": null,
+                    "evidences": null,
+                    "incidents": "{% if vars.steps.Get_Linked_Incidents.data.incidents %}['{{vars.steps.Get_Linked_Incidents.data.incidents[0]}}']{% endif %}",
+                    "recordTags": null,
+                    "reputation": {
+                        "id": 6435,
+                        "@id": "\/api\/3\/picklists\/ae98ebc6-beef-4882-9980-1d88fc6d87cd",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": "#696969",
+                        "display": "TBD",
+                        "listName": "\/api\/3\/picklist_names\/e75ed3c3-9f23-4a43-832b-0daf236209ba",
+                        "itemValue": "TBD",
+                        "orderIndex": 3
+                    },
+                    "attachments": null,
+                    "description": null,
+                    "indicatorStatus": null,
+                    "typeofindicator": {
+                        "id": 6835,
+                        "@id": "\/api\/3\/picklists\/4ea7b083-a0af-41ea-8d7c-7ace16021722",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": "#0b0000",
+                        "display": "FileHash-SHA256",
+                        "listName": "\/api\/3\/picklist_names\/50ee5bfa-e18f-49ba-8af9-dcca25b0f9c0",
+                        "itemValue": "FileHash-SHA256",
+                        "orderIndex": 4
+                    },
+                    "vulnerabilities": null,
+                    "correlationGraph": null
+                },
+                "_showJson": false,
+                "operation": "Overwrite",
+                "collection": "\/api\/3\/upsert\/indicators",
+                "tagsOperation": "OverwriteTags",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "160",
+            "left": "1700",
+            "stepType": "\/api\/3\/workflow_step_types\/2597053c-e718-44b4-8394-4d40fe26d357",
+            "uuid": "fa4dfdcd-f03e-476c-ab7c-a621e295d882",
+            "id": 4642
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Find Existing URL Indicators",
+            "description": null,
+            "arguments": {
+                "query": {
+                    "sort": [],
+                    "limit": 30,
+                    "logic": "AND",
+                    "filters": [
+                        {
+                            "type": "primitive",
+                            "field": "value",
+                            "value": "{{vars.input.records[0].url}}",
+                            "operator": "eq"
+                        }
+                    ]
+                },
+                "module": "indicators?$limit=30",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "580",
+            "left": "680",
+            "stepType": "\/api\/3\/workflow_step_types\/b593663d-7d13-40ce-a3a3-96dece928770",
+            "uuid": "26a9de36-9de5-430a-9e6d-06ffaa9a3b5e",
+            "id": 4643
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create Source IP Address Indicator",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "tags": null,
+                    "hunts": null,
+                    "notes": null,
+                    "value": "{{vars.input.records[0].sourceIP}}",
+                    "alerts": "['{{vars.input.records[0]['@id']}}']",
+                    "assets": null,
+                    "emails": null,
+                    "events": null,
+                    "owners": null,
+                    "persons": null,
+                    "sources": null,
+                    "comments": null,
+                    "__replace": "true",
+                    "campaigns": null,
+                    "companies": null,
+                    "evidences": null,
+                    "incidents": "{% if vars.steps.Get_Linked_Incidents.data.incidents %}['{{vars.steps.Get_Linked_Incidents.data.incidents[0]}}']{% endif %}",
+                    "recordTags": null,
+                    "reputation": {
+                        "id": 6435,
+                        "@id": "\/api\/3\/picklists\/ae98ebc6-beef-4882-9980-1d88fc6d87cd",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": "#696969",
+                        "display": "TBD",
+                        "listName": "\/api\/3\/picklist_names\/e75ed3c3-9f23-4a43-832b-0daf236209ba",
+                        "itemValue": "TBD",
+                        "orderIndex": 3
+                    },
+                    "attachments": null,
+                    "description": null,
+                    "indicatorStatus": null,
+                    "typeofindicator": {
+                        "id": 433,
+                        "@id": "\/api\/3\/picklists\/c0beeda4-2c7a-4214-b7e5-53ba1649539c",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": "#0b0101",
+                        "display": "IP Address",
+                        "listName": "\/api\/3\/picklist_names\/50ee5bfa-e18f-49ba-8af9-dcca25b0f9c0",
+                        "itemValue": "IP Address",
+                        "orderIndex": 7
+                    },
+                    "vulnerabilities": null,
+                    "correlationGraph": null
+                },
+                "_showJson": false,
+                "operation": "Overwrite",
+                "collection": "\/api\/3\/upsert\/indicators",
+                "tagsOperation": "OverwriteTags",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "900",
+            "left": "2126",
+            "stepType": "\/api\/3\/workflow_step_types\/2597053c-e718-44b4-8394-4d40fe26d357",
+            "uuid": "2e18ff22-c312-4b48-b39e-1bd56de756b3",
+            "id": 4644
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Set IP variables",
+            "description": null,
+            "arguments": {
+                "dest_ip": "{{vars.input.records[0].destinationIP}}",
+                "source_ip": "{{vars.input.records[0].sourceIP}}"
+            },
+            "status": null,
+            "top": "1048",
+            "left": "1160",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "901e976e-6389-40a8-a607-9f8cc6aa98a9",
+            "id": 4645
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Update Existing IP Address Indicator",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "__link": {
+                        "alerts": "['{{vars.input.records[0]['@id']}}']",
+                        "incidents": "{% if vars.steps.Get_Linked_Incidents.data.incidents %}['{{vars.steps.Get_Linked_Incidents.data.incidents[0]}}']{% endif %}"
+                    }
+                },
+                "_showJson": false,
+                "operation": "Append",
+                "collection": "{{vars.steps.Find_Existing_IP_Address_Indicators[0]['@id']}}",
+                "collectionType": "\/api\/3\/indicators",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "760",
+            "left": "1340",
+            "stepType": "\/api\/3\/workflow_step_types\/b593663d-7d13-40ce-a3a3-96dece928722",
+            "uuid": "6e239c1e-2eb4-486c-a39c-8d6c3a6fea62",
+            "id": 4646
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Does Alert have IP Address",
+            "description": null,
+            "arguments": {
+                "conditions": [
+                    {
+                        "option": "No",
+                        "step_iri": "\/api\/3\/workflow_steps\/32c4a912-27b0-4ca7-8464-733bca1895e5",
+                        "condition": "{{ not vars.input.records[0].sourceIP and not vars.input.records[0].destinationIP }}"
+                    },
+                    {
+                        "option": "Yes",
+                        "default": true,
+                        "step_iri": "\/api\/3\/workflow_steps\/f1586482-d91c-4748-9cb1-6f23c144a388"
+                    }
+                ]
+            },
+            "status": null,
+            "top": "780",
+            "left": "320",
+            "stepType": "\/api\/3\/workflow_step_types\/12254cf5-5db7-4b1a-8cb1-3af081924b28",
+            "uuid": "167b730a-aade-42fb-897b-62814aec3c8a",
+            "id": 4647
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Update Existing Processname Indicator",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "__link": {
+                        "alerts": "[\"{{vars.input.records[0]['@id']}}\"]",
+                        "incidents": "{% if vars.steps.Get_Linked_Incidents.data.incidents %}['{{vars.steps.Get_Linked_Incidents.data.incidents[0]}}']{% endif %}"
+                    }
+                },
+                "_showJson": false,
+                "operation": "Append",
+                "collection": "{{vars.steps.Find_Existing_Processname_Indicator[0]['@id']}}",
+                "collectionType": "\/api\/3\/indicators",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "330",
+            "left": "1340",
+            "stepType": "\/api\/3\/workflow_step_types\/b593663d-7d13-40ce-a3a3-96dece928722",
+            "uuid": "b298c605-29db-4e21-88d9-2d9e59eddb45",
+            "id": 4648
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Do Not Create Destination IP Indicator",
+            "description": null,
+            "arguments": {
+                "params": [],
+                "version": "2.4.0",
+                "connector": "cyops_utilities",
+                "operation": "no_op",
+                "operationTitle": "Utils: No Operation",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "1200",
+            "left": "2132",
+            "stepType": "\/api\/3\/workflow_step_types\/0109f35d-090b-4a2b-bd8a-94cbc3508562",
+            "uuid": "89c30782-d90a-4664-8c6f-27cc6740ac05",
+            "id": 4649
+        }
+    ],
+    "routes": [
+        {
+            "@type": "WorkflowRoute",
+            "name": "Identify Type of Hash -> Create New SHA256 Indicator",
+            "targetStep": "\/api\/3\/workflow_steps\/fa4dfdcd-f03e-476c-ab7c-a621e295d882",
+            "sourceStep": "\/api\/3\/workflow_steps\/642dae19-8078-418e-b129-d1b4fc6be464",
+            "label": "SHA256",
+            "isExecuted": false,
+            "uuid": "ba5b4308-9a56-4eb3-aaa8-485d152bad7f"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Get Linked Incidents -> Does Alert have Hash",
+            "targetStep": "\/api\/3\/workflow_steps\/4690de1a-b7a7-4a89-a06b-eba023ce3ffb",
+            "sourceStep": "\/api\/3\/workflow_steps\/de6e6655-a85b-4c6f-b3fe-f0439b8c2951",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "809ba7d6-42f2-4d55-8e72-c0558826988e"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Find Existing Processname Indicator -> Was Processname Indicator Found",
+            "targetStep": "\/api\/3\/workflow_steps\/1e2b4702-cbdd-4faa-9b13-93456d5e338f",
+            "sourceStep": "\/api\/3\/workflow_steps\/9185d88c-bee8-4d4b-802b-00059c1e3d1f",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "bb1d4645-b621-4e1a-8bcc-d86fde976f58"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Does Alert have IP Address -> Find Existing IP Address Indicators",
+            "targetStep": "\/api\/3\/workflow_steps\/f1586482-d91c-4748-9cb1-6f23c144a388",
+            "sourceStep": "\/api\/3\/workflow_steps\/167b730a-aade-42fb-897b-62814aec3c8a",
+            "label": "Yes",
+            "isExecuted": false,
+            "uuid": "2e8155fa-5e32-4a47-a940-439180938346"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Was File Hash Indicator Found -> Update Existing File Hash Indicator",
+            "targetStep": "\/api\/3\/workflow_steps\/30687751-6605-4bb1-b163-79d18f0fc5ed",
+            "sourceStep": "\/api\/3\/workflow_steps\/f0e26362-73ff-4bc4-879a-490643bbf173",
+            "label": "Yes",
+            "isExecuted": false,
+            "uuid": "61bf9ad0-1687-4586-88bf-b3744db21557"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Get Linked Incidents -> Does Alert have URL",
+            "targetStep": "\/api\/3\/workflow_steps\/e74e9a7b-c2b5-4395-9f04-7e016af36416",
+            "sourceStep": "\/api\/3\/workflow_steps\/de6e6655-a85b-4c6f-b3fe-f0439b8c2951",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "c25830b9-f371-4a97-ad48-2ac7afdc8ad6"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Start -> Get Linked Incidents",
+            "targetStep": "\/api\/3\/workflow_steps\/de6e6655-a85b-4c6f-b3fe-f0439b8c2951",
+            "sourceStep": "\/api\/3\/workflow_steps\/8d271cec-57f6-4fa8-ae1b-eaa8c281e933",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "c2b81e6e-25a6-4c38-bd14-1ac4cafd9026"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Was URL Indicator Found -> Updating Existing URL Indicator",
+            "targetStep": "\/api\/3\/workflow_steps\/1419206d-7646-4ca0-9d24-740a67f4bdc7",
+            "sourceStep": "\/api\/3\/workflow_steps\/d8492f89-daeb-4191-9ef1-7419e3f40eaa",
+            "label": "Yes",
+            "isExecuted": false,
+            "uuid": "b108b408-ed92-4ef4-936a-6934c96a179a"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Get Linked Incidents -> Does Alert have Processname",
+            "targetStep": "\/api\/3\/workflow_steps\/1c3d7ee2-602a-4378-9d5f-834fa0bad677",
+            "sourceStep": "\/api\/3\/workflow_steps\/de6e6655-a85b-4c6f-b3fe-f0439b8c2951",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "8295d4da-521a-4af4-89a7-1a690b9f9546"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Was IP Address Indicator Found -> Set IP variables",
+            "targetStep": "\/api\/3\/workflow_steps\/901e976e-6389-40a8-a607-9f8cc6aa98a9",
+            "sourceStep": "\/api\/3\/workflow_steps\/4c4dd858-03d4-424c-a027-3895bbc7fe39",
+            "label": "No",
+            "isExecuted": false,
+            "uuid": "291d6fb2-7f7f-4858-9107-0916760c6990"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Find Existing URL Indicators -> Was URL",
+            "targetStep": "\/api\/3\/workflow_steps\/d8492f89-daeb-4191-9ef1-7419e3f40eaa",
+            "sourceStep": "\/api\/3\/workflow_steps\/26a9de36-9de5-430a-9e6d-06ffaa9a3b5e",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "dc800475-1541-4aa8-8224-325d42a0f8d3"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Does Alert have Processname -> Find Existing Processname Indicator",
+            "targetStep": "\/api\/3\/workflow_steps\/9185d88c-bee8-4d4b-802b-00059c1e3d1f",
+            "sourceStep": "\/api\/3\/workflow_steps\/1c3d7ee2-602a-4378-9d5f-834fa0bad677",
+            "label": "Yes",
+            "isExecuted": false,
+            "uuid": "0544af24-2c76-48b9-850b-98ff2d757f14"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Set Process Name IRI -> Correlate File Hash and Process Name Indicators",
+            "targetStep": "\/api\/3\/workflow_steps\/b491ec59-406a-414e-8325-c2d08617cbbf",
+            "sourceStep": "\/api\/3\/workflow_steps\/2419d901-2bd2-43a5-b050-61d5fb8b4bf0",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "d749b111-6577-47ea-9910-5df3a80894f9"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Create New SHA256 Indicator -> Set Process Name IRI",
+            "targetStep": "\/api\/3\/workflow_steps\/fbd2fb53-733d-4554-81b5-4a6243908f8c",
+            "sourceStep": "\/api\/3\/workflow_steps\/fa4dfdcd-f03e-476c-ab7c-a621e295d882",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "bddc59c5-56d6-476b-861d-42a114289cf2"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Is Destination IP Private -> Copy  of Create IP Address Indicator",
+            "targetStep": "\/api\/3\/workflow_steps\/0aa7a41f-83ed-4ad7-9d7a-89efc722d160",
+            "sourceStep": "\/api\/3\/workflow_steps\/8a761ee9-d6db-49e6-ac89-04f9223db0ba",
+            "label": "No",
+            "isExecuted": false,
+            "uuid": "1ec8c5ba-0404-44ba-b995-1f94f646fa77"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Is Source IP Private -> Do Not Create Source IP Indicator",
+            "targetStep": "\/api\/3\/workflow_steps\/262c3fff-2449-444d-b8fd-5f45499aab8c",
+            "sourceStep": "\/api\/3\/workflow_steps\/dd24cd43-4fa4-4fd4-a1b1-6a2e59f44fae",
+            "label": "Yes",
+            "isExecuted": false,
+            "uuid": "a26e3af4-b453-41ce-80a5-233d5a086974"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Create New SHA1 Indicator -> Set Process Name IRI",
+            "targetStep": "\/api\/3\/workflow_steps\/fbd2fb53-733d-4554-81b5-4a6243908f8c",
+            "sourceStep": "\/api\/3\/workflow_steps\/7a0d935b-d92b-4d36-8891-13663aefd858",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "99f5f3bb-a0b6-4391-9461-beab8d1752ab"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Does Alert have Hash -> No File Hash",
+            "targetStep": "\/api\/3\/workflow_steps\/7f34f1fb-b78e-4747-97f6-edadfafb5e4f",
+            "sourceStep": "\/api\/3\/workflow_steps\/4690de1a-b7a7-4a89-a06b-eba023ce3ffb",
+            "label": "No",
+            "isExecuted": false,
+            "uuid": "b3daf052-a23b-4476-a485-24cc5e828d5b"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Was File Hash Indicator Found -> Identify Type of Hash",
+            "targetStep": "\/api\/3\/workflow_steps\/642dae19-8078-418e-b129-d1b4fc6be464",
+            "sourceStep": "\/api\/3\/workflow_steps\/f0e26362-73ff-4bc4-879a-490643bbf173",
+            "label": "No",
+            "isExecuted": false,
+            "uuid": "03846a59-22c1-4b7b-92d9-6eb737af0906"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Create New Indicator Record for Processname -> Set Process Name IRI",
+            "targetStep": "\/api\/3\/workflow_steps\/2419d901-2bd2-43a5-b050-61d5fb8b4bf0",
+            "sourceStep": "\/api\/3\/workflow_steps\/a7c3fb0d-3688-4d76-8563-c4ed4e7415a1",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "cc8bf9d7-8b07-4365-a6b2-90adefe7e16e"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Is Destination IP Private -> Copy  of Do Not Create Source IP Indicator",
+            "targetStep": "\/api\/3\/workflow_steps\/89c30782-d90a-4664-8c6f-27cc6740ac05",
+            "sourceStep": "\/api\/3\/workflow_steps\/8a761ee9-d6db-49e6-ac89-04f9223db0ba",
+            "label": "Yes",
+            "isExecuted": false,
+            "uuid": "21360ad0-949b-44d2-b180-1eb8d9d28826"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Update Existing Processname Indicator -> Set Process Name IRI",
+            "targetStep": "\/api\/3\/workflow_steps\/2419d901-2bd2-43a5-b050-61d5fb8b4bf0",
+            "sourceStep": "\/api\/3\/workflow_steps\/b298c605-29db-4e21-88d9-2d9e59eddb45",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "097c9f26-cd7a-4291-bc83-8c8fa77524bf"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Destination IP Private IPspace Check -> Copy  of Is Source IP Private",
+            "targetStep": "\/api\/3\/workflow_steps\/8a761ee9-d6db-49e6-ac89-04f9223db0ba",
+            "sourceStep": "\/api\/3\/workflow_steps\/5a8987f4-8784-4487-bf74-32323c5362ae",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "546000d2-d9ca-42f5-9b6a-b8713a32c627"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Was URL Indicator Found -> Create New URL Indicator",
+            "targetStep": "\/api\/3\/workflow_steps\/4c432322-6d0d-4c09-a981-8e92e96ff453",
+            "sourceStep": "\/api\/3\/workflow_steps\/d8492f89-daeb-4191-9ef1-7419e3f40eaa",
+            "label": "No",
+            "isExecuted": false,
+            "uuid": "5932965a-a2c4-4c4f-9ba9-d7a6cedd8cd6"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Was Processname Indicator Found -> Update Existing Processname Indicator",
+            "targetStep": "\/api\/3\/workflow_steps\/b298c605-29db-4e21-88d9-2d9e59eddb45",
+            "sourceStep": "\/api\/3\/workflow_steps\/1e2b4702-cbdd-4faa-9b13-93456d5e338f",
+            "label": "Yes",
+            "isExecuted": false,
+            "uuid": "0784609c-443b-4189-8017-af3cfa4ec2f1"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Get Linked Incidents -> Does Alert have IP Address",
+            "targetStep": "\/api\/3\/workflow_steps\/167b730a-aade-42fb-897b-62814aec3c8a",
+            "sourceStep": "\/api\/3\/workflow_steps\/de6e6655-a85b-4c6f-b3fe-f0439b8c2951",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "35a0fb50-54e6-4519-b5d1-bc549f825259"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Does Alert have URL -> Find Existing URL Indicators",
+            "targetStep": "\/api\/3\/workflow_steps\/26a9de36-9de5-430a-9e6d-06ffaa9a3b5e",
+            "sourceStep": "\/api\/3\/workflow_steps\/e74e9a7b-c2b5-4395-9f04-7e016af36416",
+            "label": "Yes",
+            "isExecuted": false,
+            "uuid": "5ab53e3b-64be-4c8c-bdac-b0e8a5e2675c"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Find Existing IP Address Indicators -> Was IP Address Indicator Found",
+            "targetStep": "\/api\/3\/workflow_steps\/4c4dd858-03d4-424c-a027-3895bbc7fe39",
+            "sourceStep": "\/api\/3\/workflow_steps\/f1586482-d91c-4748-9cb1-6f23c144a388",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "28349607-4053-429b-82f7-e42a11ac161d"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Find Existing File Hash Indicators -> Was File Hash Indicator Found",
+            "targetStep": "\/api\/3\/workflow_steps\/f0e26362-73ff-4bc4-879a-490643bbf173",
+            "sourceStep": "\/api\/3\/workflow_steps\/16612118-76fd-4829-9677-8580133b0e26",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "a9b16d3c-fda8-4149-b234-a03f044e6b8e"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Does Alert have Processname -> No Processname",
+            "targetStep": "\/api\/3\/workflow_steps\/a730eadd-02e4-491a-94b6-27f2c273dbae",
+            "sourceStep": "\/api\/3\/workflow_steps\/1c3d7ee2-602a-4378-9d5f-834fa0bad677",
+            "label": "No",
+            "isExecuted": false,
+            "uuid": "306d3c7d-51af-49a4-9628-73c3b30b48e3"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Create New MD5 Indicator -> Set Process Name IRI",
+            "targetStep": "\/api\/3\/workflow_steps\/fbd2fb53-733d-4554-81b5-4a6243908f8c",
+            "sourceStep": "\/api\/3\/workflow_steps\/f0e1d5d0-c167-408a-85e6-5b4f01964717",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "031acaf4-b275-486c-8466-c5341425dc0a"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Does Alert have URL -> No URL",
+            "targetStep": "\/api\/3\/workflow_steps\/7662d495-2c3b-47cd-b2f8-4e75db5c03a4",
+            "sourceStep": "\/api\/3\/workflow_steps\/e74e9a7b-c2b5-4395-9f04-7e016af36416",
+            "label": "No",
+            "isExecuted": false,
+            "uuid": "9546ca8f-14f6-4ae3-a069-aa8ee65d7b7c"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Does Alert have Hash -> Find Existing File Hash Indicators",
+            "targetStep": "\/api\/3\/workflow_steps\/16612118-76fd-4829-9677-8580133b0e26",
+            "sourceStep": "\/api\/3\/workflow_steps\/4690de1a-b7a7-4a89-a06b-eba023ce3ffb",
+            "label": "Yes",
+            "isExecuted": false,
+            "uuid": "24b5acb9-1777-4a52-b94e-49a4bc63f05d"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Is Source IP Private -> Create IP Address Indicator",
+            "targetStep": "\/api\/3\/workflow_steps\/2e18ff22-c312-4b48-b39e-1bd56de756b3",
+            "sourceStep": "\/api\/3\/workflow_steps\/dd24cd43-4fa4-4fd4-a1b1-6a2e59f44fae",
+            "label": "No",
+            "isExecuted": false,
+            "uuid": "c6bd513d-3e01-43e7-83d7-1aee36877c3d"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Identify Type of Hash -> Create New SHA1 Indicator",
+            "targetStep": "\/api\/3\/workflow_steps\/7a0d935b-d92b-4d36-8891-13663aefd858",
+            "sourceStep": "\/api\/3\/workflow_steps\/642dae19-8078-418e-b129-d1b4fc6be464",
+            "label": "SHA1",
+            "isExecuted": false,
+            "uuid": "7ccdbc95-2012-418f-9d45-276a38688b27"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Set File Hash IRI -> Correlate File Hash and Process Name Indicators",
+            "targetStep": "\/api\/3\/workflow_steps\/b491ec59-406a-414e-8325-c2d08617cbbf",
+            "sourceStep": "\/api\/3\/workflow_steps\/fbd2fb53-733d-4554-81b5-4a6243908f8c",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "4497961c-9539-4bea-b241-51c323e71561"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Set IP variables -> Destination IP Private IPspace Check",
+            "targetStep": "\/api\/3\/workflow_steps\/5a8987f4-8784-4487-bf74-32323c5362ae",
+            "sourceStep": "\/api\/3\/workflow_steps\/901e976e-6389-40a8-a607-9f8cc6aa98a9",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "3d53d1f9-fd38-4210-a9dd-36d12b334502"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Identify Type of Hash -> Create New MD5 Indicator",
+            "targetStep": "\/api\/3\/workflow_steps\/f0e1d5d0-c167-408a-85e6-5b4f01964717",
+            "sourceStep": "\/api\/3\/workflow_steps\/642dae19-8078-418e-b129-d1b4fc6be464",
+            "label": "MD5",
+            "isExecuted": false,
+            "uuid": "1e2a86f0-2324-41b3-af89-0a1a282530d5"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Update Existing File Hash Indicator -> Set Process Name IRI",
+            "targetStep": "\/api\/3\/workflow_steps\/fbd2fb53-733d-4554-81b5-4a6243908f8c",
+            "sourceStep": "\/api\/3\/workflow_steps\/30687751-6605-4bb1-b163-79d18f0fc5ed",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "99686002-b5d1-40d0-acf1-32be4f352b0a"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Does Alert have IP Address -> No IP Address",
+            "targetStep": "\/api\/3\/workflow_steps\/32c4a912-27b0-4ca7-8464-733bca1895e5",
+            "sourceStep": "\/api\/3\/workflow_steps\/167b730a-aade-42fb-897b-62814aec3c8a",
+            "label": "No",
+            "isExecuted": false,
+            "uuid": "f4be0c8b-c4e3-44d1-b517-b804c086fff6"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Source IP Private IPspace Check -> Is Source IP Private",
+            "targetStep": "\/api\/3\/workflow_steps\/dd24cd43-4fa4-4fd4-a1b1-6a2e59f44fae",
+            "sourceStep": "\/api\/3\/workflow_steps\/15602d82-aa46-437d-ad09-84fcad0d230c",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "9d1dc924-251a-4067-84b1-387f9687c378"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Was Processname Indicator Found -> Create New Indicator Record for Processname",
+            "targetStep": "\/api\/3\/workflow_steps\/a7c3fb0d-3688-4d76-8563-c4ed4e7415a1",
+            "sourceStep": "\/api\/3\/workflow_steps\/1e2b4702-cbdd-4faa-9b13-93456d5e338f",
+            "label": "No",
+            "isExecuted": false,
+            "uuid": "b100f927-f8f1-4e3a-b98b-a2fcb598a76a"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Was IP Address Indicator Found -> Update Existing IP Address Indicator",
+            "targetStep": "\/api\/3\/workflow_steps\/6e239c1e-2eb4-486c-a39c-8d6c3a6fea62",
+            "sourceStep": "\/api\/3\/workflow_steps\/4c4dd858-03d4-424c-a027-3895bbc7fe39",
+            "label": "Yes",
+            "isExecuted": false,
+            "uuid": "c073f378-1911-496c-b2bb-18af12a79bd4"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Set IP variables -> Is Source IP Private",
+            "targetStep": "\/api\/3\/workflow_steps\/15602d82-aa46-437d-ad09-84fcad0d230c",
+            "sourceStep": "\/api\/3\/workflow_steps\/901e976e-6389-40a8-a607-9f8cc6aa98a9",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "33cbc71c-1777-4386-827c-436bb30ee3c0"
+        }
+    ],
+    "priority": null,
+    "uuid": "638fae7e-eb8b-44c7-9c32-d1f7281180a4",
+    "recordTags": [],
+    "id": 1137,
+    "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "createDate": 1644165546,
+    "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "modifyDate": 1644165546,
+    "owners": [],
+    "isPrivate": false
+}

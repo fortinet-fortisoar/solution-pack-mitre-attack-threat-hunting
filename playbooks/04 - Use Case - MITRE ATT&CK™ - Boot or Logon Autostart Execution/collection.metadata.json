@@ -1,0 +1,15 @@
+{
+    "@context": "\/api\/3\/contexts\/WorkflowCollection",
+    "@type": "WorkflowCollection",
+    "name": "04 - Use Case - MITRE ATT&CK\u2122 - Boot or Logon Autostart Execution",
+    "description": null,
+    "visible": true,
+    "image": null,
+    "uuid": "11dc1218-970f-4eaf-ad2f-0e9d353445e5",
+    "id": 91,
+    "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "createDate": 1644165543,
+    "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "modifyDate": 1644572452,
+    "recordTags": []
+}

@@ -1,0 +1,749 @@
+{
+    "@type": "Workflow",
+    "triggerLimit": null,
+    "name": "Create and Link Alerts, Technique or Sub-technique from Hunt (Scenario-based)",
+    "aliasName": null,
+    "tag": "",
+    "description": "Creates and links an Alert and its respective technique or sub-technique",
+    "isActive": true,
+    "debug": false,
+    "singleRecordExecution": false,
+    "remoteExecutableFlag": false,
+    "parameters": [
+        "commandline",
+        "userName",
+        "technique",
+        "processName",
+        "MD5",
+        "hostName",
+        "sourceIP",
+        "destinationIP",
+        "sourceTool",
+        "parentProcess",
+        "eventTime",
+        "parentProcessID",
+        "processID",
+        "parentCommandLine",
+        "filePath",
+        "eventName",
+        "description",
+        "huntIRI",
+        "epochTime",
+        "comment",
+        "sourceImage",
+        "targetImage",
+        "source",
+        "processGUID",
+        "scheduledTask",
+        "service",
+        "url",
+        "bytestransferred",
+        "bitstransferid",
+        "sourceData",
+        "registryKey",
+        "registryKeyValue",
+        "computerName",
+        "alertName",
+        "decodedCommandLine",
+        "mitre_tech_id",
+        "huntIRI",
+        "alertType",
+        "mitreTechniqueData"
+    ],
+    "synchronous": false,
+    "lastModifyDate": 1644165542,
+    "collection": "\/api\/3\/workflow_collections\/e1d97fae-bb76-4989-b4d2-a30b6109e91f",
+    "versions": [],
+    "triggerStep": "\/api\/3\/workflow_steps\/08e2f1a9-587f-46fa-9daa-4389a85aa007",
+    "steps": [
+        {
+            "@type": "WorkflowStep",
+            "name": "Create and Link Comment to Hunt",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "type": {
+                        "id": 247,
+                        "@id": "\/api\/3\/picklists\/ff599189-3eeb-4c86-acb0-a7915e85ac3b",
+                        "icon": null,
+                        "uuid": "ff599189-3eeb-4c86-acb0-a7915e85ac3b",
+                        "@type": "Picklist",
+                        "color": null,
+                        "display": "Comment",
+                        "@context": "\/api\/3\/contexts\/Picklist",
+                        "listName": "\/api\/3\/picklist_names\/0841c1eb-a0a3-4abd-b29c-9f68e4d9b14f",
+                        "itemValue": "Comment",
+                        "orderIndex": 1
+                    },
+                    "hunts": "{%if vars.input.params.huntIRI %}[\"{{vars.input.params.huntIRI}}\"]{% endif %}",
+                    "people": [],
+                    "content": "<p>{{vars.input.params.comment}}<\/p>",
+                    "__replace": "",
+                    "isImportant": false,
+                    "peopleUpdated": false
+                },
+                "_showJson": false,
+                "operation": "Overwrite",
+                "collection": "\/api\/3\/comments",
+                "__recommend": [],
+                "fieldOperation": {
+                    "recordTags": "Overwrite"
+                },
+                "step_variables": []
+            },
+            "status": null,
+            "top": "435",
+            "left": "475",
+            "stepType": "\/api\/3\/workflow_step_types\/2597053c-e718-44b4-8394-4d40fe26d357",
+            "uuid": "017c3c86-c48f-47b1-850e-8b4f277c3a1a",
+            "id": 4595
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create and Link Alert to Hunt",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "url": "{{vars.input.params.url or None}}",
+                    "name": "{% if vars.input.params.alertName%}{{vars.input.params.alertName}}{% else %}MITRE-{{vars.input.params.technique}} Execution of {{vars.input.params.processName}}{% endif %}",
+                    "type": "{% if vars.input.params.alertType %}{{vars.input.params.alertType}}{% else %}{{\"AlertType\" | picklist(\"MITRE ATT&CK\", \"@id\")}}{% endif %}",
+                    "hunts": "{%if vars.input.params.huntIRI %}[\"{{vars.input.params.huntIRI}}\"]{% endif %}",
+                    "state": {
+                        "id": 220,
+                        "@id": "\/api\/3\/picklists\/a1bac09b-1441-45aa-ad1b-c88744e48e72",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": null,
+                        "display": "New",
+                        "listName": "\/api\/3\/picklist_names\/2f9ed741-25fe-475a-9f12-64336288eebf",
+                        "itemValue": "New",
+                        "orderIndex": 0
+                    },
+                    "source": "{{vars.input.params.source or None}}",
+                    "status": {
+                        "id": 120,
+                        "@id": "\/api\/3\/picklists\/7de816ff-7140-4ee5-bd05-93ce22002146",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": null,
+                        "display": "Open",
+                        "listName": "\/api\/3\/picklist_names\/33e964a9-d607-49f2-813c-7ce46141815a",
+                        "itemValue": "Open",
+                        "orderIndex": 0
+                    },
+                    "fileHash": "{{vars.input.params.MD5 or None}}",
+                    "filePath": "{{vars.input.params.filePath or None}}",
+                    "services": "{{vars.input.params.service or None}}",
+                    "severity": {
+                        "id": 81,
+                        "@id": "\/api\/3\/picklists\/40187287-89fc-4e9c-b717-e9443d57eedb",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": "#DE7A13",
+                        "display": "High",
+                        "listName": "\/api\/3\/picklist_names\/4e80cba3-032f-48b4-ac03-17e3ec247aac",
+                        "itemValue": "High",
+                        "orderIndex": 3
+                    },
+                    "sourceIp": "{{vars.input.params.sourceIP or None}}",
+                    "userName": "{{vars.input.params.userName or None}}",
+                    "__replace": "true",
+                    "epochTime": "{{vars.input.params.epochTime}}",
+                    "eventTime": "{{vars.input.params.eventTime}}",
+                    "processId": "{{vars.input.params.processID or None}}",
+                    "sourceTool": "{{vars.input.params.sourceTool or None}}",
+                    "sourcedata": "{{vars.input.params.sourceData | toJSON}}",
+                    "commandLine": "{{vars.input.params.commandline or None}}",
+                    "description": "<p>{{vars.input.params.description}}<\/p>",
+                    "processGuid": "{{vars.input.params.processGUID or None}}",
+                    "processName": "{{vars.input.params.processName or None}}",
+                    "registryKey": "{{vars.input.params.registryKey or None}}",
+                    "targetAsset": "{{vars.input.params.hostName or None}}",
+                    "ackSlaStatus": {
+                        "id": 289,
+                        "@id": "\/api\/3\/picklists\/72979f64-e8b9-4888-a965-957e0ec24818",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": "#808080",
+                        "display": "Awaiting Action",
+                        "listName": "\/api\/3\/picklist_names\/fe36a8f2-fcba-4221-b4ab-1081f596b153",
+                        "itemValue": "Awaiting Action",
+                        "orderIndex": 2
+                    },
+                    "computerName": "{{vars.input.params.computerName or None}}",
+                    "closureReason": {
+                        "id": 250,
+                        "@id": "\/api\/3\/picklists\/8590c81e-3307-4645-97f5-c3e1bec4e05a",
+                        "icon": null,
+                        "uuid": "8590c81e-3307-4645-97f5-c3e1bec4e05a",
+                        "@type": "Picklist",
+                        "color": null,
+                        "display": "Tasks Completed",
+                        "@context": "\/api\/3\/contexts\/Picklist",
+                        "listName": "\/api\/3\/picklist_names\/4ebacea1-88cd-4ea8-9dcc-385bea42cc59",
+                        "itemValue": "Tasks Completed",
+                        "orderIndex": 0
+                    },
+                    "destinationIp": "{{vars.input.params.destinationIP or None}}",
+                    "mitreattackid": "{{vars.input.params['mitre_tech_id']}}",
+                    "respSlaStatus": {
+                        "id": 289,
+                        "@id": "\/api\/3\/picklists\/72979f64-e8b9-4888-a965-957e0ec24818",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": "#808080",
+                        "display": "Awaiting Action",
+                        "listName": "\/api\/3\/picklist_names\/fe36a8f2-fcba-4221-b4ab-1081f596b153",
+                        "itemValue": "Awaiting Action",
+                        "orderIndex": 2
+                    },
+                    "scheduledTask": "{{vars.input.params.scheduledTask or None}}",
+                    "sourceProcess": "{{vars.input.params.sourceImage or None}}",
+                    "targetProcess": "{{vars.input.params.targetImage or None}}",
+                    "mitreTechnique": "{{vars.input.params.technique}}",
+                    "priorityWeight": 1,
+                    "bytesTransferred": "{{vars.input.params.bytestransferred or None}}",
+                    "parentProcessPid": "{{vars.input.params.parentProcessID or None}}",
+                    "registryKeyValue": "{{vars.input.params.registryKeyValue or None}}",
+                    "parentProcessName": "{{vars.input.params.parentProcess or None}}",
+                    "decodedCommandLine": "{{vars.input.params.decodedCommandLine or None}}",
+                    "escalatedtoincident": {
+                        "id": 32,
+                        "@id": "\/api\/3\/picklists\/2128a09c-153d-4db3-985d-de6be33deae5",
+                        "icon": null,
+                        "@type": "Picklist",
+                        "color": "#808080",
+                        "display": "No",
+                        "listName": "\/api\/3\/picklist_names\/e131cc54-9ae4-43c9-b830-af6e331fe024",
+                        "itemValue": "No",
+                        "orderIndex": 1
+                    },
+                    "alertRemainingAckSLA": 0,
+                    "parentProcessCmdLine": "{{vars.input.params.parentCommandLine or None}}"
+                },
+                "_showJson": false,
+                "operation": "Overwrite",
+                "collection": "\/api\/3\/upsert\/alerts",
+                "__recommend": [],
+                "tagsOperation": "OverwriteTags",
+                "fieldOperation": {
+                    "recordTags": "Overwrite"
+                },
+                "step_variables": []
+            },
+            "status": null,
+            "top": "300",
+            "left": "475",
+            "stepType": "\/api\/3\/workflow_step_types\/2597053c-e718-44b4-8394-4d40fe26d357",
+            "uuid": "55c76613-d412-4f6b-a7f3-825a911eb244",
+            "id": 4596
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Set Step Output",
+            "description": null,
+            "arguments": {
+                "alert_data": "{{vars.steps.Create_and_Link_Alert_to_Hunt}}",
+                "technique_data": "{% if vars.mitreTechniqueType == 'mitre_sub_techniques' and vars.steps.Find_Technique | length == 0 and vars.steps.Find_Sub_Techniques | length == 0 %}['{{vars.subTechniqueIRI}}','{{vars.techniqueIRI}}']{% elif vars.mitreTechniqueType == 'mitre_sub_techniques' and vars.steps.Find_Technique | length > 0 and vars.steps.Find_Sub_Techniques | length == 0 %}['{{vars.subTechniqueIRI}}']{% elif vars.mitreTechniqueType == 'mitre_techniques' and vars.steps.Find_Technique_Record | length == 0 %}['{{vars.techniqueIRI}}']{% else %}[]{% endif %}"
+            },
+            "status": null,
+            "top": "1515",
+            "left": "393",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "73628b03-35e1-4ab1-8a2d-48dd3bc92ae3",
+            "id": 4597
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Start",
+            "description": null,
+            "arguments": {
+                "step_variables": {
+                    "input": {
+                        "params": []
+                    }
+                }
+            },
+            "status": null,
+            "top": "30",
+            "left": "475",
+            "stepType": "\/api\/3\/workflow_step_types\/b348f017-9a94-471f-87f8-ce88b6a7ad62",
+            "uuid": "08e2f1a9-587f-46fa-9daa-4389a85aa007",
+            "id": 4598
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Is Technique or Sub Technique Found",
+            "description": null,
+            "arguments": {
+                "conditions": [
+                    {
+                        "option": "Sub Technique",
+                        "step_iri": "\/api\/3\/workflow_steps\/dafd54ce-9c7e-4304-a458-d12d35d40760",
+                        "condition": "{{ (vars.mitreTechniqueType == 'mitre_sub_techniques') and (vars.modulesList | length == 2) }}",
+                        "step_name": "Find Sub Techniques"
+                    },
+                    {
+                        "option": "Techniques",
+                        "step_iri": "\/api\/3\/workflow_steps\/745e635d-e17c-41a4-a4b1-2a62027932c7",
+                        "condition": "{{ (vars.mitreTechniqueType == 'mitre_techniques') and (vars.modulesList | length == 2) }}",
+                        "step_name": "Find Technique Record"
+                    },
+                    {
+                        "option": "Not Found",
+                        "default": true,
+                        "step_iri": "\/api\/3\/workflow_steps\/e7d397c5-a79f-4156-94b3-88d4ca200ae7",
+                        "step_name": "Step Output"
+                    }
+                ]
+            },
+            "status": null,
+            "top": "705",
+            "left": "475",
+            "stepType": "\/api\/3\/workflow_step_types\/12254cf5-5db7-4b1a-8cb1-3af081924b28",
+            "uuid": "791d0d3b-e13d-46b7-8f23-8530b75b33dc",
+            "id": 4599
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Check Module Availability",
+            "description": "Check for Technique or Sub Technique Module Availability",
+            "arguments": {
+                "params": {
+                    "iri": "\/api\/query\/modules?$limit=250",
+                    "body": "{\n  \"logic\": \"OR\",\n  \"filters\": [\n    {\n      \"field\": \"type\",\n      \"operator\": \"eq\",\n      \"value\": \"mitre_techniques\"\n    },\n    {\n      \"field\": \"type\",\n      \"operator\": \"eq\",\n      \"value\": \"mitre_sub_techniques\"\n    }\n  ]\n}",
+                    "method": "POST"
+                },
+                "version": "3.1.2",
+                "connector": "cyops_utilities",
+                "operation": "make_cyops_request",
+                "operationTitle": "FSR: Make FortiSOAR API Call",
+                "step_variables": {
+                    "modulesList": "{{vars.result.data['hydra:member'] | json_query('[].type')}}"
+                }
+            },
+            "status": null,
+            "top": "570",
+            "left": "475",
+            "stepType": "\/api\/3\/workflow_step_types\/0109f35d-090b-4a2b-bd8a-94cbc3508562",
+            "uuid": "0bbd1646-ef26-4555-81a0-d81fd7a33c2a",
+            "id": 4600
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create Sub Technique",
+            "description": null,
+            "arguments": {
+                "when": "{{vars.steps.Find_Sub_Techniques | length == 0}}",
+                "resource": {
+                    "name": "{{vars.input.params.mitreTechniqueData.name}}",
+                    "__link": {
+                        "alerts": "{{vars.steps.Create_and_Link_Alert_to_Hunt['@id']}}"
+                    },
+                    "capecId": "{{vars.input.params.mitreTechniqueData.capecId}}",
+                    "mitreId": "{{vars.input.params.mitreTechniqueData.mitreId}}",
+                    "myNotes": "<p>{{vars.input.params.mitreTechniqueData.myNotes}}<\/p>",
+                    "version": "{{vars.input.params.mitreTechniqueData.version}}",
+                    "__replace": "false",
+                    "detection": "{{vars.input.params.mitreTechniqueData.detection}}",
+                    "platforms": "{{vars.input.params.mitreTechniqueData.platforms}}",
+                    "dataSources": "{{vars.input.params.mitreTechniqueData.dataSources}}",
+                    "description": "{{vars.input.params.mitreTechniqueData.description}}",
+                    "parentTechnique": "{{vars.techniqueIRI}}",
+                    "permissionsRequired": "{{vars.input.params.mitreTechniqueData.permissionsRequired}}"
+                },
+                "_showJson": false,
+                "operation": "Append",
+                "collection": "\/api\/3\/upsert\/mitre_sub_techniques",
+                "__recommend": [],
+                "fieldOperation": {
+                    "recordTags": "Overwrite"
+                },
+                "step_variables": {
+                    "subTechniqueIRI": "{{vars.result['@id']}}"
+                }
+            },
+            "status": null,
+            "top": "1245",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/2597053c-e718-44b4-8394-4d40fe26d357",
+            "uuid": "de052abe-8c99-4e56-9a4e-c944f985efdc",
+            "id": 4601
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create Technique Record",
+            "description": null,
+            "arguments": {
+                "when": "{{vars.steps.Find_Technique_Record | length == 0}}",
+                "resource": {
+                    "name": "{{vars.input.params.mitreTechniqueData.name}}",
+                    "notes": "{{vars.input.params.mitreTechniqueData.myNotes}}",
+                    "__link": {
+                        "alerts": "{{vars.steps.Create_and_Link_Alert_to_Hunt['@id']}}"
+                    },
+                    "capecId": "{{vars.input.params.mitreTechniqueData.capecId}}",
+                    "mitreId": "{{vars.input.params.mitreTechniqueData.mitreId}}",
+                    "version": "{{vars.input.params.mitreTechniqueData.version}}",
+                    "__replace": "false",
+                    "detection": "<p>{{vars.input.params.mitreTechniqueData.detection}}<\/p>",
+                    "platforms": "{{vars.input.params.mitreTechniqueData.platforms}}",
+                    "dataSources": "{{vars.input.params.mitreTechniqueData.dataSources}}",
+                    "description": "{{vars.input.params.mitreTechniqueData.description}}",
+                    "permissionsRequired": "{{vars.input.params.mitreTechniqueData.permissionsRequired}}"
+                },
+                "_showJson": false,
+                "operation": "Append",
+                "collection": "\/api\/3\/upsert\/mitre_techniques",
+                "__recommend": [],
+                "fieldOperation": {
+                    "recordTags": "Overwrite"
+                },
+                "step_variables": {
+                    "techniqueIRI": "{{vars.result['@id']}}"
+                }
+            },
+            "status": null,
+            "top": "1245",
+            "left": "660",
+            "stepType": "\/api\/3\/workflow_step_types\/2597053c-e718-44b4-8394-4d40fe26d357",
+            "uuid": "bbef3b67-2274-4c5d-984a-0369ebbfabab",
+            "id": 4602
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Configuration",
+            "description": null,
+            "arguments": {
+                "mitreTechniqueType": "{% if '.' in vars.input.params['mitre_tech_id']%}mitre_sub_techniques{% else %}mitre_techniques{% endif %}"
+            },
+            "status": null,
+            "top": "165",
+            "left": "475",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "462be6d7-1c20-49f9-8bb8-f7d26c21eb31",
+            "id": 4603
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Find Sub Techniques",
+            "description": null,
+            "arguments": {
+                "query": {
+                    "sort": [],
+                    "limit": 30,
+                    "logic": "AND",
+                    "filters": [
+                        {
+                            "type": "primitive",
+                            "field": "mitreId",
+                            "value": "{{vars.input.params['mitre_tech_id']}}",
+                            "operator": "eq",
+                            "_operator": "eq"
+                        }
+                    ]
+                },
+                "module": "mitre_sub_techniques?$limit=30&$relationships=true",
+                "step_variables": {
+                    "subTechniqueIRI": "{% if vars.result | length > 0 %}{{vars.result[0]['@id']}}{% endif %}"
+                }
+            },
+            "status": null,
+            "top": "840",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/b593663d-7d13-40ce-a3a3-96dece928770",
+            "uuid": "dafd54ce-9c7e-4304-a458-d12d35d40760",
+            "id": 4604
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Find Technique Record",
+            "description": null,
+            "arguments": {
+                "query": {
+                    "sort": [],
+                    "limit": 30,
+                    "logic": "AND",
+                    "filters": [
+                        {
+                            "type": "primitive",
+                            "field": "mitreId",
+                            "value": "{{vars.input.params['mitre_tech_id']}}",
+                            "operator": "eq",
+                            "_operator": "eq"
+                        }
+                    ]
+                },
+                "module": "mitre_techniques?$limit=30",
+                "step_variables": {
+                    "techniqueIRI": "{% if vars.result | length > 0 %}{{vars.result[0]['@id']}}{% endif %}"
+                }
+            },
+            "status": null,
+            "top": "1110",
+            "left": "660",
+            "stepType": "\/api\/3\/workflow_step_types\/b593663d-7d13-40ce-a3a3-96dece928770",
+            "uuid": "745e635d-e17c-41a4-a4b1-2a62027932c7",
+            "id": 4605
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create Technique",
+            "description": null,
+            "arguments": {
+                "when": "{{vars.steps.Find_Technique | length == 0}}",
+                "resource": {
+                    "name": "{{vars.input.params.mitreTechniqueData.parentTechnique.name}}",
+                    "notes": "{{vars.input.params.mitreTechniqueData.parentTechnique.myNotes}}",
+                    "capecId": "{{vars.input.params.mitreTechniqueData.parentTechnique.capecId}}",
+                    "mitreId": "{{vars.input.params.mitreTechniqueData.parentTechnique.mitreId}}",
+                    "version": "{{vars.input.params.mitreTechniqueData.parentTechnique.version}}",
+                    "__replace": "false",
+                    "detection": "<p>{{vars.input.params.mitreTechniqueData.parentTechnique.detection}}<\/p>",
+                    "platforms": "{{vars.input.params.mitreTechniqueData.parentTechnique.platforms}}",
+                    "dataSources": "{{vars.input.params.mitreTechniqueData.parentTechnique.dataSources}}",
+                    "description": "{{vars.input.params.mitreTechniqueData.parentTechnique.description}}",
+                    "permissionsRequired": "{{vars.input.params.mitreTechniqueData.parentTechnique.permissionsRequired}}"
+                },
+                "_showJson": false,
+                "operation": "Append",
+                "collection": "\/api\/3\/upsert\/mitre_techniques",
+                "__recommend": [],
+                "fieldOperation": {
+                    "recordTags": "Overwrite"
+                },
+                "step_variables": {
+                    "techniqueIRI": "{{vars.result['@id']}}"
+                }
+            },
+            "status": null,
+            "top": "1110",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/2597053c-e718-44b4-8394-4d40fe26d357",
+            "uuid": "3e106313-dcf1-4961-94e7-142c8ffaee6d",
+            "id": 4606
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Link Technique or Sub Technique to Alert",
+            "description": null,
+            "arguments": {
+                "resource": {
+                    "__link": {
+                        "mitre_techniques": "{{vars.techniqueIRI}}",
+                        "mitre_sub_techniques": "{{vars.subTechniqueIRI}}"
+                    }
+                },
+                "_showJson": true,
+                "operation": "Append",
+                "collection": "{{vars.steps.Create_and_Link_Alert_to_Hunt['@id']}}",
+                "__recommend": [],
+                "collectionType": "\/api\/3\/alerts",
+                "fieldOperation": {
+                    "recordTags": "Append"
+                },
+                "step_variables": []
+            },
+            "status": null,
+            "top": "1380",
+            "left": "393",
+            "stepType": "\/api\/3\/workflow_step_types\/b593663d-7d13-40ce-a3a3-96dece928722",
+            "uuid": "e553c793-9e41-4493-8a09-21bfb4de7d7b",
+            "id": 4607
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Find Technique",
+            "description": null,
+            "arguments": {
+                "query": {
+                    "sort": [],
+                    "limit": 30,
+                    "logic": "AND",
+                    "filters": [
+                        {
+                            "type": "primitive",
+                            "field": "mitreId",
+                            "value": "{{vars.input.params.mitreTechniqueData.parentTechnique.mitreId}}",
+                            "operator": "eq",
+                            "_operator": "eq"
+                        }
+                    ]
+                },
+                "module": "mitre_techniques?$limit=30",
+                "step_variables": {
+                    "techniqueIRI": "{% if vars.result | length > 0 %}{{vars.result[0]['@id']}}{% endif %}"
+                }
+            },
+            "status": null,
+            "top": "975",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/b593663d-7d13-40ce-a3a3-96dece928770",
+            "uuid": "5472bf97-c35b-4c8b-ac05-ced50ce058b7",
+            "id": 4608
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Step Output",
+            "description": null,
+            "arguments": {
+                "alert_data": "{{vars.steps.Create_and_Link_Alert_to_Hunt}}"
+            },
+            "status": null,
+            "top": "840",
+            "left": "475",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "e7d397c5-a79f-4156-94b3-88d4ca200ae7",
+            "id": 4609
+        }
+    ],
+    "routes": [
+        {
+            "@type": "WorkflowRoute",
+            "name": "Create and Link Alert -> Create and Link Comment to Hunt",
+            "targetStep": "\/api\/3\/workflow_steps\/017c3c86-c48f-47b1-850e-8b4f277c3a1a",
+            "sourceStep": "\/api\/3\/workflow_steps\/55c76613-d412-4f6b-a7f3-825a911eb244",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "63a24349-6125-4cd3-9be9-c848c3ebf944"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Start -> Configuration",
+            "targetStep": "\/api\/3\/workflow_steps\/462be6d7-1c20-49f9-8bb8-f7d26c21eb31",
+            "sourceStep": "\/api\/3\/workflow_steps\/08e2f1a9-587f-46fa-9daa-4389a85aa007",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "42bedb52-eb1f-4fe5-a55e-903b386ec74a"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Configuration -> Create and Link Alert",
+            "targetStep": "\/api\/3\/workflow_steps\/55c76613-d412-4f6b-a7f3-825a911eb244",
+            "sourceStep": "\/api\/3\/workflow_steps\/462be6d7-1c20-49f9-8bb8-f7d26c21eb31",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "e693e70a-b57c-4101-b864-820b75f5d02d"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Create and Link Comment to Hunt -> Is Technique Module Available",
+            "targetStep": "\/api\/3\/workflow_steps\/0bbd1646-ef26-4555-81a0-d81fd7a33c2a",
+            "sourceStep": "\/api\/3\/workflow_steps\/017c3c86-c48f-47b1-850e-8b4f277c3a1a",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "b3a75ce6-f9f8-4bdf-a4c7-aa1f905f8674"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Check Module Availability -> Is it a Sub Technique",
+            "targetStep": "\/api\/3\/workflow_steps\/791d0d3b-e13d-46b7-8f23-8530b75b33dc",
+            "sourceStep": "\/api\/3\/workflow_steps\/0bbd1646-ef26-4555-81a0-d81fd7a33c2a",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "301350a2-9352-4493-9627-90ed30b04f98"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Is it a Sub Technique -> Find Sub Techniques",
+            "targetStep": "\/api\/3\/workflow_steps\/dafd54ce-9c7e-4304-a458-d12d35d40760",
+            "sourceStep": "\/api\/3\/workflow_steps\/791d0d3b-e13d-46b7-8f23-8530b75b33dc",
+            "label": "Sub Technique",
+            "isExecuted": false,
+            "uuid": "d7a2bca3-fa27-4623-a06b-5496d53b1a04"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Is it a Sub Technique -> Find Technique",
+            "targetStep": "\/api\/3\/workflow_steps\/745e635d-e17c-41a4-a4b1-2a62027932c7",
+            "sourceStep": "\/api\/3\/workflow_steps\/791d0d3b-e13d-46b7-8f23-8530b75b33dc",
+            "label": "Techniques",
+            "isExecuted": false,
+            "uuid": "341c7eb7-1d70-418c-80e5-58aff4093d9d"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Find Technique -> Create Technique",
+            "targetStep": "\/api\/3\/workflow_steps\/bbef3b67-2274-4c5d-984a-0369ebbfabab",
+            "sourceStep": "\/api\/3\/workflow_steps\/745e635d-e17c-41a4-a4b1-2a62027932c7",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "a413bd31-3f8a-4a1a-8e8c-df9ecc03a9f8"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Copy  of Create Technique -> Create Sub Technique",
+            "targetStep": "\/api\/3\/workflow_steps\/de052abe-8c99-4e56-9a4e-c944f985efdc",
+            "sourceStep": "\/api\/3\/workflow_steps\/3e106313-dcf1-4961-94e7-142c8ffaee6d",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "83cde060-d735-45ee-99b9-313588188df9"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Create Sub Technique -> Link Technique or Sub Technique to Alert",
+            "targetStep": "\/api\/3\/workflow_steps\/e553c793-9e41-4493-8a09-21bfb4de7d7b",
+            "sourceStep": "\/api\/3\/workflow_steps\/de052abe-8c99-4e56-9a4e-c944f985efdc",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "57c56287-d52e-45c9-96cd-f3996b20d16d"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Create Technique -> Link Technique or Sub Technique to Alert",
+            "targetStep": "\/api\/3\/workflow_steps\/e553c793-9e41-4493-8a09-21bfb4de7d7b",
+            "sourceStep": "\/api\/3\/workflow_steps\/bbef3b67-2274-4c5d-984a-0369ebbfabab",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "449f1cfc-6e2d-4d96-84a5-9ada47fa97af"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Link Technique or Sub Technique to Alert -> Set Step Output",
+            "targetStep": "\/api\/3\/workflow_steps\/73628b03-35e1-4ab1-8a2d-48dd3bc92ae3",
+            "sourceStep": "\/api\/3\/workflow_steps\/e553c793-9e41-4493-8a09-21bfb4de7d7b",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "d1df7a6c-bd98-4a0f-8914-d951e28b77ed"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Find Sub Techniques -> Find Technique",
+            "targetStep": "\/api\/3\/workflow_steps\/5472bf97-c35b-4c8b-ac05-ced50ce058b7",
+            "sourceStep": "\/api\/3\/workflow_steps\/dafd54ce-9c7e-4304-a458-d12d35d40760",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "713f106a-a308-4f3f-83e9-dbdf3c6396f3"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Find Technique -> Create Technique",
+            "targetStep": "\/api\/3\/workflow_steps\/3e106313-dcf1-4961-94e7-142c8ffaee6d",
+            "sourceStep": "\/api\/3\/workflow_steps\/5472bf97-c35b-4c8b-ac05-ced50ce058b7",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "4b897d8e-0b5b-4461-bd4b-563b2007d83b"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Is it a Sub Technique -> Copy  of Set Step Output",
+            "targetStep": "\/api\/3\/workflow_steps\/e7d397c5-a79f-4156-94b3-88d4ca200ae7",
+            "sourceStep": "\/api\/3\/workflow_steps\/791d0d3b-e13d-46b7-8f23-8530b75b33dc",
+            "label": "Not Found",
+            "isExecuted": false,
+            "uuid": "04b019ab-ea4a-4c1c-9c1f-7173169f63f3"
+        }
+    ],
+    "priority": null,
+    "uuid": "8f61e7f7-955b-4a81-947e-be12568e66b8",
+    "recordTags": [
+        "Referenced"
+    ],
+    "id": 1136,
+    "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "createDate": 1644165546,
+    "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "modifyDate": 1644165546,
+    "owners": [],
+    "isPrivate": false
+}

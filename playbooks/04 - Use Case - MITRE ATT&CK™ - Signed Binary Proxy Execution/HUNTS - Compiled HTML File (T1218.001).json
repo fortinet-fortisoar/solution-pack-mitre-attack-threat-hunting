@@ -1,0 +1,507 @@
+{
+    "@type": "Workflow",
+    "triggerLimit": null,
+    "name": "HUNTS - Compiled HTML File (T1218.001)",
+    "aliasName": null,
+    "tag": "ATT&CK, Defense_Evasion, Execution, Compiled_HTML",
+    "description": "Identifies processes spawned by hh.exe",
+    "isActive": true,
+    "debug": false,
+    "singleRecordExecution": false,
+    "remoteExecutableFlag": false,
+    "parameters": [],
+    "synchronous": false,
+    "lastModifyDate": 1644165542,
+    "collection": "\/api\/3\/workflow_collections\/c926f317-8aba-41c5-8f71-2f0f23d992fb",
+    "versions": [],
+    "triggerStep": "\/api\/3\/workflow_steps\/c99ab208-317c-4da6-8a32-2bfe5dbf4915",
+    "steps": [
+        {
+            "@type": "WorkflowStep",
+            "name": "Create Elastic Alerts",
+            "description": null,
+            "arguments": {
+                "for_each": {
+                    "item": "{{vars.steps.Elastic_Query_for_Sysmon_Compiled_HTML.data.hits.hits}}",
+                    "parallel": false,
+                    "condition": ""
+                },
+                "arguments": {
+                    "MD5": "{{vars.item._source.event_data.Hashes.split(\"MD5=\")[1].split(',')[0]}}",
+                    "url": "",
+                    "source": "{{vars.item._source.source_name}}",
+                    "comment": "SIEM query identified a Compiled HTML file spawning child process {{vars.item._source.image_path.split(\"\\\\\")[-1] }} on {{vars.item._source.beat.hostname}} at {{vars.item._source.event_data.UtcTime}}.",
+                    "huntIRI": "{{vars.input.records[0]['@id']}}",
+                    "service": "",
+                    "filePath": "{{vars.item._source.image_path}}",
+                    "hostName": "{{vars.item._source.beat.hostname}}",
+                    "sourceIP": "null",
+                    "userName": "{{vars.item._source.username}}",
+                    "alertName": "ATT&CK-Compiled HTML-{{vars.item._source.image_path.split(\"\\\\\")[-1]}} spawned",
+                    "alertType": "{{\"AlertType\" | picklist(\"Signed Binary Proxy Execution\", \"@id\")}}",
+                    "epochTime": "{{arrow.get(vars.item._source.event_data.UtcTime).timestamp}}",
+                    "eventName": "",
+                    "eventTime": "{{vars.item._source.event_data.UtcTime}}",
+                    "processID": "{{vars.item._source.event_data.ProcessId}}",
+                    "technique": "Compiled HTML",
+                    "sourceData": "{{vars.item}}",
+                    "sourceTool": "{{vars.item._source.source_name}}",
+                    "commandline": "{{vars.item._source.event_data.CommandLine}}",
+                    "description": "An attempt by hh.exe to spawn a process was observed. Hh.exe can be used to execute compiled HTML (.chm) files. An adversary could craft a custom malicious .chm file and trick a user into executing it, potentially infecting the host. Any process spawned by hh.exe should be analyzed for malicious activity.",
+                    "processGUID": "{{vars.item._source.event_data.ProcessGuid}}",
+                    "processName": "{{vars.item._source.image_path.split(\"\\\\\")[-1] }}",
+                    "registryKey": "",
+                    "sourceImage": "",
+                    "targetImage": "",
+                    "computerName": "{{vars.item._source.computer_name}}",
+                    "destinationIP": "null",
+                    "mitre_tech_id": "T1218.001",
+                    "parentProcess": "{{vars.item._source.parent_image_path}}",
+                    "scheduledTask": "",
+                    "bitstransferid": "",
+                    "parentProcessID": "{{vars.item._source.event_data.ParentProcessId}}",
+                    "bytestransferred": "",
+                    "registryKeyValue": "",
+                    "parentCommandLine": "{{vars.item._source.event_data.ParentCommandLine}}",
+                    "decodedCommandLine": ""
+                },
+                "apply_async": false,
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/bf7d418b-7ff3-44c1-b473-90d0a03c4641"
+            },
+            "status": null,
+            "top": "190",
+            "left": "1750",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "cca624f5-4c7e-4904-9dc8-5d320f99b898",
+            "id": 4756
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Create Splunk Alerts",
+            "description": null,
+            "arguments": {
+                "for_each": {
+                    "item": "{{vars.steps.Get_Results_for_Sysmon_Compiled_HTML.data.results}}",
+                    "parallel": false,
+                    "condition": ""
+                },
+                "arguments": {
+                    "MD5": "{{vars.item.MD5}}",
+                    "url": "",
+                    "source": "{{vars.item.EventChannel}}",
+                    "comment": "SIEM query identified a Compiled HTML file spawning child process {{vars.item.process_exec}} on {{vars.item.host}} at {{vars.item.UtcTime}}.",
+                    "huntIRI": "{{vars.input.records[0]['@id']}}",
+                    "service": "",
+                    "filePath": "{{vars.item.Image}}",
+                    "hostName": "{{vars.item.host}}",
+                    "sourceIP": "",
+                    "userName": "{{vars.item.User}}",
+                    "alertName": "ATT&CK-Compiled HTML-{{vars.item.process_exec}} spawned",
+                    "alertType": "{{\"AlertType\" | picklist(\"Signed Binary Proxy Execution\", \"@id\")}}",
+                    "epochTime": "{{ arrow.get(vars.item.UtcTime).timestamp }}",
+                    "eventName": "",
+                    "eventTime": "{{vars.item.UtcTime}}",
+                    "processID": "{{vars.item.ProcessId}}",
+                    "technique": "Compiled HTML",
+                    "sourceData": "{{vars.item}}",
+                    "sourceTool": "{{vars.item.EventChannel}}",
+                    "commandline": "{{vars.item.CommandLine}}",
+                    "description": "An attempt by hh.exe to spawn a process was observed. Hh.exe can be used to execute compiled HTML (.chm) files. An adversary could craft a custom malicious .chm file and trick a user into executing it, potentially infecting the host. Any process spawned by hh.exe should be analyzed for malicious activity.",
+                    "processGUID": "{{vars.item.ProcessGuid}}",
+                    "processName": "{{vars.item.process_exec}}",
+                    "registryKey": "",
+                    "sourceImage": "",
+                    "targetImage": "",
+                    "computerName": "{{vars.item.Computer}}",
+                    "destinationIP": "",
+                    "mitre_tech_id": "T1223",
+                    "parentProcess": "{{vars.item.ParentImage}}",
+                    "scheduledTask": "",
+                    "bitstransferid": "",
+                    "parentProcessID": "{{vars.item.ParentProcessId}}",
+                    "bytestransferred": "",
+                    "registryKeyValue": "",
+                    "parentCommandLine": "{{vars.item.ParentCommandLine}}",
+                    "decodedCommandLine": ""
+                },
+                "apply_async": false,
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/bf7d418b-7ff3-44c1-b473-90d0a03c4641"
+            },
+            "status": null,
+            "top": "30",
+            "left": "1750",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "a7f58a49-4c60-4e3a-971e-45710d769737",
+            "id": 4757
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Deduplicate Comments",
+            "description": null,
+            "arguments": {
+                "arguments": {
+                    "hunt_iri": "{{vars.input.records[0]['@id']}}"
+                },
+                "step_variables": [],
+                "workflowReference": "\/api\/3\/workflows\/3fd311be-a1c6-41c7-99a3-8794b33d8f8a"
+            },
+            "status": null,
+            "top": "110",
+            "left": "2075",
+            "stepType": "\/api\/3\/workflow_step_types\/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
+            "uuid": "96ac4241-2058-49e4-952a-c5f1729a85c5",
+            "id": 4758
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Elastic Query for Sysmon Compiled HTML",
+            "description": null,
+            "arguments": {
+                "name": "ElasticSearch",
+                "config": "8d03a01d-1cef-40a8-992a-63d8de2b339f",
+                "params": {
+                    "index": "logstash-beats-*",
+                    "query": "event_type:sysmon AND event_id:\"1\" AND @timestamp:{ {{vars.elasticHuntStart}} TO {{vars.elasticHuntEnd}} } AND parent_image_path:\"C:\\\\windows\\\\hh.exe\"",
+                    "run_as_user": ""
+                },
+                "version": "2.2.1",
+                "connector": "elasticsearch",
+                "operation": "execute_lucene_query",
+                "mock_result": "{\n  \"data\": {\n    \"hits\": {\n      \"hits\": [\n        {\n          \"_id\": \"HgnpT2oBqSmy6R6grirH\",\n          \"_type\": \"doc\",\n          \"_index\": \"logstash-beats-compiledhtml\",\n          \"_score\": 2.7292862,\n          \"_source\": {\n            \"beat\": {\n              \"name\": \"admin-PC4\",\n              \"version\": \"6.5.3\",\n              \"hostname\": \"admin-PC4\"\n            },\n            \"tags\": [\n              \"beat\",\n              \"beats_input_codec_plain_applied\"\n            ],\n            \"task\": \"Process Create (rule: ProcessCreate)\",\n            \"user\": {\n              \"name\": \"SYSTEM\",\n              \"type\": \"User\",\n              \"domain\": \"NT AUTHORITY\",\n              \"identifier\": \"S-1-5-18\"\n            },\n            \"level\": \"Information\",\n            \"opcode\": \"Info\",\n            \"message\": \"Process Create:\\nRuleName: \\nUtcTime: 2019-04-24 15:11:22.359\\nProcessGuid: {D1BE7B41-7C9A-5CC0-0000-00100883E809}\\nProcessId: 1160\\nImage: C:\\\\Users\\\\superman\\\\Desktop\\\\x64\\\\mimikatz.exe\\nFileVersion: 2.1.1.0\\nDescription: mimikatz for Windows\\nProduct: mimikatz\\nCompany: gentilkiwi (Benjamin DELPY)\\nCommandLine: \\\"C:\\\\Users\\\\superman\\\\Desktop\\\\x64\\\\mimikatz.exe\\\" \\nCurrentDirectory: C:\\\\Users\\\\superman\\\\Desktop\\\\threat emulation\\\\\\nUser: batman\\\\superman\\nLogonGuid: {D1BE7B41-F352-5CB9-0000-00208C590300}\\nLogonId: 0x3598c\\nTerminalSessionId: 1\\nIntegrityLevel: High\\nHashes: MD5=332A5371389A8953A96BF09B69EDCB6E,SHA256=E46BA4BDD4168A399EE5BC2161A8C918095FA30EB20AC88CAC6AB1D6DBEA2B4A\\nParentProcessGuid: {D1BE7B41-7C9A-5CC0-0000-00106D6DE809}\\nParentProcessId: 2168\\nParentImage: C:\\\\Windows\\\\hh.exe\\nParentCommandLine: \\\"C:\\\\Windows\\\\hh.exe\\\" C:\\\\Users\\\\superman\\\\Desktop\\\\threat emulation\\\\test.chm\",\n            \"version\": 5,\n            \"@version\": \"1\",\n            \"event_id\": 1,\n            \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n            \"username\": \"batman\\\\superman\",\n            \"beat_host\": {\n              \"id\": \"d1be7b41-2fc5-49e3-9ff1-ec91443d27c3\",\n              \"os\": {\n                \"build\": \"7601.0\",\n                \"family\": \"windows\",\n                \"version\": \"6.1\",\n                \"platform\": \"windows\"\n              },\n              \"name\": \"admin-PC4\",\n              \"architecture\": \"x86_64\"\n            },\n            \"thread_id\": 1920,\n            \"@timestamp\": \"2019-04-24T15:11:22.453Z\",\n            \"event_data\": {\n              \"Hashes\": \"MD5=332A5371389A8953A96BF09B69EDCB6E,SHA256=E46BA4BDD4168A399EE5BC2161A8C918095FA30EB20AC88CAC6AB1D6DBEA2B4A\",\n              \"Company\": \"gentilkiwi (Benjamin DELPY)\",\n              \"LogonId\": \"0x3598c\",\n              \"Product\": \"mimikatz\",\n              \"UtcTime\": \"2019-04-24 15:11:22.359\",\n              \"LogonGuid\": \"{D1BE7B41-F352-5CB9-0000-00208C590300}\",\n              \"ProcessId\": \"1160\",\n              \"CommandLine\": \"\\\"C:\\\\Users\\\\superman\\\\Desktop\\\\x64\\\\mimikatz.exe\\\" \",\n              \"Description\": \"mimikatz for Windows\",\n              \"FileVersion\": \"2.1.1.0\",\n              \"ProcessGuid\": \"{D1BE7B41-7C9A-5CC0-0000-00100883E809}\",\n              \"IntegrityLevel\": \"High\",\n              \"ParentProcessId\": \"2168\",\n              \"CurrentDirectory\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\threat emulation\\\\\",\n              \"ParentCommandLine\": \"\\\"C:\\\\Windows\\\\hh.exe\\\" C:\\\\Users\\\\superman\\\\Desktop\\\\threat emulation\\\\test.chm\",\n              \"ParentProcessGuid\": \"{D1BE7B41-7C9A-5CC0-0000-00106D6DE809}\",\n              \"TerminalSessionId\": \"1\"\n            },\n            \"event_type\": \"sysmon\",\n            \"image_path\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\x64\\\\mimikatz.exe\",\n            \"process_id\": 1420,\n            \"source_name\": \"Microsoft-Windows-Sysmon\",\n            \"computer_name\": \"admin-PC4.batman.local\",\n            \"logstash_time\": 0.0008568763732910156,\n            \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n            \"record_number\": \"335366\",\n            \"parent_image_path\": \"C:\\\\Windows\\\\hh.exe\"\n          }\n        },\n        {\n          \"_id\": \"GgnnT2oBqSmy6R6gvydG\",\n          \"_type\": \"doc\",\n          \"_index\": \"logstash-beats-compiledhtml\",\n          \"_score\": 2.7292862,\n          \"_source\": {\n            \"beat\": {\n              \"name\": \"admin-PC4\",\n              \"version\": \"6.5.3\",\n              \"hostname\": \"admin-PC4\"\n            },\n            \"tags\": [\n              \"beat\",\n              \"beats_input_codec_plain_applied\"\n            ],\n            \"task\": \"Process Create (rule: ProcessCreate)\",\n            \"user\": {\n              \"name\": \"SYSTEM\",\n              \"type\": \"User\",\n              \"domain\": \"NT AUTHORITY\",\n              \"identifier\": \"S-1-5-18\"\n            },\n            \"level\": \"Information\",\n            \"opcode\": \"Info\",\n            \"message\": \"Process Create:\\nRuleName: \\nUtcTime: 2019-04-24 18:09:23.753\\nProcessGuid: {D1BE7B41-A653-5CC0-0000-00107D78E709}\\nProcessId: 2892\\nImage: C:\\\\Users\\\\superman\\\\Desktop\\\\x64\\\\mimikatz.exe\\nFileVersion: 2.1.1.0\\nDescription: mimikatz for Windows\\nProduct: mimikatz\\nCompany: gentilkiwi (Benjamin DELPY)\\nCommandLine: \\\"C:\\\\Users\\\\superman\\\\Desktop\\\\x64\\\\mimikatz.exe\\\" \\nCurrentDirectory: C:\\\\Users\\\\superman\\\\Desktop\\\\threat emulation\\\\\\nUser: batman\\\\superman\\nLogonGuid: {D1BE7B41-F352-5CB9-0000-00208C590300}\\nLogonId: 0x3598c\\nTerminalSessionId: 1\\nIntegrityLevel: High\\nHashes: MD5=332A5371389A8953A96BF09B69EDCB6E,SHA256=E46BA4BDD4168A399EE5BC2161A8C918095FA30EB20AC88CAC6AB1D6DBEA2B4A\\nParentProcessGuid: {D1BE7B41-A653-5CC0-0000-00106D5DE709}\\nParentProcessId: 2876\\nParentImage: C:\\\\Windows\\\\hh.exe\\nParentCommandLine: \\\"C:\\\\Windows\\\\hh.exe\\\" C:\\\\Users\\\\superman\\\\Desktop\\\\threat emulation\\\\test.chm\",\n            \"version\": 5,\n            \"@version\": \"1\",\n            \"event_id\": 1,\n            \"log_name\": \"Microsoft-Windows-Sysmon\/Operational\",\n            \"username\": \"batman\\\\superman\",\n            \"beat_host\": {\n              \"id\": \"d1be7b41-2fc5-49e3-9ff1-ec91443d27c3\",\n              \"os\": {\n                \"build\": \"7601.0\",\n                \"family\": \"windows\",\n                \"version\": \"6.1\",\n                \"platform\": \"windows\"\n              },\n              \"name\": \"admin-PC4\",\n              \"architecture\": \"x86_64\"\n            },\n            \"thread_id\": 1920,\n            \"@timestamp\": \"2019-04-24T18:09:23.878Z\",\n            \"event_data\": {\n              \"Hashes\": \"MD5=332A5371389A8953A96BF09B69EDCB6E,SHA256=E46BA4BDD4168A399EE5BC2161A8C918095FA30EB20AC88CAC6AB1D6DBEA2B4A\",\n              \"Company\": \"gentilkiwi (Benjamin DELPY)\",\n              \"LogonId\": \"0x3598c\",\n              \"Product\": \"mimikatz\",\n              \"UtcTime\": \"2019-04-24 18:09:23.753\",\n              \"LogonGuid\": \"{D1BE7B41-F352-5CB9-0000-00208C590300}\",\n              \"ProcessId\": \"2892\",\n              \"CommandLine\": \"\\\"C:\\\\Users\\\\superman\\\\Desktop\\\\x64\\\\mimikatz.exe\\\" \",\n              \"Description\": \"mimikatz for Windows\",\n              \"FileVersion\": \"2.1.1.0\",\n              \"ProcessGuid\": \"{D1BE7B41-A653-5CC0-0000-00107D78E709}\",\n              \"IntegrityLevel\": \"High\",\n              \"ParentProcessId\": \"2876\",\n              \"CurrentDirectory\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\threat emulation\\\\\",\n              \"ParentCommandLine\": \"\\\"C:\\\\Windows\\\\hh.exe\\\" C:\\\\Users\\\\superman\\\\Desktop\\\\threat emulation\\\\test.chm\",\n              \"ParentProcessGuid\": \"{D1BE7B41-A653-5CC0-0000-00106D5DE709}\",\n              \"TerminalSessionId\": \"1\"\n            },\n            \"event_type\": \"sysmon\",\n            \"image_path\": \"C:\\\\Users\\\\superman\\\\Desktop\\\\x64\\\\mimikatz.exe\",\n            \"process_id\": 1420,\n            \"source_name\": \"Microsoft-Windows-Sysmon\",\n            \"computer_name\": \"admin-PC4.batman.local\",\n            \"logstash_time\": 0.0005850791931152344,\n            \"provider_guid\": \"{5770385F-C22A-43E0-BF4C-06F5698FFBD9}\",\n            \"record_number\": \"335357\",\n            \"parent_image_path\": \"C:\\\\Windows\\\\hh.exe\"\n          }\n        }\n      ],\n      \"total\": {\n        \"value\": 2,\n        \"relation\": \"eq\"\n      },\n      \"max_score\": 2.7292862\n    },\n    \"took\": 656,\n    \"_shards\": {\n      \"total\": 95,\n      \"failed\": 0,\n      \"skipped\": 0,\n      \"successful\": 95\n    },\n    \"timed_out\": false\n  },\n  \"status\": \"Success\",\n  \"message\": \"\",\n  \"operation\": null\n}",
+                "operationTitle": "Execute Lucene Query",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "190",
+            "left": "1425",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "117b8955-05d2-42d8-a5e4-c187d39cf88f",
+            "id": 4759
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Which SIEM",
+            "description": null,
+            "arguments": {
+                "conditions": [
+                    {
+                        "step_iri": "\/api\/3\/workflow_steps\/7f9f8bd3-6ee8-4d87-a87b-34f7f2dbba34",
+                        "condition": "{{ vars.input.params.siem.itemValue == \"Elastic\" }}"
+                    },
+                    {
+                        "step_iri": "\/api\/3\/workflow_steps\/8bcd0f0f-cf81-4a4e-bb5f-b69d8111802f",
+                        "condition": "{{ vars.input.params.siem.itemValue == \"Splunk\" }}"
+                    }
+                ]
+            },
+            "status": null,
+            "top": "110",
+            "left": "450",
+            "stepType": "\/api\/3\/workflow_step_types\/12254cf5-5db7-4b1a-8cb1-3af081924b28",
+            "uuid": "575df749-1c79-403a-bc83-dc77128405ac",
+            "id": 4760
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Set Elastic hunt times",
+            "description": null,
+            "arguments": {
+                "elasticHuntEnd": "{% if vars.input.records[0].huntEnd %} {{ arrow.get(vars.input.records[0].huntEnd).format('YYYY-MM-DDTHH:mm:ss.SSSSSSSSSZ') }} {% else %} now {% endif %}",
+                "elasticHuntStart": "{{ arrow.get(vars.input.records[0].huntStart).format('YYYY-MM-DDTHH:mm:ss.SSSSSSSSSZ') }}"
+            },
+            "status": null,
+            "top": "190",
+            "left": "1100",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "7f9f8bd3-6ee8-4d87-a87b-34f7f2dbba34",
+            "id": 4761
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Get Results for Sysmon Compiled HTML",
+            "description": null,
+            "arguments": {
+                "name": "Splunk",
+                "config": "55bf97af-75c2-45ca-ae75-f4d27220cc52",
+                "params": {
+                    "sid": "{\"value\": \"{{vars.steps.Splunk_Query_for_Sysmon_Compiled_HTML.data.sid}}\"}",
+                    "additional_args": "{\"a\":\"b\"}"
+                },
+                "version": "1.4.0",
+                "do_until": {
+                    "delay": "1",
+                    "retries": "300",
+                    "condition": "{{\"results\" in vars.result.data}}"
+                },
+                "connector": "splunk",
+                "operation": "get_results",
+                "operationTitle": "Get Results for a Search",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "30",
+            "left": "1425",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "dcae5f1e-7996-4e15-a7c2-a600dcd7bbb8",
+            "id": 4762
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Splunk Query for Sysmon Compiled HTML",
+            "description": null,
+            "arguments": {
+                "name": "Splunk",
+                "config": "55bf97af-75c2-45ca-ae75-f4d27220cc52",
+                "params": {
+                    "query": "index=\"sysmon\" EventCode=1 {{vars.splunkHuntStart}} {{vars.splunkHuntEnd}} ParentImage=\"C:\\\\windows\\\\hh.exe\" | table host Image MD5 ParentImage User CommandLine process_exec vendor_product TimeCreated ParentProcessId ProcessId ParentCommandLine ProcessGuid UtcTime EventChannel Computer",
+                    "exec_mode": "",
+                    "auto_cancel": "",
+                    "latest_time": "",
+                    "earliest_time": "",
+                    "additional_search_args": "{\"a\":\"B\"}"
+                },
+                "version": "1.5.0",
+                "connector": "splunk",
+                "operation": "invoke_search",
+                "operationTitle": "Invoke Search",
+                "step_variables": []
+            },
+            "status": null,
+            "top": "30",
+            "left": "1100",
+            "stepType": "\/api\/3\/workflow_step_types\/0bfed618-0316-11e7-93ae-92361f002671",
+            "uuid": "620923e6-7501-485f-99c2-ceb3b417f17c",
+            "id": 4763
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Hunt for Compiled HTML File",
+            "description": null,
+            "arguments": {
+                "route": "b1b93ce9-378e-4b6b-8cc7-c79e79683959",
+                "title": "T1218.001 - Hunt for Compiled HTML File",
+                "resources": [
+                    "hunt"
+                ],
+                "inputVariables": [
+                    {
+                        "name": "siem",
+                        "type": "picklists",
+                        "label": "SIEM",
+                        "title": "Picklist",
+                        "usable": true,
+                        "tooltip": "Choose your SIEM",
+                        "dataType": "picklist",
+                        "formType": "picklist",
+                        "required": true,
+                        "_expanded": true,
+                        "mmdUpdate": true,
+                        "collection": false,
+                        "dataSource": {
+                            "model": "picklists",
+                            "query": {
+                                "sort": [
+                                    {
+                                        "field": "orderIndex",
+                                        "direction": "ASC"
+                                    }
+                                ],
+                                "logic": "AND",
+                                "filters": [
+                                    {
+                                        "field": "listName__name",
+                                        "value": "SIEMs",
+                                        "operator": "eq"
+                                    }
+                                ]
+                            },
+                            "displayConditions": {
+                                "876c1483-416b-4d2f-8138-15769ae16d5c": {
+                                    "conditions": null,
+                                    "visibility": "visible"
+                                },
+                                "bcebcab1-3f93-468a-9f3f-91e5c511a0b5": {
+                                    "conditions": null,
+                                    "visibility": "visible"
+                                }
+                            }
+                        },
+                        "searchable": false,
+                        "templateUrl": "app\/components\/form\/fields\/typeahead.html",
+                        "_nameTouched": true,
+                        "defaultValue": {
+                            "id": 280,
+                            "@id": "\/api\/3\/picklists\/876c1483-416b-4d2f-8138-15769ae16d5c",
+                            "icon": null,
+                            "@type": "Picklist",
+                            "color": null,
+                            "display": "Elastic",
+                            "listName": "\/api\/3\/picklist_names\/98830189-afff-40e6-bed1-94012551dc67",
+                            "itemValue": "Elastic",
+                            "orderIndex": 1
+                        },
+                        "displayTemplate": "{{ itemValue }}",
+                        "lengthConstraint": false,
+                        "allowedEncryption": false,
+                        "allowedGridColumn": true,
+                        "useRecordFieldDefault": false
+                    }
+                ],
+                "step_variables": {
+                    "input": {
+                        "params": {
+                            "siem": "{{vars.request.data[\"siem\"]}}"
+                        },
+                        "records": "{{vars.input.records}}"
+                    },
+                    "useMockOutput": "{{globalVars.Demo_mode}}"
+                },
+                "_promptexpanded": true,
+                "displayConditions": {
+                    "hunt": {
+                        "sort": [],
+                        "limit": 30,
+                        "logic": "AND",
+                        "filters": []
+                    },
+                    "alerts": {
+                        "sort": [],
+                        "limit": 30,
+                        "logic": "AND",
+                        "filters": []
+                    }
+                },
+                "executeButtonText": "Execute",
+                "noRecordExecution": false,
+                "singleRecordExecution": false
+            },
+            "status": null,
+            "top": "110",
+            "left": "125",
+            "stepType": "\/api\/3\/workflow_step_types\/f414d039-bb0d-4e59-9c39-a8f1e880b18a",
+            "uuid": "c99ab208-317c-4da6-8a32-2bfe5dbf4915",
+            "id": 4764
+        },
+        {
+            "@type": "WorkflowStep",
+            "name": "Set Splunk hunt times",
+            "description": null,
+            "arguments": {
+                "splunkHuntEnd": "{% if vars.input.records[0].huntEnd %}latest={{vars.input.records[0].huntEnd}}{% endif %}",
+                "splunkHuntStart": "earliest={{vars.input.records[0].huntStart}}"
+            },
+            "status": null,
+            "top": "30",
+            "left": "775",
+            "stepType": "\/api\/3\/workflow_step_types\/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+            "uuid": "8bcd0f0f-cf81-4a4e-bb5f-b69d8111802f",
+            "id": 4765
+        }
+    ],
+    "routes": [
+        {
+            "@type": "WorkflowRoute",
+            "name": "Splunk Query for Sysmon Compiled HTML -> Get Results for Sysmon Compiled HTML",
+            "targetStep": "\/api\/3\/workflow_steps\/dcae5f1e-7996-4e15-a7c2-a600dcd7bbb8",
+            "sourceStep": "\/api\/3\/workflow_steps\/620923e6-7501-485f-99c2-ceb3b417f17c",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "dee70e51-1c9f-497d-a853-14ac1a42bfea"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Create Splunk Alerts -> Deduplicate Comments",
+            "targetStep": "\/api\/3\/workflow_steps\/96ac4241-2058-49e4-952a-c5f1729a85c5",
+            "sourceStep": "\/api\/3\/workflow_steps\/a7f58a49-4c60-4e3a-971e-45710d769737",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "ede508b7-d1aa-4aa9-b157-f2c8f9580667"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Which SIEM -> Set Splunk hunt times",
+            "targetStep": "\/api\/3\/workflow_steps\/8bcd0f0f-cf81-4a4e-bb5f-b69d8111802f",
+            "sourceStep": "\/api\/3\/workflow_steps\/575df749-1c79-403a-bc83-dc77128405ac",
+            "label": "",
+            "isExecuted": false,
+            "uuid": "c7a2d6ee-b65b-4cfe-93ca-f36c36120a45"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Set Splunk hunt times -> Splunk Query for Sysmon Compiled HTML",
+            "targetStep": "\/api\/3\/workflow_steps\/620923e6-7501-485f-99c2-ceb3b417f17c",
+            "sourceStep": "\/api\/3\/workflow_steps\/8bcd0f0f-cf81-4a4e-bb5f-b69d8111802f",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "5ad2bfe6-dcba-47e4-ae2b-b9a76f397cce"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Copy  of Create Splunk Alerts -> Deduplicate Comments",
+            "targetStep": "\/api\/3\/workflow_steps\/96ac4241-2058-49e4-952a-c5f1729a85c5",
+            "sourceStep": "\/api\/3\/workflow_steps\/cca624f5-4c7e-4904-9dc8-5d320f99b898",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "f46280ad-9d5f-46b0-9dd3-057a6287d510"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Which SIEM -> Copy  of Set Splunk hunt times",
+            "targetStep": "\/api\/3\/workflow_steps\/7f9f8bd3-6ee8-4d87-a87b-34f7f2dbba34",
+            "sourceStep": "\/api\/3\/workflow_steps\/575df749-1c79-403a-bc83-dc77128405ac",
+            "label": "",
+            "isExecuted": false,
+            "uuid": "48df2eca-2f46-467a-ba2d-5e6bb603cca0"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Elastic Query for Sysmon Compiled HTML -> Copy  of Create Splunk Alerts",
+            "targetStep": "\/api\/3\/workflow_steps\/cca624f5-4c7e-4904-9dc8-5d320f99b898",
+            "sourceStep": "\/api\/3\/workflow_steps\/117b8955-05d2-42d8-a5e4-c187d39cf88f",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "97121c2d-0ac4-4a87-b009-0b2c25f803e7"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Set Elastic hunt times -> Elastic Query for Sysmon Compiled HTML",
+            "targetStep": "\/api\/3\/workflow_steps\/117b8955-05d2-42d8-a5e4-c187d39cf88f",
+            "sourceStep": "\/api\/3\/workflow_steps\/7f9f8bd3-6ee8-4d87-a87b-34f7f2dbba34",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "bacc37ae-a9ac-49b5-992d-2ea38ede56b2"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Hunt for Compiled HTML -> Which SIEM",
+            "targetStep": "\/api\/3\/workflow_steps\/575df749-1c79-403a-bc83-dc77128405ac",
+            "sourceStep": "\/api\/3\/workflow_steps\/c99ab208-317c-4da6-8a32-2bfe5dbf4915",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "c47fe396-5e65-4ce3-ba3d-38bc457dcf9a"
+        },
+        {
+            "@type": "WorkflowRoute",
+            "name": "Get Results for Sysmon Compiled HTML -> Create Splunk Alerts",
+            "targetStep": "\/api\/3\/workflow_steps\/a7f58a49-4c60-4e3a-971e-45710d769737",
+            "sourceStep": "\/api\/3\/workflow_steps\/dcae5f1e-7996-4e15-a7c2-a600dcd7bbb8",
+            "label": null,
+            "isExecuted": false,
+            "uuid": "2f56e9c3-327e-432e-b6e3-0decea647220"
+        }
+    ],
+    "priority": null,
+    "uuid": "210b92ea-4286-429a-8bf2-9c55ac1e2999",
+    "recordTags": [
+        "ManualTrigger"
+    ],
+    "id": 1148,
+    "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "createDate": 1644165547,
+    "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+    "modifyDate": 1644165547,
+    "owners": [],
+    "isPrivate": false
+}
