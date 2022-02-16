@@ -1,42 +1,58 @@
 {
-    "name": "mITREATT&CKThreatHunting",
+    "name": "mITREATTACKThreatHunting",
     "version": "1.0.0",
     "type": "solutionpack",
-    "local": true,
-    "label": "MITRE ATT&CK Threat Hunting",
+    "local": false,
+    "label": "MITRE ATTACK Threat Hunting",
     "dependencies": [
         {
             "name": "fortiSOAREssentials",
             "type": "solutionpack",
-            "label": "FortiSOAR Essentials"
+            "label": "FortiSOAR Essentials",
+            "version": "1.0.0",
+            "minVersion": null
         },
         {
             "name": "socSimulator",
             "type": "solutionpack",
-            "label": "SOC Simulator"
+            "label": "SOC Simulator",
+            "version": "1.0.0",
+            "minVersion": null
+        },
+        {
+            "name": "mITREATTACKEnrichmentFramework",
+            "type": "solutionpack",
+            "label": "MITRE ATTACK Enrichment Framework",
+            "version": "2.0.2",
+            "minVersion": null
         }
     ],
     "prerequisite": [
-        "Deploy Incident Response Solution Pack",
-        "Deploy SOC Simulator Solution Pack",
         "Ensure that SOC Simulator connector is configured",
-        "Deploy MITRE ATT&CK Solution Pack",
         "Ensure that MITRE ATT&CK Connector is configured",
-        "Ensure that MITRE ingestion is done"
+        "Ensure that MITRE data ingestion is configured"
     ],
     "category": [],
     "publisher": "Fortinet",
     "description": "The solution pack demonstrates users a variety of scenarios and use cases around threat hunting based on using the information provided by the MITRE ATT&CK Framework.",
     "supportInfo": "support@fortinet.com",
-    "help":"https://github.com/fortinet-fortisoar/solution-pack-mitre-attack-threat-hunting",
+    "help":"https://github.com/fortinet-fortisoar/solution-pack-mitre-attack-threat-hunting/blob/develop/README.md",
     "tags": [],
     "fsrMinCompatibility": "7.2.0",
-    "date": "2022-02-09T19:25:29+00:00",
-    "exported_from": "master.fortisoar.com",
+    "date": "2022-02-16T19:22:10+00:00",
+    "exported_from": "tenant.fortisoar.com",
     "exported_by": "CS Admin",
     "contents": {
+        "picklistNames": [
+            {
+                "name": "AlertType"
+            }
+        ],
         "modules": {
-            "scenario": []
+            "scenario": {
+                "name": "Scenario",
+                "apiName": "scenario"
+            }
         },
         "viewTemplates": {
             "scenario": [
@@ -77,9 +93,24 @@
                 "name": "04 - Use Case - MITRE ATT&CK\u2122 - System Services"
             }
         ],
+        "globalVariables": [
+            {
+                "id": 14,
+                "name": "Demo_mode",
+                "value": "true",
+                "default_value": "true"
+            },
+            {
+                "id": 18,
+                "name": "mitre_version",
+                "value": "10.1",
+                "default_value": "9.0"
+            }
+        ],
         "connectors": [
             {
-                "name": "elasticsearch",
+                "name": "ElasticSearch",
+                "apiName": "elasticsearch",
                 "version": "2.2.1"
             }
         ],
