@@ -6,9 +6,9 @@
     "label": "MITRE ATTACK Threat Hunting",
     "dependencies": [
         {
-            "name": "fortiSOAREssentials",
+            "name": "sOARFramework",
             "type": "solutionpack",
-            "label": "FortiSOAR Essentials",
+            "label": "SOAR Framework",
             "version": "1.0.0",
             "minVersion": null
         },
