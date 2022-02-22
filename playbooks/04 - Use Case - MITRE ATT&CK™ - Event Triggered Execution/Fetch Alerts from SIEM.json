@@ -336,6 +336,8 @@
     "priority": "\/api\/3\/picklists\/2b563c61-ae2c-41c0-a85a-c9709585e3f2",
     "uuid": "27b1c8f5-3548-437e-b3dc-d8b19b988781",
     "recordTags": [
+        "FSRSolutionPack",
+        "mITREATTACKThreatHunting-1.0.0",
         "Referenced"
     ],
     "id": 1121,

@@ -250,6 +250,8 @@
     "priority": null,
     "uuid": "d81c9f18-da8b-44f0-bf8d-b6579d5bcb69",
     "recordTags": [
+        "FSRSolutionPack",
+        "mITREATTACKThreatHunting-1.0.0",
         "PostUpdate"
     ],
     "id": 1128,

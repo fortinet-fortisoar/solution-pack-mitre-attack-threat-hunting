@@ -11,5 +11,7 @@
     "createDate": 1644165543,
     "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
     "modifyDate": 1644572462,
-    "recordTags": []
+    "recordTags": [    "FSRSolutionPack",
+        "mITREATTACKThreatHunting-1.0.0"
+    ]
 }
