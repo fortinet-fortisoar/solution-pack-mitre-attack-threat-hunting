@@ -608,7 +608,10 @@
     ],
     "priority": null,
     "uuid": "5e4d1f4a-b109-40d3-9d36-4ff6de69b4ca",
-    "recordTags": [],
+    "recordTags": [
+        "FSRSolutionPack",
+        "mITREATTACKThreatHunting-1.0.0"
+    ],
     "id": 1134,
     "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
     "createDate": 1644165546,
