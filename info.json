@@ -1,9 +1,9 @@
 {
-    "name": "mITREATTACKThreatHunting",
+    "name": "mITREATT&CKThreatHunting",
     "version": "1.0.0",
     "type": "solutionpack",
     "local": false,
-    "label": "MITRE ATTACK Threat Hunting",
+    "label": "MITRE ATT&CK Threat Hunting",
     "dependencies": [
         {
             "name": "sOARFramework",
@@ -20,9 +20,9 @@
             "minVersion": null
         },
         {
-            "name": "mITREATTACKEnrichmentFramework",
+            "name": "mITREATT&CKEnrichmentFramework",
             "type": "solutionpack",
-            "label": "MITRE ATTACK Enrichment Framework",
+            "label": "MITRE ATT&CK Enrichment Framework",
             "version": "2.0.2",
             "minVersion": null
         }
