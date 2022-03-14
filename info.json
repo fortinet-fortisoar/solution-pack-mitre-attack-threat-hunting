@@ -2,7 +2,7 @@
     "name": "mITREATT&CKThreatHunting",
     "version": "1.0.0",
     "type": "solutionpack",
-    "local": false,
+    "local": true,
     "label": "MITRE ATT&CK Threat Hunting",
     "dependencies": [
         {
@@ -27,20 +27,14 @@
             "minVersion": null
         }
     ],
-    "prerequisite": [
-        "Ensure that SOC Simulator connector is configured",
-        "Ensure that MITRE ATT&CK Connector is configured",
-        "Ensure that MITRE data ingestion is configured"
-    ],
+    "prerequisite": "* Ensure that SOC Simulator connector is configured\n* Ensure that MITRE ATT&CK Connector as well as data ingestion is configured",
     "category": [],
     "certified": "true",
     "publisher": "Fortinet",
     "description": "The solution pack demonstrates users a variety of scenarios and use cases around threat hunting based on using the information provided by the MITRE ATT&CK Framework.",
-    "summary": null,
     "supportInfo": "support@fortinet.com",
     "help": "https:\/\/github.com\/fortinet-fortisoar\/solution-pack-mitre-attack-threat-hunting\/blob\/develop\/README.md",
     "iconLarge": null,
-    "recordTags": [],
     "fsrMinCompatibility": "7.2.0",
     "date": "2022-02-16T19:22:10+00:00",
     "exported_from": "tenant.fortisoar.com",
@@ -51,19 +45,6 @@
                 "name": "AlertType"
             }
         ],
-        "modules": {
-            "scenario": {
-                "name": "Scenario",
-                "apiName": "scenario"
-            }
-        },
-        "viewTemplates": {
-            "scenario": [
-                "list",
-                "detail",
-                "form"
-            ]
-        },
         "playbooks": [
             {
                 "name": "04 - Use Case - MITRE ATT&CK\u2122 - Access Token Manipulation"
@@ -98,7 +79,7 @@
         ],
         "globalVariables": [
             {
-                "id": 14,
+                "id": 16,
                 "name": "Demo_mode",
                 "value": "true",
                 "default_value": "true"
