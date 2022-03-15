@@ -696,8 +696,6 @@
     "priority": null,
     "uuid": "00e0fc49-d7c6-4a18-abcf-f9a7abaafce9",
     "recordTags": [
-        "FSRSolutionPack",
-        "mITREATT&CKThreatHunting-1.0.0",
         "ManualTrigger"
     ],
     "id": 1120,

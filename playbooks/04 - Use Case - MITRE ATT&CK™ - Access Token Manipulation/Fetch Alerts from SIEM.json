@@ -127,9 +127,7 @@
     "priority": "\/api\/3\/picklists\/2b563c61-ae2c-41c0-a85a-c9709585e3f2",
     "uuid": "7453fd94-9af3-414b-be96-546eff40b174",
     "recordTags": [
-        "Referenced",
-        "FSRSolutionPack",
-        "mITREATT&CKThreatHunting-1.0.0"
+        "Referenced"
     ],
     "id": 1106,
     "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
