@@ -47,34 +47,34 @@
         ],
         "playbooks": [
             {
-                "name": "04 - Use Case - MITRE ATT&CK\u2122 - Access Token Manipulation"
+                "name": "02 - Use Case - MITRE ATT&CK\u2122 - Access Token Manipulation"
             },
             {
-                "name": "04 - Use Case - MITRE ATT&CK\u2122 - Boot or Logon Autostart Execution"
+                "name": "02 - Use Case - MITRE ATT&CK\u2122 - Boot or Logon Autostart Execution"
             },
             {
-                "name": "04 - Use Case - MITRE ATT&CK\u2122 - Credential Access"
+                "name": "02 - Use Case - MITRE ATT&CK\u2122 - Credential Access"
             },
             {
-                "name": "04 - Use Case - MITRE ATT&CK\u2122 - Defense Evasion"
+                "name": "02 - Use Case - MITRE ATT&CK\u2122 - Defense Evasion"
             },
             {
-                "name": "04 - Use Case - MITRE ATT&CK\u2122 - Event Triggered Execution"
+                "name": "02 - Use Case - MITRE ATT&CK\u2122 - Event Triggered Execution"
             },
             {
-                "name": "04 - Use Case - MITRE ATT&CK\u2122 - Link Techniques to Alerts and Incidents"
+                "name": "02 - Use Case - MITRE ATT&CK\u2122 - Link Techniques to Alerts and Incidents"
             },
             {
-                "name": "04 - Use Case - MITRE ATT&CK\u2122 - Modulars"
+                "name": "02 - Use Case - MITRE ATT&CK\u2122 - Modulars"
             },
             {
-                "name": "04 - Use Case - MITRE ATT&CK\u2122 - Process Execution"
+                "name": "02 - Use Case - MITRE ATT&CK\u2122 - Process Execution"
             },
             {
-                "name": "04 - Use Case - MITRE ATT&CK\u2122 - Signed Binary Proxy Execution"
+                "name": "02 - Use Case - MITRE ATT&CK\u2122 - Signed Binary Proxy Execution"
             },
             {
-                "name": "04 - Use Case - MITRE ATT&CK\u2122 - System Services"
+                "name": "02 - Use Case - MITRE ATT&CK\u2122 - System Services"
             }
         ],
         "globalVariables": [

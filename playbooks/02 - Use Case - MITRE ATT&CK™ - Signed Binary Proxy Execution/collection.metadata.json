@@ -1,15 +1,15 @@
 {
     "@context": "\/api\/3\/contexts\/WorkflowCollection",
     "@type": "WorkflowCollection",
-    "name": "04 - Use Case - MITRE ATT&CK\u2122 - Access Token Manipulation",
+    "name": "02 - Use Case - MITRE ATT&CK\u2122 - Signed Binary Proxy Execution",
     "description": null,
     "visible": true,
     "image": null,
-    "uuid": "36a5df59-b132-4031-8c94-4fdd0d88e857",
-    "id": 90,
+    "uuid": "c926f317-8aba-41c5-8f71-2f0f23d992fb",
+    "id": 98,
     "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
-    "createDate": 1644165542,
+    "createDate": 1644165547,
     "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
-    "modifyDate": 1644572435,
+    "modifyDate": 1644572529,
     "recordTags": []
 }
