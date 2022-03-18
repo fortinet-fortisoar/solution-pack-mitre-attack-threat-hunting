@@ -1,7 +1,7 @@
 {
     "@context": "\/api\/3\/contexts\/WorkflowCollection",
     "@type": "WorkflowCollection",
-    "name": "04 - Use Case - MITRE ATT&CK\u2122 - System Services",
+    "name": "02 - Use Case - MITRE ATT&CK\u2122 - System Services",
     "description": "Playbooks designed to hunt System Services  Techniques identified in the MITRE ATT&CK Framework",
     "visible": true,
     "image": null,

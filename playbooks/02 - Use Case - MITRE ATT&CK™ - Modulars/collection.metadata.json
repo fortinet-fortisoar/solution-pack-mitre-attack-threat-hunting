@@ -1,15 +1,15 @@
 {
     "@context": "\/api\/3\/contexts\/WorkflowCollection",
     "@type": "WorkflowCollection",
-    "name": "04 - Use Case - MITRE ATT&CK\u2122 - Signed Binary Proxy Execution",
-    "description": null,
+    "name": "02 - Use Case - MITRE ATT&CK\u2122 - Modulars",
+    "description": "Modular Playbooks used by MITRE Hunt playbooks",
     "visible": true,
     "image": null,
-    "uuid": "c926f317-8aba-41c5-8f71-2f0f23d992fb",
-    "id": 98,
+    "uuid": "e1d97fae-bb76-4989-b4d2-a30b6109e91f",
+    "id": 96,
     "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
-    "createDate": 1644165547,
+    "createDate": 1644165546,
     "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
-    "modifyDate": 1644572529,
+    "modifyDate": 1644572507,
     "recordTags": []
 }
