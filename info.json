@@ -28,17 +28,15 @@
         }
     ],
     "prerequisite": "* Ensure that SOC Simulator connector is configured\n* Ensure that MITRE ATT&CK Connector as well as data ingestion is configured",
-    "category": [],
     "certified": "true",
     "publisher": "Fortinet",
-    "description": "The solution pack demonstrates users a variety of scenarios and use cases around threat hunting based on using the information provided by the MITRE ATT&CK Framework.",
-    "supportInfo": "support@fortinet.com",
-    "help": "https:\/\/github.com\/fortinet-fortisoar\/solution-pack-mitre-attack-threat-hunting\/blob\/develop\/README.md",
+    "description": "The solution pack demonstrates users a variety of scenarios based on data ingested from Elasticsearch as well as use cases around threat hunting based on using the information provided by the MITRE ATT&CK Framework. ",
+    "help": "https://github.com/fortinet-fortisoar/solution-pack-mitre-attack-threat-hunting/blob/develop/README.md",
+    "category": [],
+    "supportInfo": "Fortinet Customer Support",
     "iconLarge": null,
     "fsrMinCompatibility": "7.2.0",
     "date": "2022-02-16T19:22:10+00:00",
-    "exported_from": "tenant.fortisoar.com",
-    "exported_by": "CS Admin",
     "contents": {
         "picklistNames": [
             {
@@ -83,23 +81,20 @@
                 "name": "Demo_mode",
                 "value": "true",
                 "default_value": "true"
-            },
-            {
-                "id": 18,
-                "name": "mitre_version",
-                "value": "10.1",
-                "default_value": "9.0"
             }
         ],
         "connectors": [
             {
                 "name": "ElasticSearch",
-                "apiName": "elasticsearch",
-                "version": "2.2.1"
+                "apiName": "elasticsearch"
             }
         ],
-        "recordSets": {
-            "scenario": 7
-        }
+        "recordSets": [
+            {
+                "name": "Scenario",
+                "apiName": "scenario",
+                "count": 7
+            }
+        ]
     }
 }

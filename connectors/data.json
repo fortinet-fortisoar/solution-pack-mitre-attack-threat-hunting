@@ -5,7 +5,6 @@
         "category": "Database",
         "description": "ElasticSearch is a distributed, RESTful search and analytics engine capable of solving a number of use cases. This connector facilitates automated operations to execute lucene query, get mapping and cluster details.",
         "publisher": null,
-        "version": "2.2.1",
         "operation_roles": {
             "get_cluster_details": [],
             "get_mapping": [],
@@ -15,8 +14,6 @@
         },
         "configurations": [],
         "dataImports": [],
-        "rpm_name": "cyops-connector-elasticsearch-2.2.1",
-        "install_mode": "rpm",
-        "installer_path": "cyops-connector-elasticsearch-2.2.1"
+        "install_mode": "rpm"
     }
 ]
