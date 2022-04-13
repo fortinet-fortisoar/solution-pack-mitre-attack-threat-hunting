@@ -79,7 +79,7 @@
                     "mitreTechnique": "{{vars.steps.Find_Subtechnique[0].name}}",
                     "mitre_sub_techniques": "{{vars.steps.Find_Subtechnique[0]['@id']}}"
                 },
-                "_showJson": true,
+                "_showJson": false,
                 "operation": "Overwrite",
                 "collection": "{{vars.input.records[0]['@id']}}",
                 "__recommend": [],
