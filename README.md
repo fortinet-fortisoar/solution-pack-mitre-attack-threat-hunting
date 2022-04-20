@@ -3,7 +3,7 @@
 ## Release Information
 
 - Solution Pack Version: 1.0.0
-- FortiSOAR™ Version Tested on: 7.2.0
+- Minimum Compatible FortiSOAR™ Version: 7.2.0
 - Authored: Fortinet
 - Certified: Yes
 
