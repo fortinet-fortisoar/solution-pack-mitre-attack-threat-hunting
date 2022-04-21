@@ -60,7 +60,7 @@ Goto generated hunt and observe the following:
 
 ## Prerequisites
 
-**Solution Pack Name**|**Purpose**|**Doc Link**|
+|**Solution Pack Name**|**Purpose**|**Doc Link**|
 | :- | :- | :- |
 |SOAR Framework 1.0.0|Require for Incident Response modules|[Click Here](https://github.com/fortinet-fortisoar/solution-pack-soar-framework/blob/develop/README.md)|
 |SOC Simulator 1.0.1|Require for Scenario Module and SOC Simulator connector| [Click Here](https://github.com/fortinet-fortisoar/solution-pack-soc-simulator/blob/develop/README.md)|
