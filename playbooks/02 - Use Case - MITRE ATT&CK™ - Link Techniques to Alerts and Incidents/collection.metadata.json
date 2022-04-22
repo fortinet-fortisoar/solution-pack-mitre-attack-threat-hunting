@@ -6,10 +6,6 @@
     "visible": true,
     "image": null,
     "uuid": "c862c8b5-f841-44a5-983f-551625ca7d6d",
-    "id": 95,
-    "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
-    "createDate": 1644165545,
-    "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
-    "modifyDate": 1644572492,
+    "deletedAt": null,
     "recordTags": []
 }
