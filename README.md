@@ -7,15 +7,17 @@
 
 ## Overview
 
+### Introduction
+
 *MITRE ATT&CK Threat Hunting Solution Pack* is designed to provide a set of threat hunting playbooks that demonstrate a variety of scenarios and use cases around threat hunting based on the information provided by the MITRE ATT&CK Framework.
 
 Configure the data ingestion from SIEM using connectors such as Elasticsearch or Splunk. The hunting playbooks then trigger the hunt for the specified period mentioned in the hunt record and create an alert for the corresponding MITRE Technique.
 
-Refer to the following Simulation Scenarios to experience the use case without any SIEM configuration.
-
 ## Usage
 
-This Solution Pack ships with the following simulation scenarios. Refer to [Simulate Scenario documentation](https://github.com/fortinet-fortisoar/solution-pack-soc-simulator/blob/develop/docs/solution-pack-guide.md) to understand how to Simulate and Reset scenarios.
+Refer to [Simulate Scenario documentation](https://github.com/fortinet-fortisoar/solution-pack-soc-simulator/blob/develop/docs/solution-pack-guide.md) to understand how to Simulate and Reset scenarios.
+
+MITRE ATT&CK Threat Hunting Solution Pack ships with the following simulation scenarios. 
 
 ### 1. MITRE ATT&CK™ - Access Token Manipulation
 
@@ -47,8 +49,8 @@ The scenario demonstrates threat hunting for the attacks using the MITRE techniq
 
 Navigate to generated alerts and observe the following:
 
-- MITRE Technique information (MITRE ID, Technique, or Sub-Technique) is presented as a handy reference
-- Attack details (Process ID, Process Name, File Path, or Computer Name) presented for analyzing the case
+- MITRE Technique information (MITRE ID, Technique, and Sub-Technique) is presented as a handy reference
+- Attack details (Process ID, Process Name, File Path, and Computer Name) presented for analyzing the case
 
 Navigate to generated hunt and observe the following:
 
