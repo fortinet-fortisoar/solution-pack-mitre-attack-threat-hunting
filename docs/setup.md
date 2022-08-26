@@ -1,5 +1,5 @@
-| [Home](https://github.com/fortinet-fortisoar/solution-pack-mitre-attack-threat-hunting/blob/develop/README.md) |
-|-----------------------------------------------------------------------------------------------------------------------------------|
+| [Home](https://github.com/fortinet-fortisoar/solution-pack-mitre-attack-threat-hunting/blob/release/1.0.1/README.md) |
+|----------------------------------------------------------------------------------------------------------------------|
 
 # Installation
 

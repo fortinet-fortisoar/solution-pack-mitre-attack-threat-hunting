@@ -1,39 +1,6 @@
 [
     {
         "@type": "Scenario",
-        "configuration": null,
-        "title": "MITRE ATT&CK\u2122 - Access Token Manipulation",
-        "description": "The scenario demonstrates the attacks using MITRE technique Access Token Manipulation [T1134]\n \nIn such attacks, adversaries may modify access tokens to operate under a different user or system security context to perform actions and bypass access controls.\n \n This scenario generates alerts for the following sub-technique:\n\n* **T1134.005 - SID-History Injection**: Attacker uses SID-History injection via mimikatz and other tools. Also hunts for SID-History added to accounts (success and failure). Adding SID-History may allow for escalated privileges if SID filtering is not enabled.\n",
-        "steps": {
-            "Steps": [
-                {
-                    "name": "MITRE ATT&CK\u2122 - Access Token Manipulation",
-                    "type": "executePlaybook",
-                    "playbookIRI": "\/api\/3\/workflows\/baa86563-db1d-4101-bfda-334374e12757",
-                    "preCreateMessage": "Creating demo record for SID-History Injection (T1134.005)",
-                    "postCreateMessage": "",
-                    "waitTimeforNextStep": "0"
-                }
-            ]
-        },
-        "createdAlertsID": null,
-        "comments": [],
-        "uuid": "c46aca9e-d246-4975-a671-91d167d658fc",
-        "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
-        "createDate": 1634895658,
-        "modifyUser": "\/api\/3\/appliances\/57545210-2adc-472b-a24f-2df6ee8dfe63",
-        "modifyDate": 1644164877,
-        "id": 5,
-        "recordTags": [
-            "mitre-attack",
-            "FortiSOAR"
-        ]
-    },
-    {
-        "@type": "Scenario",
-        "configuration": null,
-        "title": "MITRE ATT&CK\u2122 - Boot or Logon Autostart Execution",
-        "description": "\nThe scenario demonstrates the attacks using MITRE technique Boot or Logon Autostart Execution [T1547]\n \nIn such attacks, Adversaries may configure system settings to automatically execute a program during system boot or logon to maintain persistence or gain higher-level privileges on compromised systems. \n \n This scenario generates alerts for the following sub-technique:\n\n* **T1547.004 - Winlogon Helper DLL**: Adversaries may abuse features of Winlogon to execute DLLs and\/or executables when a user logs in.\n* **T1547.008 - LSASS Driver**: Adversaries may modify or add LSASS drivers to obtain persistence on compromised systems.\n",
         "steps": {
             "Steps": [
                 {
@@ -46,114 +13,23 @@
                 }
             ]
         },
+        "configuration": null,
+        "title": "MITRE ATT&CK\u2122 - Boot or Logon Autostart Execution",
+        "description": "\nThe scenario demonstrates the attacks using MITRE technique Boot or Logon Autostart Execution [T1547]\n \nIn such attacks, Adversaries may configure system settings to automatically execute a program during system boot or logon to maintain persistence or gain higher-level privileges on compromised systems. \n \n This scenario generates alerts for the following sub-technique:\n\n* **T1547.004 - Winlogon Helper DLL**: Adversaries may abuse features of Winlogon to execute DLLs and\/or executables when a user logs in.\n* **T1547.008 - LSASS Driver**: Adversaries may modify or add LSASS drivers to obtain persistence on compromised systems.\n",
         "createdAlertsID": null,
         "comments": [],
         "uuid": "1c9c6abb-7c57-4d13-9a1c-29de89de2443",
         "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
         "createDate": 1638872055,
-        "modifyUser": "\/api\/3\/appliances\/57545210-2adc-472b-a24f-2df6ee8dfe63",
-        "modifyDate": 1643404229,
-        "id": 1,
+        "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+        "modifyDate": 1661165310.459963,
+        "id": 2,
         "recordTags": [
-            "mitre-attack",
-            "FortiSOAR"
+            "mitre-attack"
         ]
     },
     {
         "@type": "Scenario",
-        "configuration": null,
-        "title": "MITRE ATT&CK\u2122 - Credential Access",
-        "description": "The scenario demonstrates the attacks using MITRE technique OS Credential Dumping [T1003]\n \nIn such attacks, adversaries may attempt to dump credentials to obtain account login and credential material, normally in the form of a hash or a clear text password, from the operating system and software. Credentials can then be used to perform Lateral Movement and access restricted information..\n \n This scenario generates alerts for the following sub-technique:\n\n* **T1003.001 - LSASS Memory**: Adversaries may attempt to access credential material stored in the process memory of the Local Security Authority Subsystem Service (LSASS).\n",
-        "steps": {
-            "Steps": [
-                {
-                    "name": "MITRE ATT&CK\u2122 - Credential Access",
-                    "type": "executePlaybook",
-                    "playbookIRI": "\/api\/3\/workflows\/0f7279b8-976a-4664-99bc-9cb10f5faa52",
-                    "preCreateMessage": "Creating demo record for OS Credential Dumping (T1003) technique",
-                    "postCreateMessage": "",
-                    "waitTimeforNextStep": "0"
-                }
-            ]
-        },
-        "createdAlertsID": null,
-        "comments": [],
-        "uuid": "f082b7fb-f074-4a45-ad54-aedb017c2b22",
-        "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
-        "createDate": 1638907051,
-        "modifyUser": "\/api\/3\/appliances\/57545210-2adc-472b-a24f-2df6ee8dfe63",
-        "modifyDate": 1643404380,
-        "id": 6,
-        "recordTags": [
-            "mitre-attack",
-            "FortiSOAR"
-        ]
-    },
-    {
-        "@type": "Scenario",
-        "configuration": null,
-        "title": "MITRE ATT&CK\u2122 - Defense Evasion",
-        "description": "The scenario demonstrates the attacks using MITRE technique Exploitation for Defense Evasion:\n \nIn such attacks, adversaries may exploit a system or application vulnerability to bypass security features.\n \n This scenario generates alerts for the following techniques:\n\n* **T1140 - Deobfuscate\/Decode Files or Information:** Adversaries may use Obfuscated Files or Information to hide artifacts of an intrusion from analysis.\n* **T1207 - Rogue Domain Controller**: Adversaries may register a rogue Domain Controller to enable manipulation of Active Directory data. DCShadow may be used to create a rogue Domain Controller (DC).\n\n",
-        "steps": {
-            "Steps": [
-                {
-                    "name": "MITRE ATT&CK\u2122 - Defense Evasion",
-                    "type": "executePlaybook",
-                    "playbookIRI": "\/api\/3\/workflows\/42fcd125-90b5-492d-a6be-ac7b3e1cec49",
-                    "preCreateMessage": "Creating demo record for Rogue Domain Controller (T1207) and Deobfuscate\/Decode Files or Information (T1140)",
-                    "postCreateMessage": "",
-                    "waitTimeforNextStep": "0"
-                }
-            ]
-        },
-        "createdAlertsID": null,
-        "comments": [],
-        "uuid": "c2eb17b9-62cc-4fb2-8737-3d27b8618a1f",
-        "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
-        "createDate": 1638961181,
-        "modifyUser": "\/api\/3\/appliances\/57545210-2adc-472b-a24f-2df6ee8dfe63",
-        "modifyDate": 1643403703,
-        "id": 4,
-        "recordTags": [
-            "mitre-attack",
-            "FortiSOAR"
-        ]
-    },
-    {
-        "@type": "Scenario",
-        "configuration": null,
-        "title": "MITRE ATT&CK\u2122 - Event Triggered Execution",
-        "description": "The scenario demonstrates the attacks using MITRE technique Event Triggered Execution [T1546]\n \nIn such attacks, adversaries may establish persistence and\/or elevate privileges using system mechanisms that trigger execution based on specific events.Various operating systems have means to monitor and subscribe to events such as logons or other user activity such as running specific applications\/binaries.\n\n This scenario generates alerts for the following sub-technique:\n\n* **T1546.001 - Change Default File Association**: Adversaries may establish persistence by executing malicious content triggered by a file type association.\n* **T1546.002 - Screensaver**: Adversaries may establish persistence by executing malicious content triggered by user inactivity.\n* **T1546.007 - Netsh Helper DLL**: Adversaries may establish persistence by executing malicious content triggered by Netsh Helper DLLs. \n* **T1546.010 - AppInit DLLs**: Adversaries may establish persistence and\/or elevate privileges by executing malicious content triggered by AppInit DLLs loaded into processes.  \n",
-        "steps": {
-            "Steps": [
-                {
-                    "name": "MITRE ATT&CK\u2122 - Event Triggered Execution",
-                    "type": "executePlaybook",
-                    "playbookIRI": "\/api\/3\/workflows\/d320bbe0-b5ee-4f95-a1bc-8725e85f6144",
-                    "preCreateMessage": "Creating demo records for AppInit DLLs (T1546.010), Hidden Files and Directories (T1564.001), Netsh Helper DLL (T1546.007) and Screensaver (T1546.002)",
-                    "postCreateMessage": "",
-                    "waitTimeforNextStep": "0"
-                }
-            ]
-        },
-        "createdAlertsID": null,
-        "comments": [],
-        "uuid": "f8228c47-740f-4971-ab9b-8864102d3630",
-        "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
-        "createDate": 1638990041,
-        "modifyUser": "\/api\/3\/appliances\/57545210-2adc-472b-a24f-2df6ee8dfe63",
-        "modifyDate": 1643404649,
-        "id": 7,
-        "recordTags": [
-            "mitre-attack",
-            "FortiSOAR"
-        ]
-    },
-    {
-        "@type": "Scenario",
-        "configuration": null,
-        "title": "MITRE ATT&CK\u2122 - Process Execution",
-        "description": "The scenario demonstrates the attacks Process Execution using following MITRE technique:\n\n* **T1220 - XSL Script Processing:** Adversaries may bypass application control and obscure execution of code by embedding scripts inside XSL files. Extensible Stylesheet Language (XSL) files are commonly used to describe the processing and rendering of data within XML files. \n\n* **T1559 - Inter-Process Communication:** Adversaries may abuse inter-process communication (IPC) mechanisms for local code or command execution.\n* **T1559.002 - Dynamic Data Exchange:** Adversaries may use Windows Dynamic Data Exchange (DDE) to execute arbitrary commands. DDE is a client-server protocol for one-time and\/or continuous inter-process communication (IPC) between applications.\n",
         "steps": {
             "Steps": [
                 {
@@ -166,24 +42,23 @@
                 }
             ]
         },
+        "configuration": null,
+        "title": "MITRE ATT&CK\u2122 - Process Execution",
+        "description": "The scenario demonstrates the attacks Process Execution using following MITRE technique:\n\n* **T1220 - XSL Script Processing:** Adversaries may bypass application control and obscure execution of code by embedding scripts inside XSL files. Extensible Stylesheet Language (XSL) files are commonly used to describe the processing and rendering of data within XML files. \n\n* **T1559 - Inter-Process Communication:** Adversaries may abuse inter-process communication (IPC) mechanisms for local code or command execution.\n* **T1559.002 - Dynamic Data Exchange:** Adversaries may use Windows Dynamic Data Exchange (DDE) to execute arbitrary commands. DDE is a client-server protocol for one-time and\/or continuous inter-process communication (IPC) between applications.\n",
         "createdAlertsID": null,
         "comments": [],
         "uuid": "53ba5f4a-1006-4015-832f-d0fb4497c467",
         "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
         "createDate": 1639033293,
-        "modifyUser": "\/api\/3\/appliances\/57545210-2adc-472b-a24f-2df6ee8dfe63",
-        "modifyDate": 1643404791,
-        "id": 2,
+        "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+        "modifyDate": 1661165296.14585,
+        "id": 6,
         "recordTags": [
-            "mitre-attack",
-            "FortiSOAR"
+            "mitre-attack"
         ]
     },
     {
         "@type": "Scenario",
-        "configuration": null,
-        "title": "MITRE ATT&CK\u2122 - Signed Binary Proxy Execution",
-        "description": "The scenario demonstrates the attacks using MITRE technique Signed Binary Proxy Execution [T1218]    \n \nIn such attacks, adversaries may bypass process and\/or signature-based defenses by proxying execution of malicious content with signed binaries. Binaries signed with trusted digital certificates can execute on Windows systems protected by digital signature validation.\n \n This scenario generates alerts for the following sub-techniques:\n\n* **T1218.001 Compiled HTML File**:  Attacker abuses Compiled HTML files (.chm) to conceal malicious code. \n* **T1218.002 Control Panel Items**: Attackers  abuses control.exe to proxy execution of malicious payloads. \n* **T1218.003 - CMSTP**: Attackers supply the CMSTP.exe (Microsoft Connection Manager Profile Installer (CMSTP.exe)) with INF files infected with malicious commands.\n* **T1218.004 InstallUtil**: Attackers uses InstallUtil to proxy execution of code through a trusted Windows utility.\n* **T1218.005 Mshta**:  Attackers abuses mshta.exe to proxy execution of malicious .hta files and Javascript or VBScript through a trusted Windows utility.\n* **T1218.009 Regsvcs\/Regasm**: Attackers abuses Regsvcs and Regasm to proxy execution of code through a trusted Windows utility.\n* **T1218.011 Rundll32**: Attackers abuses rundll32.exe to proxy execution of malicious code.",
         "steps": {
             "Steps": [
                 {
@@ -196,17 +71,135 @@
                 }
             ]
         },
+        "configuration": null,
+        "title": "MITRE ATT&CK\u2122 - Signed Binary Proxy Execution",
+        "description": "The scenario demonstrates the attacks using MITRE technique Signed Binary Proxy Execution [T1218]    \n \nIn such attacks, adversaries may bypass process and\/or signature-based defenses by proxying execution of malicious content with signed binaries. Binaries signed with trusted digital certificates can execute on Windows systems protected by digital signature validation.\n \n This scenario generates alerts for the following sub-techniques:\n\n* **T1218.001 Compiled HTML File**:  Attacker abuses Compiled HTML files (.chm) to conceal malicious code. \n* **T1218.002 Control Panel Items**: Attackers  abuses control.exe to proxy execution of malicious payloads. \n* **T1218.003 - CMSTP**: Attackers supply the CMSTP.exe (Microsoft Connection Manager Profile Installer (CMSTP.exe)) with INF files infected with malicious commands.\n* **T1218.004 InstallUtil**: Attackers uses InstallUtil to proxy execution of code through a trusted Windows utility.\n* **T1218.005 Mshta**:  Attackers abuses mshta.exe to proxy execution of malicious .hta files and Javascript or VBScript through a trusted Windows utility.\n* **T1218.009 Regsvcs\/Regasm**: Attackers abuses Regsvcs and Regasm to proxy execution of code through a trusted Windows utility.\n* **T1218.011 Rundll32**: Attackers abuses rundll32.exe to proxy execution of malicious code.",
         "createdAlertsID": null,
         "comments": [],
         "uuid": "6f7dda64-c237-4570-b897-fb9fd877bbbe",
         "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
         "createDate": 1639041055,
-        "modifyUser": "\/api\/3\/appliances\/57545210-2adc-472b-a24f-2df6ee8dfe63",
-        "modifyDate": 1643821741,
+        "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+        "modifyDate": 1661165291.446579,
+        "id": 7,
+        "recordTags": [
+            "mitre-attack"
+        ]
+    },
+    {
+        "@type": "Scenario",
+        "steps": {
+            "Steps": [
+                {
+                    "name": "MITRE ATT&CK\u2122 - Defense Evasion",
+                    "type": "executePlaybook",
+                    "playbookIRI": "\/api\/3\/workflows\/42fcd125-90b5-492d-a6be-ac7b3e1cec49",
+                    "preCreateMessage": "Creating demo record for Rogue Domain Controller (T1207) and Deobfuscate\/Decode Files or Information (T1140)",
+                    "postCreateMessage": "",
+                    "waitTimeforNextStep": "0"
+                }
+            ]
+        },
+        "configuration": null,
+        "title": "MITRE ATT&CK\u2122 - Defense Evasion",
+        "description": "The scenario demonstrates the attacks using MITRE technique Exploitation for Defense Evasion:\n \nIn such attacks, adversaries may exploit a system or application vulnerability to bypass security features.\n \n This scenario generates alerts for the following techniques:\n\n* **T1140 - Deobfuscate\/Decode Files or Information:** Adversaries may use Obfuscated Files or Information to hide artifacts of an intrusion from analysis.\n* **T1207 - Rogue Domain Controller**: Adversaries may register a rogue Domain Controller to enable manipulation of Active Directory data. DCShadow may be used to create a rogue Domain Controller (DC).\n\n",
+        "createdAlertsID": null,
+        "comments": [],
+        "uuid": "c2eb17b9-62cc-4fb2-8737-3d27b8618a1f",
+        "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+        "createDate": 1638961181,
+        "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+        "modifyDate": 1661165314.97921,
+        "id": 4,
+        "recordTags": [
+            "mitre-attack"
+        ]
+    },
+    {
+        "@type": "Scenario",
+        "steps": {
+            "Steps": [
+                {
+                    "name": "MITRE ATT&CK\u2122 - Access Token Manipulation",
+                    "type": "executePlaybook",
+                    "playbookIRI": "\/api\/3\/workflows\/baa86563-db1d-4101-bfda-334374e12757",
+                    "preCreateMessage": "Creating demo record for SID-History Injection (T1134.005)",
+                    "postCreateMessage": "",
+                    "waitTimeforNextStep": "0"
+                }
+            ]
+        },
+        "configuration": null,
+        "title": "MITRE ATT&CK\u2122 - Access Token Manipulation",
+        "description": "The scenario demonstrates the attacks using MITRE technique Access Token Manipulation [T1134]\n \nIn such attacks, adversaries may modify access tokens to operate under a different user or system security context to perform actions and bypass access controls.\n \n This scenario generates alerts for the following sub-technique:\n\n* **T1134.005 - SID-History Injection**: Attacker uses SID-History injection via mimikatz and other tools. Also hunts for SID-History added to accounts (success and failure). Adding SID-History may allow for escalated privileges if SID filtering is not enabled.\n",
+        "createdAlertsID": null,
+        "comments": [],
+        "uuid": "c46aca9e-d246-4975-a671-91d167d658fc",
+        "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+        "createDate": 1634895658,
+        "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+        "modifyDate": 1661165280.597155,
+        "id": 1,
+        "recordTags": [
+            "mitre-attack"
+        ]
+    },
+    {
+        "@type": "Scenario",
+        "steps": {
+            "Steps": [
+                {
+                    "name": "MITRE ATT&CK\u2122 - Credential Access",
+                    "type": "executePlaybook",
+                    "playbookIRI": "\/api\/3\/workflows\/0f7279b8-976a-4664-99bc-9cb10f5faa52",
+                    "preCreateMessage": "Creating demo record for OS Credential Dumping (T1003) technique",
+                    "postCreateMessage": "",
+                    "waitTimeforNextStep": "0"
+                }
+            ]
+        },
+        "configuration": null,
+        "title": "MITRE ATT&CK\u2122 - Credential Access",
+        "description": "The scenario demonstrates the attacks using MITRE technique OS Credential Dumping [T1003]\n \nIn such attacks, adversaries may attempt to dump credentials to obtain account login and credential material, normally in the form of a hash or a clear text password, from the operating system and software. Credentials can then be used to perform Lateral Movement and access restricted information..\n \n This scenario generates alerts for the following sub-technique:\n\n* **T1003.001 - LSASS Memory**: Adversaries may attempt to access credential material stored in the process memory of the Local Security Authority Subsystem Service (LSASS).\n",
+        "createdAlertsID": null,
+        "comments": [],
+        "uuid": "f082b7fb-f074-4a45-ad54-aedb017c2b22",
+        "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+        "createDate": 1638907051,
+        "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+        "modifyDate": 1661165305.506059,
         "id": 3,
         "recordTags": [
-            "mitre-attack",
-            "FortiSOAR"
+            "mitre-attack"
+        ]
+    },
+    {
+        "@type": "Scenario",
+        "steps": {
+            "Steps": [
+                {
+                    "name": "MITRE ATT&CK\u2122 - Event Triggered Execution",
+                    "type": "executePlaybook",
+                    "playbookIRI": "\/api\/3\/workflows\/d320bbe0-b5ee-4f95-a1bc-8725e85f6144",
+                    "preCreateMessage": "Creating demo records for AppInit DLLs (T1546.010), Hidden Files and Directories (T1564.001), Netsh Helper DLL (T1546.007) and Screensaver (T1546.002)",
+                    "postCreateMessage": "",
+                    "waitTimeforNextStep": "0"
+                }
+            ]
+        },
+        "configuration": null,
+        "title": "MITRE ATT&CK\u2122 - Event Triggered Execution",
+        "description": "The scenario demonstrates the attacks using MITRE technique Event Triggered Execution [T1546]\n \nIn such attacks, adversaries may establish persistence and\/or elevate privileges using system mechanisms that trigger execution based on specific events.Various operating systems have means to monitor and subscribe to events such as logons or other user activity such as running specific applications\/binaries.\n\n This scenario generates alerts for the following sub-technique:\n\n* **T1546.001 - Change Default File Association**: Adversaries may establish persistence by executing malicious content triggered by a file type association.\n* **T1546.002 - Screensaver**: Adversaries may establish persistence by executing malicious content triggered by user inactivity.\n* **T1546.007 - Netsh Helper DLL**: Adversaries may establish persistence by executing malicious content triggered by Netsh Helper DLLs. \n* **T1546.010 - AppInit DLLs**: Adversaries may establish persistence and\/or elevate privileges by executing malicious content triggered by AppInit DLLs loaded into processes.  \n",
+        "createdAlertsID": null,
+        "comments": [],
+        "uuid": "f8228c47-740f-4971-ab9b-8864102d3630",
+        "createUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+        "createDate": 1638990041,
+        "modifyUser": "\/api\/3\/people\/3451141c-bac6-467c-8d72-85e0fab569ce",
+        "modifyDate": 1661165300.898007,
+        "id": 5,
+        "recordTags": [
+            "mitre-attack"
         ]
     }
 ]

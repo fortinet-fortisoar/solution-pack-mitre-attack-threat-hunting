@@ -1,6 +1,6 @@
 {
     "name": "mITREATT&CKThreatHunting",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "solutionpack",
     "local": true,
     "label": "MITRE ATT&CK Threat Hunting",
@@ -9,21 +9,18 @@
             "name": "sOARFramework",
             "type": "solutionpack",
             "label": "SOAR Framework",
-            "version": "1.0.0",
             "minVersion": null
         },
         {
             "name": "socSimulator",
             "type": "solutionpack",
             "label": "SOC Simulator",
-            "version": "1.0.0",
             "minVersion": null
         },
         {
             "name": "mITREATT&CKEnrichmentFramework",
             "type": "solutionpack",
             "label": "MITRE ATT&CK Enrichment Framework",
-            "version": "2.0.2",
             "minVersion": null
         }
     ],
@@ -31,7 +28,7 @@
     "certified": "true",
     "publisher": "Fortinet",
     "description": "The solution pack demonstrates users a variety of scenarios based on data ingested from Elasticsearch as well as use cases around threat hunting based on using the information provided by the MITRE ATT&CK Framework. ",
-    "help": "https://github.com/fortinet-fortisoar/solution-pack-mitre-attack-threat-hunting/blob/develop/README.md",
+    "help": "https://github.com/fortinet-fortisoar/solution-pack-mitre-attack-threat-hunting/blob/release/1.0.1/README.md",
     "category": [],
     "supportInfo": "Fortinet Customer Support",
     "iconLarge": null,
@@ -58,9 +55,6 @@
             },
             {
                 "name": "02 - Use Case - MITRE ATT&CK\u2122 - Event Triggered Execution"
-            },
-            {
-                "name": "02 - Use Case - MITRE ATT&CK\u2122 - Link Techniques to Alerts and Incidents"
             },
             {
                 "name": "02 - Use Case - MITRE ATT&CK\u2122 - Modulars"
