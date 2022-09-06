@@ -6,4 +6,4 @@
     - Link ATT&CK Technique to Incident (On Create)
     - Link ATT&CK Technique to Incident (On Update)
 
-- The tag `FortiSOAR` has been removed from all **MITRE ATT&CK** scenarios
+- The tag `FortiSOAR` has been removed from all **MITRE ATT&CK&reg;** scenarios
