@@ -8,7 +8,7 @@
 
 # Overview
 
-**MITRE ATT&CK Threat Hunting** solution pack provides a set of threat hunting playbooks that demonstrate a variety of scenarios and use cases around threat hunting based on the information received from the MITRE ATT&CK Framework.
+**MITRE ATT&CK&reg; Threat Hunting** solution pack provides a set of threat hunting playbooks that demonstrate a variety of scenarios and use cases around threat hunting based on the information received from the MITRE ATT&CK&reg; Framework.
 
 Configure the data ingestion from SIEM using connectors such as Elasticsearch or Splunk. The hunting playbooks then trigger the hunt for the specified period mentioned in the hunt record and create an alert for the corresponding MITRE Technique.
 
